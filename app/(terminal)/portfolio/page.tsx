@@ -6,6 +6,10 @@ import { RiskPanel } from '@/components/portfolio/RiskPanel';
 import { FiscalPanel } from '@/components/portfolio/FiscalPanel';
 import { TradesTable } from '@/components/portfolio/TradesTable';
 
+export const metadata = {
+  title: 'Portfólio — TradeView',
+};
+
 export default async function PortfolioPage() {
   const data = (await getDataSource().getPortfolio()) as PortfolioData;
 

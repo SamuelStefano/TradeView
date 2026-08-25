@@ -6,6 +6,10 @@ import { SignalsFeed } from '@/components/overview/SignalsFeed';
 import { HeatmapPanel } from '@/components/overview/HeatmapPanel';
 import { WatchlistPanel } from '@/components/overview/WatchlistPanel';
 
+export const metadata = {
+  title: 'Overview — TradeView',
+};
+
 export default async function OverviewPage() {
   const data = await getDataSource().getOverview();
 

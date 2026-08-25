@@ -5,6 +5,12 @@ import type { AssetClass } from '@/lib/types';
 import type { AssetDetailData } from '@/lib/data/mock/assets';
 import { AssetDetailClient } from '@/components/asset/AssetDetailClient';
 
+export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }) {
+  const { symbol } = await params;
+  const data = await getDataSource().getAsset(symbol);
+  return { title: data ? `${data.asset.symbol} — TradeView` : 'Ativo não encontrado — TradeView' };
+}
+
 export default async function AssetDetailPage({
   params,
 }: {

@@ -3,6 +3,10 @@ import { AlertList } from '@/components/alerts/AlertList';
 import { FiredHistory } from '@/components/alerts/FiredHistory';
 import { CreateAlertPanel } from '@/components/alerts/CreateAlertPanel';
 
+export const metadata = {
+  title: 'Alertas — TradeView',
+};
+
 export default async function AlertsPage() {
   const data = await getDataSource().getAlerts();
 

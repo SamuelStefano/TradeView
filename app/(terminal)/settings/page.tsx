@@ -2,6 +2,10 @@ import { ApiKeysSection } from '@/components/settings/ApiKeysSection';
 import { RiskSection } from '@/components/settings/RiskSection';
 import { PrefsSection } from '@/components/settings/PrefsSection';
 
+export const metadata = {
+  title: 'Configurações — TradeView',
+};
+
 export default function SettingsPage() {
   return (
     <div

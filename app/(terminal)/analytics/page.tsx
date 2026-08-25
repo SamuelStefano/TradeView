@@ -3,6 +3,10 @@ import { AccuracyGrid } from '@/components/analytics/AccuracyGrid';
 import { CostPanel } from '@/components/analytics/CostPanel';
 import { MissedOpportunities } from '@/components/analytics/MissedOpportunities';
 
+export const metadata = {
+  title: 'Analytics — TradeView',
+};
+
 export default async function AnalyticsPage() {
   const data = await getDataSource().getAnalytics();
 
