@@ -90,12 +90,12 @@ export const overviewMock: OverviewData = {
     { label: 'Desde o início', value: '+R$ 847.312', pct: 42.4 },
   ],
   allocation: [
-    { assetClass: 'ações', pct: 34, value: '', color: '#4E7CF6' },
-    { assetClass: 'cripto', pct: 22, value: '', color: '#A78BFA' },
-    { assetClass: 'renda fixa', pct: 21, value: '', color: '#21C77D' },
-    { assetClass: 'energia', pct: 9, value: '', color: '#E8A33D' },
-    { assetClass: 'commodities', pct: 8, value: '', color: '#38BDF8' },
-    { assetClass: 'câmbio', pct: 6, value: '', color: '#8A93A8' },
+    { assetClass: 'ações', pct: 34, value: '', color: 'var(--color-accent)' },
+    { assetClass: 'cripto', pct: 22, value: '', color: 'var(--color-class-cripto)' },
+    { assetClass: 'renda fixa', pct: 21, value: '', color: 'var(--color-class-renda-fixa)' },
+    { assetClass: 'energia', pct: 9, value: '', color: 'var(--color-class-energia)' },
+    { assetClass: 'commodities', pct: 8, value: '', color: 'var(--color-class-cambio)' },
+    { assetClass: 'câmbio', pct: 6, value: '', color: 'var(--color-class-indices)' },
   ],
   events: [
     { time: '09:00', country: 'BR', title: 'IPCA-15 (ago)', impact: 'ALTO', forecast: '+0,18% m/m', previous: '' },

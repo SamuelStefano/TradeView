@@ -64,7 +64,7 @@ export function KillSwitchModal({ open, onClose, onConfirm }: KillSwitchModalPro
 
   return (
     <div
-      style={{ position: 'fixed', inset: 0, background: 'rgba(5,7,10,.75)', zIndex: 70, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--color-scrim) 75%, transparent)', zIndex: 70, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
       <div
         ref={dialogRef}

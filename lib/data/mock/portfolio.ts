@@ -160,35 +160,35 @@ export const portfolioMock: PortfolioData = {
   ],
 
   exposureByClass: [
-    { label: 'Renda variável', value: 'Renda variável', pct: 34, color: '#7DA0FF' },
-    { label: 'Cripto', value: 'Cripto', pct: 22, color: '#A78BFA' },
-    { label: 'Renda fixa', value: 'Renda fixa', pct: 21, color: '#21C77D' },
-    { label: 'Energia', value: 'Energia', pct: 9, color: '#E8A33D' },
-    { label: 'Commodities', value: 'Commodities', pct: 8, color: '#D4A574' },
-    { label: 'Câmbio', value: 'Câmbio', pct: 4, color: '#38BDF8' },
-    { label: 'Caixa', value: 'Caixa', pct: 2, color: '#5A6478' },
+    { label: 'Renda variável', value: 'Renda variável', pct: 34, color: 'var(--color-class-acoes)' },
+    { label: 'Cripto', value: 'Cripto', pct: 22, color: 'var(--color-class-cripto)' },
+    { label: 'Renda fixa', value: 'Renda fixa', pct: 21, color: 'var(--color-class-renda-fixa)' },
+    { label: 'Energia', value: 'Energia', pct: 9, color: 'var(--color-class-energia)' },
+    { label: 'Commodities', value: 'Commodities', pct: 8, color: 'var(--color-class-commodities)' },
+    { label: 'Câmbio', value: 'Câmbio', pct: 4, color: 'var(--color-class-cambio)' },
+    { label: 'Caixa', value: 'Caixa', pct: 2, color: 'var(--color-text-faint)' },
   ],
 
   exposureByVenue: [
-    { label: 'Energia & O&G', value: 'Energia & O&G', pct: 28, color: '#E8A33D' },
-    { label: 'Financeiro', value: 'Financeiro', pct: 18, color: '#7DA0FF' },
-    { label: 'Tecnologia', value: 'Tecnologia', pct: 16, color: '#A78BFA' },
-    { label: 'Logística/RE', value: 'Logística/RE', pct: 14, color: '#8FBF6A' },
-    { label: 'Agro', value: 'Agro', pct: 12, color: '#D4A574' },
-    { label: 'Outros', value: 'Outros', pct: 12, color: '#5A6478' },
+    { label: 'Energia & O&G', value: 'Energia & O&G', pct: 28, color: 'var(--color-class-energia)' },
+    { label: 'Financeiro', value: 'Financeiro', pct: 18, color: 'var(--color-class-acoes)' },
+    { label: 'Tecnologia', value: 'Tecnologia', pct: 16, color: 'var(--color-class-cripto)' },
+    { label: 'Logística/RE', value: 'Logística/RE', pct: 14, color: 'var(--color-class-fundos)' },
+    { label: 'Agro', value: 'Agro', pct: 12, color: 'var(--color-class-commodities)' },
+    { label: 'Outros', value: 'Outros', pct: 12, color: 'var(--color-text-faint)' },
   ],
 
   exposureByCurrency: [
-    { label: 'BRL', value: 'BRL', pct: 58, color: '#21C77D' },
-    { label: 'USD', value: 'USD', pct: 36, color: '#7DA0FF' },
-    { label: 'USDT', value: 'USDT', pct: 5, color: '#A78BFA' },
-    { label: 'EUR', value: 'EUR', pct: 1, color: '#38BDF8' },
+    { label: 'BRL', value: 'BRL', pct: 58, color: 'var(--color-class-renda-fixa)' },
+    { label: 'USD', value: 'USD', pct: 36, color: 'var(--color-class-acoes)' },
+    { label: 'USDT', value: 'USDT', pct: 5, color: 'var(--color-class-cripto)' },
+    { label: 'EUR', value: 'EUR', pct: 1, color: 'var(--color-class-cambio)' },
   ],
 
   exposureByCountry: [
-    { label: 'Brasil', value: 'Brasil', pct: 61, color: '#21C77D' },
-    { label: 'EUA', value: 'EUA', pct: 31, color: '#7DA0FF' },
-    { label: 'Global/cripto', value: 'Global/cripto', pct: 8, color: '#A78BFA' },
+    { label: 'Brasil', value: 'Brasil', pct: 61, color: 'var(--color-class-renda-fixa)' },
+    { label: 'EUA', value: 'EUA', pct: 31, color: 'var(--color-class-acoes)' },
+    { label: 'Global/cripto', value: 'Global/cripto', pct: 8, color: 'var(--color-class-cripto)' },
   ],
 
   risk: [
