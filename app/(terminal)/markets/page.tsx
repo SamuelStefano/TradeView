@@ -1,9 +1,7 @@
-export default function MarketsPage() {
-  return (
-    <div className="p-6">
-      <h1 className="text-sm font-semibold text-text-muted uppercase" style={{ letterSpacing: '0.6px' }}>
-        Mercados
-      </h1>
-    </div>
-  );
+import { getDataSource } from '@/lib/data/index';
+import { MarketsClient } from '@/components/markets/MarketsClient';
+
+export default async function MarketsPage() {
+  const data = await getDataSource().getMarkets();
+  return <MarketsClient data={data} />;
 }
