@@ -16,7 +16,7 @@ export default async function PortfolioPage() {
           Portfólio consolidado
         </h1>
         <span className="text-text-muted" style={{ fontSize: '11px' }}>
-          52 integrações · atualizado{' '}
+          55 integrações · atualizado{' '}
           <span className="font-mono">há 3s</span>
         </span>
         <div className="flex-1" />

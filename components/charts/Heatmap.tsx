@@ -27,10 +27,11 @@ function formatChg(changePct: number): string {
 
 export function Heatmap({ rows }: HeatmapProps) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div role="table" aria-label="Variação por mercado" className="flex flex-col gap-1.5">
       {rows.map((row) => (
-        <div key={row.label} className="flex gap-1.5 items-center">
+        <div key={row.label} role="row" className="flex gap-1.5 items-center">
           <span
+            role="rowheader"
             className="flex-shrink-0 text-text-muted"
             style={{ width: 88, fontSize: '10.5px' }}
           >

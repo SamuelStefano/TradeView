@@ -66,11 +66,8 @@ export function MarketsClient({ data }: MarketsClientProps) {
         </button>
       </div>
 
-      <div
-        role="table"
-        aria-label="Integrações"
-        className="bg-surface border border-border rounded-lg overflow-hidden"
-      >
+      <div className="bg-surface border border-border rounded-lg overflow-hidden">
+        <div role="table" aria-label="Integrações">
         <div
           role="row"
           className="grid border-b border-border text-text-faint uppercase"
@@ -99,6 +96,7 @@ export function MarketsClient({ data }: MarketsClientProps) {
             <IntegrationRow key={r.id} integration={r} />
           ))
         )}
+        </div>
 
         <div className="text-text-faint" style={{ padding: '9px 14px', fontSize: '10.5px' }}>
           mostrando {filtered.length} de {data.totalCount} · <a href="#">ver todas</a> · chaves nunca são exibidas por completo

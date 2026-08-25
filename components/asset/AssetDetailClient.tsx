@@ -37,6 +37,7 @@ function OHLCTable({ candles }: { candles: Candle[] }) {
   return (
     <div role="table" aria-label="OHLC em tabela" style={{ maxHeight: '300px', overflowY: 'auto' }}>
       <div
+        role="rowgroup"
         className="font-mono tabular-nums"
         style={{
           display: 'grid',

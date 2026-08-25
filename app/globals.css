@@ -16,7 +16,7 @@
   --color-text: #e8ecf4;
   --color-text-secondary: #b7bfd2;
   --color-text-muted: #8a93a8;
-  --color-text-faint: #5a6478;
+  --color-text-faint: #727e95;
 
   --color-up: #21c77d;
   --color-up-border: #1e4536;
@@ -83,12 +83,14 @@ body {
 
 a {
   color: var(--color-accent);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 2px;
 }
 
 a:hover {
   color: var(--color-accent-hover);
-  text-decoration: underline;
+  text-decoration-color: currentColor;
 }
 
 ::-webkit-scrollbar {

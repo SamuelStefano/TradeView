@@ -57,7 +57,7 @@ export function AIMessage({
         }}
       >
         Seu portfólio caiu{' '}
-        <a href="#" title="fonte: P&L consolidado, 52 integrações">
+        <a href="#" title="fonte: P&L consolidado, 55 integrações">
           −R$ 8.112 (−0,28%)
         </a>{' '}
         hoje. Três fatores explicam{' '}
