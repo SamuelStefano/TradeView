@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const CONFIRM_PHRASE = 'ativar modo real';
 
@@ -15,6 +15,11 @@ export function RealModeModal({ open, onClose, onConfirm }: RealModeModalProps) 
   const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const matched = text.trim().toLowerCase() === CONFIRM_PHRASE;
+
+  const handleClose = useCallback(() => {
+    setText('');
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -55,12 +60,7 @@ export function RealModeModal({ open, onClose, onConfirm }: RealModeModalProps) 
       document.removeEventListener('keydown', onKeyDown);
       prev?.focus();
     };
-  }, [open]);
-
-  function handleClose() {
-    setText('');
-    onClose();
-  }
+  }, [open, handleClose]);
 
   function handleConfirm() {
     if (!matched) return;
