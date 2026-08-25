@@ -300,18 +300,15 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
 
   return (
     <div className="flex flex-col gap-2.5 p-3.5 text-xs">
-      <div
-        role="tablist"
-        aria-label="Classe de ativo"
-        className="flex gap-1 flex-wrap"
-      >
+      <div className="flex gap-1 flex-wrap items-center">
+        <div role="radiogroup" aria-label="Classe de ativo" className="flex gap-1 flex-wrap">
         {ASSET_CLASSES.map((cls) => {
           const isActive = activeClass === cls;
           return (
             <button
               key={cls}
-              role="tab"
-              aria-selected={isActive}
+              role="radio"
+              aria-checked={isActive}
               onClick={() => setActiveClass(cls)}
               className="cursor-pointer transition-colors"
               style={{
@@ -331,7 +328,8 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
             </button>
           );
         })}
-        <span className="ml-auto text-text-faint self-center" style={{ fontSize: '10.5px' }}>
+        </div>
+        <span className="ml-auto text-text-faint" style={{ fontSize: '10.5px' }}>
           mesma tela, painéis declarados pela classe
         </span>
       </div>

@@ -37,7 +37,7 @@ export function ExposurePanel({ byClass, byCurrency, byVenue, byCountry }: Expos
       aria-label="Exposição do portfólio"
     >
       <div
-        role="tablist"
+        role="radiogroup"
         aria-label="Dimensão de exposição"
         className="flex gap-0.5 mb-2.5"
       >
@@ -46,9 +46,9 @@ export function ExposurePanel({ byClass, byCurrency, byVenue, byCountry }: Expos
           return (
             <button
               key={id}
-              role="tab"
+              role="radio"
               type="button"
-              aria-selected={isActive}
+              aria-checked={isActive}
               onClick={() => setActive(id)}
               className="cursor-pointer rounded border-none px-2.5 transition-colors"
               style={{
