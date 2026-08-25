@@ -1,8 +1,8 @@
+import { notFound } from 'next/navigation';
 import { getDataSource } from '@/lib/data';
 import { ASSET_CLASSES } from '@/lib/types';
 import type { AssetClass } from '@/lib/types';
 import type { AssetDetailData } from '@/lib/data/mock/assets';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { AssetDetailClient } from '@/components/asset/AssetDetailClient';
 
 export default async function AssetDetailPage({
@@ -15,16 +15,7 @@ export default async function AssetDetailPage({
 
   const data = await ds.getAsset(symbol);
 
-  if (!data) {
-    return (
-      <div className="flex items-center justify-center min-h-64">
-        <EmptyState
-          title="Ativo não encontrado"
-          description={`O símbolo "${symbol}" não existe na base de dados mockada.`}
-        />
-      </div>
-    );
-  }
+  if (!data) notFound();
 
   const defaultSymbols = await ds.getDefaultSymbols();
 
