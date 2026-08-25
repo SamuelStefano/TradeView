@@ -126,7 +126,7 @@ function RateLimitBanner({ banner }: { banner: { provider: string; cachedSince: 
         <span className="font-mono">{banner.renewsIn}</span>.
       </div>
       <button
-        className="bg-warn-border border border-warn-border rounded text-warn cursor-pointer font-sans hover:bg-warn-bg transition-colors"
+        className="bg-warn-bg border border-warn-border rounded text-warn cursor-pointer font-sans hover:bg-warn-border transition-colors"
         style={{ height: 26, padding: '0 12px', fontSize: '11px' }}
       >
         {banner.fallbackLabel}
