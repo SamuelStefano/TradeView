@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TradeView
 
-## Getting Started
+Terminal de trading multimercado com análise por IA. Cripto, ações, renda fixa, câmbio, energia, commodities, índices e fundos numa tela só.
 
-First, run the development server:
+**Produção:** https://tradeview-six.vercel.app
+
+## Stack
+
+- Next.js 16 (App Router, Turbopack) · React 19 · TypeScript strict
+- Tailwind CSS v4 — sem `tailwind.config.js`, paleta no bloco `@theme` de `app/globals.css`
+- Zero dependência de gráfico: candlestick, donut, heatmap e sparkline são SVG próprio
+
+## Rodar
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm run build && npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Estado atual
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Fase 1: todas as 10 telas construídas e navegáveis, alimentadas por dados mockados.
+Fase 2 (pendente): adaptadores reais de mercado e camada de IA.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Camada de dados
 
-## Learn More
+Nenhuma tela importa mock diretamente. Todas passam por `getDataSource()` em `lib/data/index.ts`,
+que devolve um objeto conforme a interface `DataSource`. Trocar mock por adaptadores reais é
+uma mudança num ponto só.
 
-To learn more about Next.js, take a look at the following resources:
+```ts
+export interface DataSource {
+  getOverview(): Promise<OverviewData>;
+  getAsset(symbol: string): Promise<AssetDetailData | null>;
+  getDefaultSymbols(): Promise<Record<AssetClass, string>>;
+  getMarkets(): Promise<MarketsData>;
+  getPortfolio(): Promise<PortfolioData>;
+  getStrategies(): Promise<Strategy[]>;
+  getAlerts(): Promise<AlertsData>;
+  getAnalytics(): Promise<AnalyticsData>;
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Cores
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`app/globals.css` é a única fonte da paleta. Nenhum hex ou `rgba()` literal em `components/` ou `lib/` —
+tudo referencia `var(--color-*)`. Variantes com opacidade usam `color-mix(in srgb, var(--token) N%, transparent)`.
 
-## Deploy on Vercel
+Duas armadilhas do Tailwind v4 que já custaram bug aqui:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Utilitários ficam numa cascade layer. Um seletor de elemento sem layer (`a { color: … }`) vence
+  qualquer classe utilitária de cor, independente de especificidade. Regras base vão dentro de `@layer base`.
+- Tokens do `@theme` viram custom properties reais em `:root` e não são tree-shaken mesmo quando
+  usados só via `var()` cru — verificado contra o bundle de produção.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Acessibilidade
+
+WCAG 2.1 AA. Auditado com axe-core nas 10 rotas: zero violações, zero erro de console.
+
+- Controles segmentados sem painel associado usam `radiogroup`/`radio`, não `tablist`/`tab`
+- `Tabs` (`components/ui/Tabs.tsx`) implementa o padrão APG completo: setas, Home/End e roving tabindex
+- Tabelas em div seguem a hierarquia ARIA correta (`table` > `rowgroup`/`row` > `cell`/`columnheader`/`rowheader`)
+
+`--color-text-faint` foi ajustado de `#5a6478` (design original) para `#7a859b` para fechar 4.5:1.
+
+## Segurança
+
+Nada de credencial no cliente. Chave de API nunca é renderizada por completo, nunca vai pra
+`localStorage`/`sessionStorage`. As duas ações destrutivas — kill switch global e modo real —
+exigem confirmação por frase digitada.
+
+## Estrutura
+
+```
+app/(terminal)/        rotas do terminal (server components)
+components/
+  shell/               nav, topbar, command palette, kill switch
+  ui/                  primitivos do design system
+  charts/              candlestick, donut, heatmap
+  panels/              painéis adaptativos por classe de ativo
+lib/data/              DataSource + mocks
+design/                export original do Claude Design (referência)
+PLANO.md               plano de construção por tela
+```

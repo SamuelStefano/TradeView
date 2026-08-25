@@ -1,7 +1,6 @@
 import { getDataSource } from '@/lib/data';
 import { ASSET_CLASSES } from '@/lib/types';
 import type { AssetClass } from '@/lib/types';
-import { defaultSymbolByClass } from '@/lib/data/mock/assets';
 import type { AssetDetailData } from '@/lib/data/mock/assets';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AssetDetailClient } from '@/components/asset/AssetDetailClient';
@@ -27,10 +26,11 @@ export default async function AssetDetailPage({
     );
   }
 
+  const defaultSymbols = await ds.getDefaultSymbols();
+
   const allData = await Promise.all(
     ASSET_CLASSES.map(async (cls) => {
-      const sym = defaultSymbolByClass[cls];
-      const d = await ds.getAsset(sym);
+      const d = await ds.getAsset(defaultSymbols[cls]);
       return [cls, d] as [AssetClass, AssetDetailData | null];
     })
   );
