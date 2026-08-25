@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { ExposureRow } from '@/lib/data/mock/portfolio';
+import { useRadioGroup } from '@/components/ui/useRadioGroup';
 
 type ExpTab = 'classe' | 'moeda' | 'setor' | 'país';
 
@@ -30,6 +31,11 @@ export function ExposurePanel({ byClass, byCurrency, byVenue, byCountry }: Expos
   };
 
   const rows = dataMap[active];
+  const { groupProps, itemProps } = useRadioGroup(
+    TAB_LABELS.map((t) => t.id),
+    active,
+    setActive,
+  );
 
   return (
     <section
@@ -40,16 +46,14 @@ export function ExposurePanel({ byClass, byCurrency, byVenue, byCountry }: Expos
         role="radiogroup"
         aria-label="Dimensão de exposição"
         className="flex gap-0.5 mb-2.5"
+        {...groupProps}
       >
         {TAB_LABELS.map(({ id, label }) => {
           const isActive = active === id;
           return (
             <button
               key={id}
-              role="radio"
-              type="button"
-              aria-checked={isActive}
-              onClick={() => setActive(id)}
+              {...itemProps(id)}
               className="cursor-pointer rounded border-none px-2.5 transition-colors"
               style={{
                 height: '24px',

@@ -9,6 +9,7 @@ import { toneOf, toneClass } from '@/lib/format';
 import { FreshnessTag } from '@/components/ui/FreshnessTag';
 import { Tabs } from '@/components/ui/Tabs';
 import { Bar } from '@/components/ui/Bar';
+import { useRadioGroup } from '@/components/ui/useRadioGroup';
 import { Candlestick } from '@/components/charts/Candlestick';
 import { PanelRenderer } from '@/components/panels/PanelRenderer';
 
@@ -271,6 +272,8 @@ function AITab({ ai }: { ai: AssetDetailData['ai'] }) {
 export function AssetDetailClient({ initialClass, allData }: Props) {
   const [activeClass, setActiveClass] = useState<AssetClass>(initialClass);
   const [tf, setTf] = useState<string>('1h');
+  const classGroup = useRadioGroup(ASSET_CLASSES, activeClass, setActiveClass);
+  const tfGroup = useRadioGroup(TIMEFRAMES, tf, setTf);
   const [activeTab, setActiveTab] = useState<TabId>('ai');
   const [indicators, setIndicators] = useState<Record<IndicatorKey, boolean>>({
     MA: true,
@@ -301,15 +304,13 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
   return (
     <div className="flex flex-col gap-2.5 p-3.5 text-xs">
       <div className="flex gap-1 flex-wrap items-center">
-        <div role="radiogroup" aria-label="Classe de ativo" className="flex gap-1 flex-wrap">
+        <div role="radiogroup" aria-label="Classe de ativo" className="flex gap-1 flex-wrap" {...classGroup.groupProps}>
         {ASSET_CLASSES.map((cls) => {
           const isActive = activeClass === cls;
           return (
             <button
               key={cls}
-              role="radio"
-              aria-checked={isActive}
-              onClick={() => setActiveClass(cls)}
+              {...classGroup.itemProps(cls)}
               className="cursor-pointer transition-colors"
               style={{
                 height: '26px',
@@ -425,16 +426,14 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
               role="radiogroup"
               aria-label="Timeframe"
               className="flex gap-0.5 bg-inset border border-border rounded-md p-0.5"
+              {...tfGroup.groupProps}
             >
               {TIMEFRAMES.map((t) => {
                 const isActive = tf === t;
                 return (
                   <button
                     key={t}
-                    type="button"
-                    role="radio"
-                    aria-checked={isActive}
-                    onClick={() => setTf(t)}
+                    {...tfGroup.itemProps(t)}
                     className="cursor-pointer transition-colors font-mono"
                     style={{
                       height: '22px',
