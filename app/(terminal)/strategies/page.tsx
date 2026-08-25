@@ -1,9 +1,7 @@
-export default function StrategiesPage() {
-  return (
-    <div className="p-6">
-      <h1 className="text-sm font-semibold text-text-muted uppercase" style={{ letterSpacing: '0.6px' }}>
-        Estratégias
-      </h1>
-    </div>
-  );
+import { getDataSource } from '@/lib/data/index';
+import { StrategiesClient } from '@/components/strategies/StrategiesClient';
+
+export default async function StrategiesPage() {
+  const strategies = await getDataSource().getStrategies();
+  return <StrategiesClient strategies={strategies} />;
 }
