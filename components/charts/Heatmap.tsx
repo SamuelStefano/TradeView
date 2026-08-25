@@ -12,11 +12,11 @@ interface HeatmapProps {
 function cellStyle(changePct: number): { background: string; color: string } {
   const abs = Math.abs(changePct);
   const t = Math.min(abs / 4, 1);
-  const pct = Math.round((0.12 + t * 0.5) * 100);
+  const pct = Math.round((0.12 + t * 0.44) * 100);
   const tint = changePct >= 0 ? 'var(--color-up)' : 'var(--color-down)';
   return {
     background: `color-mix(in srgb, ${tint} ${pct}%, var(--color-base))`,
-    color: pct >= 45 ? 'var(--color-base)' : 'var(--color-text)',
+    color: 'var(--color-text)',
   };
 }
 
