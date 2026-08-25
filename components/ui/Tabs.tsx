@@ -11,13 +11,14 @@ export interface TabItem {
 
 interface TabsProps {
   items: TabItem[];
+  label: string;
   defaultTab?: string;
   value?: string;
   onChange?: (id: string) => void;
   className?: string;
 }
 
-export function Tabs({ items, defaultTab, value, onChange, className = '' }: TabsProps) {
+export function Tabs({ items, label, defaultTab, value, onChange, className = '' }: TabsProps) {
   const groupId = useId();
   const [internal, setInternal] = useState(defaultTab ?? items[0]?.id);
   const active = value ?? internal;
@@ -51,7 +52,7 @@ export function Tabs({ items, defaultTab, value, onChange, className = '' }: Tab
 
   return (
     <div className={className}>
-      <div role="tablist" onKeyDown={handleKeyDown} className="flex border-b border-border">
+      <div role="tablist" aria-label={label} onKeyDown={handleKeyDown} className="flex border-b border-border">
         {items.map((tab) => {
           const isActive = tab.id === active;
           return (

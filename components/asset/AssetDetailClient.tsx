@@ -545,6 +545,7 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
 
           <Tabs
             items={tabs}
+            label="Análises"
             value={activeTab}
             onChange={(id) => setActiveTab(id as TabId)}
             className="mt-3"
