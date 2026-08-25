@@ -424,7 +424,7 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
         >
           <div className="flex items-center gap-2.5 mb-2 flex-wrap">
             <div
-              role="tablist"
+              role="radiogroup"
               aria-label="Timeframe"
               className="flex gap-0.5 bg-inset border border-border rounded-md p-0.5"
             >
@@ -434,6 +434,8 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
                   <button
                     key={t}
                     type="button"
+                    role="radio"
+                    aria-checked={isActive}
                     onClick={() => setTf(t)}
                     className="cursor-pointer transition-colors font-mono"
                     style={{

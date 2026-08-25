@@ -28,7 +28,7 @@ export function Topbar({
           style={{
             width: 20,
             height: 20,
-            background: 'var(--color-accent)',
+            background: 'var(--color-accent-strong)',
             fontSize: 11,
             borderRadius: 4,
           }}

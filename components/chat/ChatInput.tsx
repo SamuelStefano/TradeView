@@ -58,7 +58,7 @@ export function ChatInput({ onSend, sessionCost }: ChatInputProps) {
           aria-label="Enviar"
           onClick={handleSend}
           disabled={!value.trim()}
-          className="w-[30px] h-[30px] bg-accent border-none rounded-md text-white cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+          className="w-[30px] h-[30px] bg-accent-strong border-none rounded-md text-white cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0"
           style={{ fontSize: '13px' }}
         >
           ↑
