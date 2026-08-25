@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#0A0C10;color:#E8ECF4;font-family:'Geist',system-ui,sans-serif;}*{box-sizing:border-box;}a{color:#4E7CF6;}a:hover{color:#7DA0FF;}</style>
+</helmet>
+<div data-screen-label="Portfólio" style="padding:16px;display:flex;flex-direction:column;gap:12px;font-size:13px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <h1 style="margin:0;font-size:16px;font-weight:700;">Portfólio consolidado</h1>
+    <span style="font-size:11px;color:#8A93A8;">52 integrações · atualizado <span style="font-family:'Geist Mono',monospace;">há 3s</span></span>
+    <div style="flex:1;"></div>
+    <button style="height:30px;padding:0 12px;background:#151A24;border:1px solid #222939;border-radius:6px;color:#B7BFD2;font-size:12px;cursor:pointer;font-family:inherit;">Exportar CSV</button>
+  </div>
+  <!-- positions -->
+  <div role="table" aria-label="Posições" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;overflow:hidden;">
+    <div style="display:grid;grid-template-columns:1.4fr 90px 110px 110px 120px 120px 80px;padding:8px 14px;border-bottom:1px solid #1A202E;font-size:10px;color:#5A6478;text-transform:uppercase;letter-spacing:.5px;">
+      <div>Ativo</div><div style="text-align:right;">Qtd.</div><div style="text-align:right;">Preço médio</div><div style="text-align:right;">Atual</div><div style="text-align:right;">P&amp;L aberto</div><div style="text-align:right;">P&amp;L realizado</div><div style="text-align:right;">Peso</div>
+    </div>
+    <sc-for list="{{ pos }}" as="p" hint-placeholder-count="8">
+      <div style="display:grid;grid-template-columns:1.4fr 90px 110px 110px 120px 120px 80px;padding:8px 14px;border-bottom:1px solid #141926;align-items:center;" style-hover="background:#12161F;">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <span style="font-size:9px;color:{{ p.clsFg }};background:{{ p.clsBg }};border-radius:3px;padding:2px 6px;font-weight:600;width:54px;text-align:center;">{{ p.cls }}</span>
+          <div><div style="font-size:12.5px;font-weight:600;font-family:'Geist Mono',monospace;">{{ p.sym }}</div><div style="font-size:9.5px;color:#5A6478;">{{ p.venue }}</div></div>
+        </div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11.5px;text-align:right;color:#8A93A8;">{{ p.qty }}</div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11.5px;text-align:right;">{{ p.avg }}</div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11.5px;text-align:right;">{{ p.cur }}</div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11.5px;text-align:right;color:{{ p.oc }};">{{ p.oArrow }} {{ p.open }}</div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11.5px;text-align:right;color:{{ p.rc }};">{{ p.real }}</div>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;">
+          <div style="width:36px;height:4px;background:#1A202E;border-radius:2px;overflow:hidden;"><div style="height:100%;width:{{ p.wW }};background:#4E7CF6;"></div></div>
+          <span style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:10.5px;color:#8A93A8;width:36px;text-align:right;">{{ p.w }}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start;">
+    <!-- exposição -->
+    <section style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+      <div style="display:flex;gap:2px;margin-bottom:10px;" role="tablist" aria-label="Dimensão de exposição">
+        <sc-for list="{{ expTabs }}" as="et" hint-placeholder-count="4">
+          <button role="tab" aria-selected="{{ et.sel }}" onClick="{{ et.go }}" style="height:24px;padding:0 10px;border:none;border-radius:5px;background:{{ et.bg }};color:{{ et.fg }};font-size:11px;cursor:pointer;font-family:inherit;">{{ et.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <sc-for list="{{ exposure }}" as="ex" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span style="width:110px;font-size:11.5px;color:#B7BFD2;">{{ ex.label }}</span>
+            <div style="flex:1;height:12px;background:#0D1017;border-radius:3px;overflow:hidden;"><div style="height:100%;width:{{ ex.w }};background:{{ ex.c }};"></div></div>
+            <span style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;width:44px;text-align:right;">{{ ex.pct }}%</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+    <!-- risco -->
+    <section aria-label="Risco" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+      <div style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Risco do portfólio</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <sc-for list="{{ risk }}" as="rk" hint-placeholder-count="6">
+          <div style="background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:8px 10px;">
+            <div style="font-size:9.5px;color:#5A6478;">{{ rk.k }}</div>
+            <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600;color:{{ rk.c }};text-align:right;">{{ rk.v }}</div>
+            <div style="font-size:9px;color:#5A6478;text-align:right;">{{ rk.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:10px;padding:9px 11px;background:#2A2113;border:1px solid #6B5320;border-radius:6px;font-size:11px;color:#E8A33D;line-height:1.5;">⚠ Concentração: fator juro real BR responde por 41% do patrimônio (NTN-B + FIIs + utilities). <a href="#" style="color:#E8A33D;text-decoration:underline;">ver decomposição</a></div>
+    </section>
+    <!-- fiscal -->
+    <section aria-label="Fiscal" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px;"><span style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">Fiscal · agosto/2026</span><span style="font-size:9.5px;color:#5A6478;">regime BR · estimativa</span></div>
+      <div style="display:flex;flex-direction:column;">
+        <sc-for list="{{ fiscal }}" as="f" hint-placeholder-count="6">
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #141926;font-size:11.5px;"><span style="color:#8A93A8;">{{ f.k }}</span><span style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;color:{{ f.c }};">{{ f.v }}</span></div>
+        </sc-for>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px;background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:9px 11px;">
+        <div style="flex:1;"><div style="font-size:10px;color:#5A6478;">DARF estimado (vence 30/set)</div><div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:15px;font-weight:700;">R$ 4.812,44</div></div>
+        <button style="height:26px;padding:0 11px;background:#151A24;border:1px solid #222939;border-radius:5px;color:#B7BFD2;font-size:11px;cursor:pointer;font-family:inherit;">Gerar memória de cálculo</button>
+      </div>
+    </section>
+  </div>
+  <!-- histórico -->
+  <section aria-label="Histórico de trades" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <span style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">Histórico de trades</span>
+      <div style="display:flex;gap:6px;margin-left:10px;">
+        <select style="height:24px;background:#0D1017;border:1px solid #222939;border-radius:5px;color:#8A93A8;font-size:10.5px;font-family:inherit;padding:0 6px;"><option>Todas as classes</option></select>
+        <select style="height:24px;background:#0D1017;border:1px solid #222939;border-radius:5px;color:#8A93A8;font-size:10.5px;font-family:inherit;padding:0 6px;"><option>Últimos 30 dias</option></select>
+        <select style="height:24px;background:#0D1017;border:1px solid #222939;border-radius:5px;color:#8A93A8;font-size:10.5px;font-family:inherit;padding:0 6px;"><option>Manual + bots</option></select>
+      </div>
+      <div style="flex:1;"></div>
+      <button style="height:26px;padding:0 11px;background:#151A24;border:1px solid #222939;border-radius:5px;color:#B7BFD2;font-size:11px;cursor:pointer;font-family:inherit;">Exportar</button>
+    </div>
+    <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;">
+      <div style="display:grid;grid-template-columns:120px 100px 60px repeat(4,1fr) 90px;padding:5px 8px;color:#5A6478;border-bottom:1px solid #1A202E;font-size:10px;">
+        <div>data/hora</div><div>ativo</div><div>lado</div><div style="text-align:right;">qtd.</div><div style="text-align:right;">preço</div><div style="text-align:right;">total</div><div style="text-align:right;">resultado</div><div style="text-align:right;">origem</div>
+      </div>
+      <sc-for list="{{ hist }}" as="h" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:120px 100px 60px repeat(4,1fr) 90px;padding:6px 8px;border-bottom:1px solid #141926;color:#B7BFD2;">
+          <div style="color:#5A6478;">{{ h.d }}</div><div>{{ h.a }}</div><div style="color:{{ h.sc }};">{{ h.s }}</div><div style="text-align:right;">{{ h.q }}</div><div style="text-align:right;">{{ h.p }}</div><div style="text-align:right;">{{ h.t }}</div><div style="text-align:right;color:{{ h.rc }};">{{ h.r }}</div><div style="text-align:right;color:#5A6478;">{{ h.o }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { expTab: 'classe' };
+  renderVals() {
+    const up = '#21C77D', dn = '#F0525F', s = this.state;
+    const clsColors = { CRIPTO: ['#A78BFA', '#1C1630'], AÇÕES: ['#7DA0FF', '#131C31'], RF: ['#21C77D', '#0D1F17'], FX: ['#38BDF8', '#0E1B26'], ENERGIA: ['#E8A33D', '#241C0D'], COMMOD: ['#D4A574', '#221A10'], FII: ['#8FBF6A', '#151F0F'] };
+    const P = (cls, sym, venue, qty, avg, cur, open, real2, w) => {
+      const c = clsColors[cls];
+      return { cls, clsFg: c[0], clsBg: c[1], sym, venue, qty, avg, cur, open, oc: open.startsWith('+') ? up : dn, oArrow: open.startsWith('+') ? '▲' : '▼', real: real2, rc: real2.startsWith('+') ? up : real2 === '—' ? '#5A6478' : dn, w: w + '%', wW: (w * 3.5) + '%' };
+    };
+    const pos = [
+      P('RF', 'NTN-B 2035', 'Tesouro Direto', '96', 'R$ 4.196,40', 'R$ 4.412,08', '+R$ 21.568', '+R$ 8.104', 14.9),
+      P('CRIPTO', 'BTC', 'Binance + Coinbase', '3,1840', 'US$ 58.212', 'US$ 67.412', '+R$ 159.884', '+R$ 84.212', 12.4),
+      P('AÇÕES', 'PETR4', 'B3 · XP', '8.940', 'R$ 36,10', 'R$ 38,42', '+R$ 20.741', '+R$ 12.480', 12.1),
+      P('AÇÕES', 'NVDA', 'IBKR', '210', 'US$ 148,20', 'US$ 182,44', '+R$ 39.244', '—', 9.8),
+      P('FII', 'HGLG11', 'B3', '2.400', 'R$ 158,10', 'R$ 162,30', '+R$ 10.080', '+R$ 4.318', 8.7),
+      P('ENERGIA', 'Fwd SE set/26', 'BBCE', '2,0 MWm', 'R$ 122,00', 'R$ 119,40', '−R$ 3.822', '—', 6.2),
+      P('CRIPTO', 'ETH', 'Binance', '18,42', 'US$ 2.890', 'US$ 3.284', '+R$ 39.664', '+R$ 11.204', 5.8),
+      P('COMMOD', 'CAFÉ dez (KC)', 'ICE · IBKR', '4', 'US¢ 261,40', 'US¢ 284,10', '+R$ 18.612', '—', 4.4),
+      P('FX', 'USD comprado', 'OANDA', 'US$ 40.000', 'R$ 5,52', 'R$ 5,4610', '−R$ 2.360', '+R$ 1.104', 3.9),
+    ];
+    const expData = {
+      classe: [['Renda variável', 34, '#7DA0FF'], ['Cripto', 22, '#A78BFA'], ['Renda fixa', 21, '#21C77D'], ['Energia', 9, '#E8A33D'], ['Commodities', 8, '#D4A574'], ['Câmbio', 4, '#38BDF8'], ['Caixa', 2, '#5A6478']],
+      moeda: [['BRL', 58, '#21C77D'], ['USD', 36, '#7DA0FF'], ['USDT', 5, '#A78BFA'], ['EUR', 1, '#38BDF8']],
+      setor: [['Energia & O&G', 28, '#E8A33D'], ['Financeiro', 18, '#7DA0FF'], ['Tecnologia', 16, '#A78BFA'], ['Logística/RE', 14, '#8FBF6A'], ['Agro', 12, '#D4A574'], ['Outros', 12, '#5A6478']],
+      'país': [['Brasil', 61, '#21C77D'], ['EUA', 31, '#7DA0FF'], ['Global/cripto', 8, '#A78BFA']],
+    };
+    const expTabs = ['classe', 'moeda', 'setor', 'país'].map(id => ({ label: id.charAt(0).toUpperCase() + id.slice(1), sel: s.expTab === id, go: () => this.setState({ expTab: id }), bg: s.expTab === id ? '#1C2333' : 'transparent', fg: s.expTab === id ? '#E8ECF4' : '#5A6478' }));
+    const exposure = expData[s.expTab].map(([label, pct, c]) => ({ label, pct, c, w: pct + '%' }));
+    const risk = [
+      { k: 'VaR 95% · 1d', v: '−R$ 38.412', sub: '1,35% do patrimônio', c: dn },
+      { k: 'Volatilidade 30d', v: '14,2% aa', sub: 'vs 18,1% do IBOV', c: '#E8ECF4' },
+      { k: 'Beta vs IBOV', v: '0,74', sub: 'janela 90d', c: '#E8ECF4' },
+      { k: 'Correlação média', v: '0,31', sub: 'entre posições', c: '#E8ECF4' },
+      { k: 'Maior posição', v: '14,9%', sub: 'NTN-B 2035', c: '#E8A33D' },
+      { k: 'Alavancagem', v: '1,08x', sub: 'via perpétuos', c: '#E8ECF4' },
+    ];
+    const fiscal = [
+      { k: 'Resultado ações (comum)', v: '+R$ 18.412', c: up }, { k: 'Resultado day trade', v: '−R$ 1.208', c: dn },
+      { k: 'Resultado cripto', v: '+R$ 22.904', c: up }, { k: 'Isenção ações < R$ 20k', v: 'não aplicável', c: '#8A93A8' },
+      { k: 'Prejuízo a compensar', v: 'R$ 3.180', c: '#8A93A8' }, { k: 'IR retido na fonte', v: 'R$ 214,10', c: '#8A93A8' },
+    ];
+    const H = (d, a, sd, q, p, t, rr, o) => ({ d, a, s: sd, sc: sd === 'COMPRA' ? up : dn, q, p, t, r: rr, rc: rr.startsWith('+') ? up : rr === '—' ? '#5A6478' : dn, o });
+    const hist = [
+      H('25/08 11:42', 'BTC perp', 'COMPRA', '0,2000', '66.980', 'US$ 13.396', '—', 'bot · FSv2'),
+      H('25/08 10:15', 'PETR4', 'VENDA', '1.200', '38,61', 'R$ 46.332', '+R$ 2.412', 'manual'),
+      H('22/08 16:48', 'NTN-B 2035', 'COMPRA', '12', '4.388,10', 'R$ 52.657', '—', 'manual'),
+      H('21/08 14:02', 'ETH perp', 'VENDA', '4,10', '3.312,00', 'US$ 13.579', '+R$ 4.788', 'bot · FSv2'),
+      H('20/08 09:31', 'HGLG11', 'COMPRA', '300', '160,80', 'R$ 48.240', '—', 'manual'),
+      H('18/08 15:20', 'CAFÉ dez', 'COMPRA', '2', '271,20', 'US$ 20.340', '—', 'manual'),
+    ];
+    return { pos, expTabs, exposure, risk, fiscal, hist };
+  }
+}
+</script>
+</body>
+</html>

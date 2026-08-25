@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#0A0C10;color:#E8ECF4;font-family:'Geist',system-ui,sans-serif;}*{box-sizing:border-box;}a{color:#4E7CF6;}a:hover{color:#7DA0FF;}</style>
+</helmet>
+<div data-screen-label="Alertas" style="padding:16px;display:grid;grid-template-columns:1fr 360px;gap:12px;font-size:13px;align-items:start;">
+  <div style="display:flex;flex-direction:column;gap:12px;min-width:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <h1 style="margin:0;font-size:16px;font-weight:700;">Alertas & sinais</h1>
+      <span style="font-size:11px;color:#8A93A8;">14 ativos · 3 disparados hoje</span>
+    </div>
+    <section aria-label="Alertas ativos" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;overflow:hidden;">
+      <sc-for list="{{ alerts }}" as="al" hint-placeholder-count="6">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #141926;" style-hover="background:#12161F;">
+          <span style="font-size:9.5px;color:{{ al.tc }};background:{{ al.tb }};border-radius:3px;padding:2px 7px;font-weight:600;width:70px;text-align:center;flex-shrink:0;">{{ al.type }}</span>
+          <div style="flex:1;min-width:0;"><div style="font-size:12.5px;">{{ al.cond }}</div><div style="font-size:10px;color:#5A6478;">{{ al.meta }}</div></div>
+          <div style="display:flex;gap:4px;">
+            <sc-for list="{{ al.ch }}" as="c" hint-placeholder-count="2"><span style="font-size:9.5px;color:#8A93A8;border:1px solid #222939;border-radius:3px;padding:1px 6px;">{{ c }}</span></sc-for>
+          </div>
+          <button style="height:24px;padding:0 10px;background:#151A24;border:1px solid #222939;border-radius:5px;color:#8A93A8;font-size:10.5px;cursor:pointer;font-family:inherit;">Editar</button>
+        </div>
+      </sc-for>
+    </section>
+    <section aria-label="Histórico de disparos" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">Histórico de disparos · a IA acertou?</span><span style="margin-left:auto;font-size:10.5px;color:#8A93A8;">accuracy 30d: <span style="font-family:'Geist Mono',monospace;color:#21C77D;">68%</span></span></div>
+      <sc-for list="{{ fired }}" as="f" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid #141926;font-size:11.5px;">
+          <span style="font-family:'Geist Mono',monospace;font-size:10.5px;color:#5A6478;width:88px;flex-shrink:0;">{{ f.when }}</span>
+          <span style="flex:1;color:#B7BFD2;">{{ f.what }}</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:10.5px;color:{{ f.rc }};">{{ f.result }}</span>
+          <span style="font-size:10px;font-weight:700;color:{{ f.vc }};width:56px;text-align:right;">{{ f.verdict }}</span>
+        </div>
+      </sc-for>
+    </section>
+  </div>
+  <section aria-label="Criar alerta" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:12px;">
+    <div style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">Novo alerta</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+      <sc-for list="{{ kinds }}" as="k" hint-placeholder-count="5"><span style="font-size:10.5px;color:{{ k.fg }};background:{{ k.bg }};border:1px solid {{ k.bc }};border-radius:5px;padding:4px 9px;cursor:pointer;">{{ k.t }}</span></sc-for>
+    </div>
+    <div>
+      <div style="font-size:10.5px;color:#5A6478;margin-bottom:5px;">Condição em linguagem natural</div>
+      <div style="background:#0A0C10;border:1px solid #2A2440;border-radius:7px;padding:10px 12px;font-size:12.5px;line-height:1.5;color:#E8ECF4;">me avise se o <strong style="color:#A78BFA;">funding do BTC</strong> ficar positivo por mais de <strong style="color:#A78BFA;">4 horas</strong> enquanto o preço estiver acima da <strong style="color:#A78BFA;">MA(21) diária</strong></div>
+      <div style="margin-top:7px;font-size:10.5px;color:#21C77D;font-family:'Geist Mono',monospace;">✓ interpretado: funding_8h &gt; 0 por 4h E preço &gt; MA(21,1D)</div>
+    </div>
+    <div>
+      <div style="font-size:10.5px;color:#5A6478;margin-bottom:6px;">Canais</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">
+        <sc-for list="{{ channels }}" as="ch" hint-placeholder-count="5"><span style="font-size:10.5px;color:{{ ch.fg }};background:{{ ch.bg }};border:1px solid {{ ch.bc }};border-radius:5px;padding:4px 10px;cursor:pointer;">{{ ch.t }}</span></sc-for>
+      </div>
+    </div>
+    <button style="height:32px;background:#16233F;border:1px solid #2E4370;border-radius:6px;color:#7DA0FF;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Criar alerta</button>
+    <div style="font-size:10px;color:#5A6478;line-height:1.5;">Alertas nunca executam ordens — apenas notificam. Disparos ficam registrados para auditoria de acurácia.</div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const up = '#21C77D', dn = '#F0525F';
+    const types = { PREÇO: ['#7DA0FF', '#131C31'], INDICADOR: ['#E8A33D', '#241C0D'], NOTÍCIA: ['#38BDF8', '#0E1B26'], 'ON-CHAIN': ['#A78BFA', '#1C1630'], NATURAL: ['#8FBF6A', '#151F0F'] };
+    const A = (type, cond, meta, ch) => ({ type, cond, meta, ch, tc: types[type][0], tb: types[type][1] });
+    const alerts = [
+      A('PREÇO', 'BTC/USDT cruzar US$ 70.000 para cima', 'Binance · criado há 3d', ['push', 'telegram']),
+      A('NATURAL', 'funding BTC positivo por 4h com preço acima da MA(21)', 'interpretado pela IA · há 1h', ['push']),
+      A('INDICADOR', 'RSI(14) do IBOV abaixo de 30 no diário', 'B3 · criado há 12d', ['e-mail']),
+      A('ON-CHAIN', 'saída líquida de exchanges > 20k BTC/24h', 'Glassnode · há 8d', ['push', 'discord']),
+      A('NOTÍCIA', 'manchete sobre PETR4 com sentimento < −0,5 e relevância alta', 'IA · há 20d', ['push', 'whatsapp']),
+      A('PREÇO', 'PLD SE/CO acima de R$ 160/MWh', 'CCEE · há 5d', ['e-mail', 'telegram']),
+    ];
+    const F = (when, what, result, ok) => ({ when, what, result, rc: result.startsWith('+') ? up : dn, verdict: ok ? 'ACERTOU' : 'ERROU', vc: ok ? up : dn });
+    const fired = [
+      F('hoje 11:02', 'Sinal LONG BTC (convicção 87) — squeeze de shorts', '+2,4% em 6h', true),
+      F('hoje 09:15', 'PLD SE/CO cruzou R$ 140', '+3,4% no dia', true),
+      F('ontem 16:40', 'Sinal SHORT SOL (convicção 58)', '+1,8% contra', false),
+      F('22/08 10:30', 'RSI IBOV < 30 → reversão esperada', '+1,1% em 2d', true),
+      F('21/08 14:12', 'Sentimento negativo PETR4 → queda esperada', '−0,4% a favor', true),
+    ];
+    const kinds = ['Preço', 'Indicador', 'Notícia', 'On-chain', 'Linguagem natural'].map((t, i) => ({ t, fg: i === 4 ? '#A78BFA' : '#8A93A8', bg: i === 4 ? '#1C1630' : '#0D1017', bc: i === 4 ? '#3A2E5C' : '#222939' }));
+    const channels = ['Push', 'E-mail', 'Telegram', 'Discord', 'WhatsApp'].map((t, i) => ({ t, fg: i < 2 ? '#7DA0FF' : '#8A93A8', bg: i < 2 ? '#16233F' : '#0D1017', bc: i < 2 ? '#2E4370' : '#222939' }));
+    return { alerts, fired, kinds, channels };
+  }
+}
+</script>
+</body>
+</html>

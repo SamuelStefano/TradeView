@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#0A0C10;color:#E8ECF4;font-family:'Geist',system-ui,sans-serif;}*{box-sizing:border-box;}a{color:#4E7CF6;}a:hover{color:#7DA0FF;}@keyframes shimmer{0%{opacity:.5}50%{opacity:1}100%{opacity:.5}}</style>
+</helmet>
+<div data-screen-label="Overview" style="padding:16px;display:grid;grid-template-columns:300px 1fr 340px;gap:12px;font-size:13px;align-items:start;">
+  <!-- COL 1: patrimônio, alocação, calendário -->
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <section aria-label="Patrimônio consolidado" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+      <div style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Patrimônio consolidado</div>
+      <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:24px;font-weight:600;">R$ 2.847.312,08</div>
+      <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;color:#8A93A8;margin-top:2px;">US$ 521.480,15 <span style="color:#5A6478;">@ 5,4610</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;">
+        <sc-for list="{{ pnl }}" as="p" hint-placeholder-count="4">
+          <div style="background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:7px 9px;">
+            <div style="font-size:10px;color:#5A6478;">{{ p.label }}</div>
+            <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;color:{{ p.color }};text-align:right;">{{ p.arrow }} {{ p.val }}</div>
+            <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:10px;color:{{ p.color }};text-align:right;">{{ p.pct }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+    <section aria-label="Alocação" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+      <div style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Alocação por classe</div>
+      <div style="display:flex;gap:14px;align-items:center;">
+        <svg width="96" height="96" viewBox="0 0 42 42" role="img" aria-label="Donut de alocação por classe de ativo">
+          <sc-for list="{{ donut }}" as="d" hint-placeholder-count="6">
+            <circle cx="21" cy="21" r="15.9155" fill="none" stroke="{{ d.c }}" stroke-width="6" stroke-dasharray="{{ d.dash }}" stroke-dashoffset="{{ d.off }}"></circle>
+          </sc-for>
+        </svg>
+        <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+          <sc-for list="{{ alloc }}" as="a" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:7px;font-size:11px;">
+              <span style="width:8px;height:8px;border-radius:2px;background:{{ a.c }};flex-shrink:0;"></span>
+              <span style="color:#B7BFD2;">{{ a.label }}</span>
+              <span style="margin-left:auto;font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;color:#E8ECF4;">{{ a.pct }}%</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+    <section aria-label="Calendário econômico" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px;"><span style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">Calendário · hoje</span><span style="font-size:10px;color:#5A6478;font-family:'Geist Mono',monospace;">ter, 25 ago</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <sc-for list="{{ calendar }}" as="e" hint-placeholder-count="4">
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-family:'Geist Mono',monospace;font-size:11px;color:#8A93A8;width:38px;flex-shrink:0;">{{ e.time }}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;color:#E8ECF4;">{{ e.title }}</div>
+              <div style="font-size:10.5px;color:#5A6478;">{{ e.detail }}</div>
+            </div>
+            <span style="font-size:9.5px;font-weight:600;letter-spacing:.4px;padding:2px 6px;border-radius:4px;background:{{ e.bg }};color:{{ e.fg }};flex-shrink:0;">{{ e.impact }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+  <!-- COL 2: sinais IA + heatmap -->
+  <div style="display:flex;flex-direction:column;gap:12px;min-width:0;">
+    <section aria-label="Sinais da IA" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:11px;color:#A78BFA;text-transform:uppercase;letter-spacing:.6px;font-weight:600;">✦ Sinais da IA</span>
+        <span style="font-size:10px;color:#5A6478;">ordenado por convicção</span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:10px;color:#8A93A8;"><span style="width:6px;height:6px;border-radius:50%;background:#21C77D;animation:shimmer 2s infinite;"></span>tempo real</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <sc-for list="{{ signals }}" as="sg" hint-placeholder-count="4">
+          <div style="background:#0D1017;border:1px solid #1A202E;border-radius:7px;padding:10px 12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-family:'Geist Mono',monospace;font-weight:600;font-size:12.5px;">{{ sg.asset }}</span>
+              <span style="font-size:10.5px;font-weight:700;letter-spacing:.5px;color:{{ sg.dirColor }};">{{ sg.dirArrow }} {{ sg.dir }}</span>
+              <span style="font-size:10px;color:#5A6478;">{{ sg.horizon }}</span>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:7px;">
+                <div role="img" aria-label="convicção {{ sg.conv }} de 100" style="width:64px;height:5px;background:#1A202E;border-radius:3px;overflow:hidden;"><div style="height:100%;width:{{ sg.convW }};background:#A78BFA;"></div></div>
+                <span style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11.5px;color:#A78BFA;font-weight:600;">{{ sg.conv }}</span>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#B7BFD2;margin-top:6px;line-height:1.45;">{{ sg.thesis }}</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+              <button onClick="{{ sg.toggle }}" style="background:none;border:none;color:#4E7CF6;font-size:11px;cursor:pointer;padding:0;font-family:inherit;">{{ sg.whyLabel }}</button>
+              <span style="font-size:10px;color:#5A6478;font-family:'Geist Mono',monospace;">{{ sg.ago }}</span>
+            </div>
+            <sc-if value="{{ sg.open }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:8px;padding:9px 11px;background:#12101C;border:1px solid #2A2440;border-radius:6px;font-size:11.5px;color:#B7BFD2;line-height:1.5;">{{ sg.why }}<div style="margin-top:5px;font-size:10.5px;color:#5A6478;">fontes: <a href="#">funding Binance</a> · <a href="#">CME OI</a> · <a href="#">Glassnode</a></div></div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <!-- IA pensando (estado) -->
+        <div aria-label="IA analisando" style="background:#0D1017;border:1px dashed #2A2440;border-radius:7px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+          <span style="color:#A78BFA;animation:shimmer 1.4s infinite;">✦</span>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+            <div style="height:8px;width:38%;background:#1A202E;border-radius:4px;animation:shimmer 1.4s infinite;"></div>
+            <div style="height:8px;width:72%;background:#161B26;border-radius:4px;animation:shimmer 1.4s .2s infinite;"></div>
+          </div>
+          <span style="font-size:10px;color:#5A6478;">analisando fluxo B3…</span>
+        </div>
+      </div>
+    </section>
+    <section aria-label="Heatmap de mercado" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">Heatmap global</span><span style="font-size:10px;color:#5A6478;">variação 24h · células = ativos</span></div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <sc-for list="{{ heatRows }}" as="hr" hint-placeholder-count="8">
+          <div style="display:flex;gap:5px;align-items:center;">
+            <span style="width:88px;flex-shrink:0;font-size:10.5px;color:#8A93A8;">{{ hr.label }}</span>
+            <sc-for list="{{ hr.cells }}" as="c" hint-placeholder-count="8">
+              <div title="{{ c.tip }}" style="flex:1;height:26px;border-radius:4px;background:{{ c.bg }};display:flex;align-items:center;justify-content:center;gap:3px;min-width:0;cursor:default;">
+                <span style="font-size:9px;color:{{ c.fg }};font-weight:600;overflow:hidden;white-space:nowrap;">{{ c.sym }}</span>
+                <span style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:9px;color:{{ c.fg }};">{{ c.chg }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+  <!-- COL 3: watchlist -->
+  <section aria-label="Watchlist" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:2px;">
+    <div style="display:flex;align-items:center;margin-bottom:8px;"><span style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">Watchlist</span><span style="margin-left:auto;font-size:10px;color:#5A6478;font-family:'Geist Mono',monospace;">12 ativos</span></div>
+    <sc-for list="{{ watch }}" as="w" hint-placeholder-count="10">
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #141926;">
+        <div style="min-width:0;flex:1;">
+          <div style="font-size:12px;font-weight:600;">{{ w.sym }}</div>
+          <div style="font-size:9.5px;color:#5A6478;display:flex;gap:5px;align-items:center;">{{ w.mkt }}
+            <sc-if value="{{ w.delayed }}" hint-placeholder-val="{{ false }}"><span style="color:#E8A33D;border:1px solid #6B5320;border-radius:3px;padding:0 4px;font-size:8.5px;">atrasado 15min</span></sc-if>
+            <sc-if value="{{ w.closed }}" hint-placeholder-val="{{ false }}"><span style="color:#8A93A8;border:1px solid #222939;border-radius:3px;padding:0 4px;font-size:8.5px;">fechado</span></sc-if>
+          </div>
+        </div>
+        <svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><polyline points="{{ w.spark }}" fill="none" stroke="{{ w.color }}" stroke-width="1.4"></polyline></svg>
+        <div style="text-align:right;width:88px;flex-shrink:0;">
+          <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;">{{ w.price }}</div>
+          <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:10.5px;color:{{ w.color }};">{{ w.arrow }} {{ w.chg }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { openSignal: 0 };
+  renderVals() {
+    const up = '#21C77D', dn = '#F0525F';
+    const pnl = [
+      { label: 'P&L dia', val: '+R$ 12.480', pct: '+0,44%', color: up, arrow: '▲' },
+      { label: 'P&L semana', val: '−R$ 8.112', pct: '−0,28%', color: dn, arrow: '▼' },
+      { label: 'P&L mês', val: '+R$ 96.204', pct: '+3,50%', color: up, arrow: '▲' },
+      { label: 'Desde o início', val: '+R$ 847.312', pct: '+42,4%', color: up, arrow: '▲' },
+    ];
+    const allocData = [
+      ['Renda variável', 34, '#4E7CF6'], ['Cripto', 22, '#A78BFA'], ['Renda fixa', 21, '#21C77D'],
+      ['Energia', 9, '#E8A33D'], ['Commodities', 8, '#38BDF8'], ['Câmbio + outros', 6, '#8A93A8'],
+    ];
+    let acc = 0;
+    const donut = allocData.map(([l, p, c]) => { const d = { c, dash: p + ' ' + (100 - p), off: 25 - acc }; acc += p; return d; });
+    const alloc = allocData.map(([label, pct, c]) => ({ label, pct, c }));
+    const calendar = [
+      { time: '09:00', title: 'IPCA-15 (ago)', detail: 'consenso +0,18% m/m', impact: 'ALTO', bg: '#2A1418', fg: '#F0525F' },
+      { time: '11:30', title: 'Leilão Tesouro — NTN-B', detail: 'lote 2035/2045', impact: 'MÉDIO', bg: '#2A2113', fg: '#E8A33D' },
+      { time: '15:00', title: 'FOMC minutes', detail: 'reunião de jul', impact: 'ALTO', bg: '#2A1418', fg: '#F0525F' },
+      { time: '18:10', title: 'Earnings NVDA', detail: 'consenso EPS 0,94', impact: 'ALTO', bg: '#2A1418', fg: '#F0525F' },
+      { time: '—', title: 'Copom (amanhã)', detail: 'Selic: manutenção 14,75%', impact: 'BAIXO', bg: '#151A24', fg: '#8A93A8' },
+    ];
+    const sigs = [
+      { asset: 'BTC/USDT', dir: 'LONG', conv: 87, horizon: '3–7 dias', thesis: 'Funding negativo com OI subindo: posicionamento vendido esticado abre espaço para squeeze.', why: 'Funding em −0,012% (P10 histórico) enquanto open interest subiu 8% em 48h e reservas em exchanges caíram 22k BTC. Combinação historicamente precede reversões de 4–9% em 5 dias (18 de 23 casos desde 2022).', ago: 'há 2min' },
+      { asset: 'Tesouro IPCA+ 2035', dir: 'COMPRA', conv: 81, horizon: '1–3 meses', thesis: 'Juro real a 6,2% com IPCA-15 desacelerando: assimetria favorável na ponta longa.', why: 'Breakeven de inflação implícito (5,9%) está 80bps acima da mediana das projeções Focus. Fechamento de 40bps na NTN-B 2035 gera +6,8% de marcação a mercado (duration 8,9).', ago: 'há 11min' },
+      { asset: 'PLD SE/CO', dir: 'ALTA', conv: 74, horizon: '2–4 semanas', thesis: 'ENA 38% abaixo da MLT e despacho térmico crescendo: pressão altista no spot de setembro.', why: 'Energia natural afluente no subsistema SE/CO em 62% da média de longo termo, reservatórios em 41%. Curva forward set/26 ainda não precifica despacho térmico adicional de 2,1 GWmed.', ago: 'há 26min' },
+      { asset: 'PETR4', dir: 'SHORT', conv: 62, horizon: '1–2 semanas', thesis: 'Brent perdendo suporte de US$ 74 com crack spreads comprimindo; PETR4 defasada do móvel.', why: 'Correlação PETR4×Brent (0,78 em 90d) sugere ajuste de −3,2% para convergência. Fluxo estrangeiro na B3 negativo há 6 pregões.', ago: 'há 1h' },
+    ];
+    const signals = sigs.map((g, i) => ({
+      ...g, conv: g.conv, convW: g.conv + '%',
+      dirColor: (g.dir === 'SHORT') ? '#F0525F' : '#21C77D',
+      dirArrow: (g.dir === 'SHORT') ? '▼' : '▲',
+      open: this.state.openSignal === i,
+      whyLabel: this.state.openSignal === i ? 'ocultar por quê' : 'por quê ▾',
+      toggle: () => this.setState(s => ({ openSignal: s.openSignal === i ? -1 : i })),
+    }));
+    const cell = (sym, chg) => {
+      const v = parseFloat(chg.replace(',', '.'));
+      const t = Math.min(Math.abs(v) / 4, 1);
+      const bg = v >= 0 ? `rgba(33,199,125,${0.12 + t * 0.5})` : `rgba(240,82,95,${0.12 + t * 0.5})`;
+      return { sym, chg: (v >= 0 ? '+' : '') + chg + '%', bg, fg: '#E8ECF4', tip: sym + ' ' + chg + '%' };
+    };
+    const heatRows = [
+      { label: 'Cripto', cells: [cell('BTC', '2,4'), cell('ETH', '3,1'), cell('SOL', '-1,8'), cell('BNB', '0,6'), cell('XRP', '-0,4'), cell('AVAX', '4,2'), cell('LINK', '1,1'), cell('DOGE', '-2,6')] },
+      { label: 'Ações BR', cells: [cell('PETR4', '-1,2'), cell('VALE3', '0,8'), cell('ITUB4', '0,4'), cell('BBAS3', '-0,6'), cell('WEGE3', '1,6'), cell('ELET3', '2,1'), cell('B3SA3', '-0,3'), cell('PRIO3', '-2,1')] },
+      { label: 'Ações US', cells: [cell('NVDA', '1,9'), cell('AAPL', '0,3'), cell('MSFT', '0,7'), cell('AMZN', '-0,5'), cell('META', '1,2'), cell('GOOG', '0,2'), cell('TSLA', '-3,1'), cell('AMD', '2,4')] },
+      { label: 'Renda fixa', cells: [cell('DI27', '-0,1'), cell('DI29', '-0,2'), cell('B35', '0,3'), cell('B45', '0,5'), cell('T10Y', '-0,1'), cell('T2Y', '0,0'), cell('CDB♦', '0,0'), cell('LCI♦', '0,0')] },
+      { label: 'Câmbio', cells: [cell('USDBRL', '-0,4'), cell('EURBRL', '-0,2'), cell('EURUSD', '0,2'), cell('GBPUSD', '0,1'), cell('USDJPY', '-0,3'), cell('USDMXN', '0,4'), cell('DXY', '-0,2'), cell('BTCBRL', '2,0')] },
+      { label: 'Energia', cells: [cell('PLD SE', '3,4'), cell('PLD S', '2,8'), cell('PLD NE', '1,2'), cell('PLD N', '0,9'), cell('TTF', '-1,4'), cell('HH', '0,8'), cell('EUA-CO2', '0,6'), cell('I-REC', '0,2')] },
+      { label: 'Commodities', cells: [cell('SOJA', '-0,8'), cell('MILHO', '-1,1'), cell('CAFÉ', '2,2'), cell('BOI', '0,4'), cell('OURO', '0,6'), cell('PRATA', '1,4'), cell('BRENT', '-1,6'), cell('COBRE', '0,9')] },
+      { label: 'Índices', cells: [cell('IBOV', '-0,3'), cell('WIN', '-0,3'), cell('SPX', '0,5'), cell('NDX', '0,9'), cell('VIX', '-4,2'), cell('DAX', '0,3'), cell('NIKKEI', '1,1'), cell('IFIX', '0,2')] },
+    ];
+    const rng = (seed) => () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const spark = (seed, upTrend) => {
+      const r = rng(seed); let y = 12; const pts = [];
+      for (let x = 0; x <= 56; x += 4) { y += (r() - (upTrend ? 0.56 : 0.44)) * 5; y = Math.max(2, Math.min(18, y)); pts.push(x + ',' + y.toFixed(1)); }
+      return pts.join(' ');
+    };
+    const W = (sym, mkt, price, chg, upv, opts) => ({ sym, mkt, price, chg, color: upv ? up : dn, arrow: upv ? '▲' : '▼', spark: spark(sym.length * 997 + 13, upv), delayed: !!(opts && opts.d), closed: !!(opts && opts.c) });
+    const watch = [
+      W('BTC/USDT', 'Binance · perp', 'US$ 67.412', '+2,41%', true),
+      W('ETH/USDT', 'Binance · spot', 'US$ 3.284,10', '+3,08%', true),
+      W('PETR4', 'B3', 'R$ 38,42', '−1,21%', false),
+      W('VALE3', 'B3', 'R$ 61,08', '+0,84%', true),
+      W('NVDA', 'NASDAQ', 'US$ 182,44', '+1,92%', true, { d: 1 }),
+      W('IPCA+ 2035', 'Tesouro', 'IPCA+6,21%', '−4 bps', true),
+      W('USD/BRL', 'FX', 'R$ 5,4610', '−0,38%', false),
+      W('PLD SE/CO', 'CCEE', 'R$ 141,20', '+3,40%', true),
+      W('SOJA nov', 'B3 · fut', 'US$ 10,42', '−0,81%', false, { c: 1 }),
+      W('HGLG11', 'B3 · FII', 'R$ 162,30', '+0,22%', true),
+    ];
+    return { pnl, donut, alloc, calendar, signals, heatRows, watch };
+  }
+}
+</script>
+</body>
+</html>

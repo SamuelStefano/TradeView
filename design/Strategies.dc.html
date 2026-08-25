@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#0A0C10;color:#E8ECF4;font-family:'Geist',system-ui,sans-serif;}*{box-sizing:border-box;}a{color:#4E7CF6;}a:hover{color:#7DA0FF;}@keyframes shimmer{0%,100%{opacity:.4}50%{opacity:1}}</style>
+</helmet>
+<div data-screen-label="Estratégias" style="padding:16px;display:flex;flex-direction:column;gap:12px;font-size:13px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <h1 style="margin:0;font-size:16px;font-weight:700;">Estratégias & bots</h1>
+    <span style="font-size:11px;color:#8A93A8;">4 estratégias · 2 em modo REAL</span>
+    <div style="flex:1;"></div>
+    <button style="height:30px;padding:0 14px;background:#16233F;border:1px solid #2E4370;border-radius:6px;color:#7DA0FF;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">+ Nova estratégia</button>
+  </div>
+  <!-- list -->
+  <div role="table" aria-label="Estratégias" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;overflow:hidden;">
+    <div style="display:grid;grid-template-columns:34px 1fr 110px 100px 100px 90px 90px 90px 100px;padding:8px 14px;border-bottom:1px solid #1A202E;font-size:10px;color:#5A6478;text-transform:uppercase;letter-spacing:.5px;">
+      <div></div><div>Estratégia</div><div>Estado</div><div style="text-align:right;">P&amp;L</div><div style="text-align:right;">Drawdown</div><div style="text-align:right;">Sharpe</div><div style="text-align:right;">Win rate</div><div style="text-align:right;">Trades</div><div style="text-align:right;">Modo</div>
+    </div>
+    <sc-for list="{{ strats }}" as="st" hint-placeholder-count="4">
+      <div style="display:grid;grid-template-columns:34px 1fr 110px 100px 100px 90px 90px 90px 100px;padding:10px 14px;border-bottom:1px solid #141926;align-items:center;background:{{ st.rowBg }};" style-hover="background:#12161F;">
+        <div style="color:{{ st.stColor }};font-size:12px;">{{ st.icon }}</div>
+        <div><div style="font-size:12.5px;font-weight:600;">{{ st.name }}</div><div style="font-size:10px;color:#5A6478;">{{ st.desc }}</div></div>
+        <div style="font-size:11px;color:{{ st.stColor }};">{{ st.state }}</div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;text-align:right;color:{{ st.pnlColor }};">{{ st.pnl }}</div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;text-align:right;color:#F0525F;">{{ st.dd }}</div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;text-align:right;">{{ st.sharpe }}</div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;text-align:right;">{{ st.wr }}</div>
+        <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;text-align:right;">{{ st.n }}</div>
+        <div style="text-align:right;">
+          <sc-if value="{{ st.real }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:700;letter-spacing:.6px;color:#fff;background:#C2323F;border-radius:4px;padding:3px 8px;">REAL</span></sc-if>
+          <sc-if value="{{ st.paper }}" hint-placeholder-val="{{ true }}"><span style="font-size:10px;font-weight:600;letter-spacing:.6px;color:#7DA0FF;background:#16233F;border:1px solid #2E4370;border-radius:4px;padding:2px 8px;">PAPER</span></sc-if>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:380px 1fr;gap:12px;align-items:start;">
+    <!-- builder -->
+    <section aria-label="Builder" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:12px;">
+      <div style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">Builder — Funding Squeeze v2</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:10.5px;color:#5A6478;">ENTRADA — todas as condições</div>
+        <sc-for list="{{ entries }}" as="e" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:8px;background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:7px 10px;font-family:'Geist Mono',monospace;font-size:11px;">
+            <span style="color:#7DA0FF;">{{ e.a }}</span><span style="color:#5A6478;">{{ e.op }}</span><span>{{ e.b }}</span>
+            <button aria-label="remover" style="margin-left:auto;background:none;border:none;color:#5A6478;cursor:pointer;font-size:11px;">✕</button>
+          </div>
+        </sc-for>
+        <button style="height:26px;border:1px dashed #222939;border-radius:6px;background:none;color:#5A6478;font-size:11px;cursor:pointer;font-family:inherit;">+ condição</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <label style="font-size:10.5px;color:#5A6478;">Sizing<div style="margin-top:3px;background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:7px 10px;font-family:'Geist Mono',monospace;font-size:11.5px;color:#E8ECF4;">2% do capital / trade</div></label>
+        <label style="font-size:10.5px;color:#5A6478;">Stop loss<div style="margin-top:3px;background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:7px 10px;font-family:'Geist Mono',monospace;font-size:11.5px;color:#E8ECF4;">−2,5% ou ATR×1,8</div></label>
+        <label style="font-size:10.5px;color:#5A6478;">Take profit<div style="margin-top:3px;background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:7px 10px;font-family:'Geist Mono',monospace;font-size:11.5px;color:#E8ECF4;">+6% ou trailing 2%</div></label>
+        <label style="font-size:10.5px;color:#5A6478;">Mercados<div style="margin-top:3px;background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:7px 10px;font-size:11.5px;color:#E8ECF4;">BTC, ETH, SOL perp</div></label>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;color:#5A6478;margin-bottom:5px;"><span>Peso da IA na decisão</span><span style="font-family:'Geist Mono',monospace;color:#A78BFA;">35%</span></div>
+        <div style="height:5px;background:#1A202E;border-radius:3px;overflow:hidden;"><div style="height:100%;width:35%;background:#A78BFA;"></div></div>
+        <div style="font-size:10px;color:#5A6478;margin-top:5px;line-height:1.4;">Com 35%, a IA pode vetar entradas (convicção &lt; 40) mas não pode abrir posição sozinha.</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button style="flex:1;height:32px;background:#151A24;border:1px solid #222939;border-radius:6px;color:#B7BFD2;font-size:12px;cursor:pointer;font-family:inherit;">Rodar backtest</button>
+        <button onClick="{{ openReal }}" style="flex:1;height:32px;background:#1C0F12;border:1px solid #7A2E36;border-radius:6px;color:#F0525F;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⚠ Ativar em REAL</button>
+      </div>
+    </section>
+    <!-- backtest -->
+    <section aria-label="Backtest" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:11px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">Backtest — jan/2023 → ago/2026</span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:10.5px;color:#7DA0FF;"><span style="width:6px;height:6px;border-radius:50%;background:#7DA0FF;animation:shimmer 1.2s infinite;"></span>rodando · 82% <span style="color:#5A6478;">· ~40s restantes</span></span>
+        <div style="margin-left:auto;display:flex;gap:12px;font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;">
+          <span style="color:#21C77D;">+214,8%</span><span style="color:#8A93A8;">vs BTC hold +168,2%</span>
+        </div>
+      </div>
+      <svg viewBox="0 0 620 150" style="width:100%;display:block;" role="img" aria-label="Curva de equity da estratégia versus benchmark">
+        <line x1="0" x2="620" y1="120" y2="120" stroke="#1A202E"></line>
+        <polyline points="{{ bench }}" fill="none" stroke="#5A6478" stroke-width="1.2" stroke-dasharray="4 3"></polyline>
+        <polyline points="{{ equity }}" fill="none" stroke="#21C77D" stroke-width="1.6"></polyline>
+        <text x="6" y="12" fill="#21C77D" font-size="9" font-family="Geist Mono">— estratégia</text>
+        <text x="80" y="12" fill="#5A6478" font-size="9" font-family="Geist Mono">┄ benchmark</text>
+      </svg>
+      <div style="display:flex;gap:10px;">
+        <svg viewBox="0 0 300 80" style="flex:1;" role="img" aria-label="Drawdown underwater">
+          <text x="4" y="10" fill="#5A6478" font-size="8.5" font-family="Geist Mono">drawdown underwater · máx −18,4%</text>
+          <sc-for list="{{ ddBars }}" as="d" hint-placeholder-count="30">
+            <rect x="{{ d.x }}" y="16" width="7" height="{{ d.h }}" fill="#F0525F" opacity=".55"></rect>
+          </sc-for>
+        </svg>
+        <svg viewBox="0 0 300 80" style="flex:1;" role="img" aria-label="Distribuição de retornos por trade">
+          <text x="4" y="10" fill="#5A6478" font-size="8.5" font-family="Geist Mono">distribuição de retornos/trade</text>
+          <sc-for list="{{ hist }}" as="hb" hint-placeholder-count="15">
+            <rect x="{{ hb.x }}" y="{{ hb.y }}" width="14" height="{{ hb.h }}" fill="{{ hb.c }}" opacity=".7"></rect>
+          </sc-for>
+          <line x1="150" x2="150" y1="14" y2="76" stroke="#5A6478" stroke-width="1" stroke-dasharray="2 2"></line>
+        </svg>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;">
+        <sc-for list="{{ btStats }}" as="b" hint-placeholder-count="6">
+          <div style="background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:7px 9px;"><div style="font-size:9.5px;color:#5A6478;">{{ b.k }}</div><div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;color:{{ b.c }};text-align:right;">{{ b.v }}</div></div>
+        </sc-for>
+      </div>
+      <div role="table" aria-label="Trades do backtest" style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:10.5px;">
+        <div style="display:grid;grid-template-columns:80px 70px 60px repeat(4,1fr);padding:5px 8px;color:#5A6478;border-bottom:1px solid #1A202E;">
+          <div>data</div><div>ativo</div><div>lado</div><div style="text-align:right;">entrada</div><div style="text-align:right;">saída</div><div style="text-align:right;">resultado</div><div style="text-align:right;">duração</div>
+        </div>
+        <sc-for list="{{ trades }}" as="t" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:80px 70px 60px repeat(4,1fr);padding:5px 8px;border-bottom:1px solid #141926;color:#B7BFD2;">
+            <div style="color:#5A6478;">{{ t.d }}</div><div>{{ t.a }}</div><div style="color:{{ t.sc }};">{{ t.s }}</div><div style="text-align:right;">{{ t.e }}</div><div style="text-align:right;">{{ t.x }}</div><div style="text-align:right;color:{{ t.rc }};">{{ t.r }}</div><div style="text-align:right;color:#5A6478;">{{ t.dur }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+  <!-- real mode confirm -->
+  <sc-if value="{{ realOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(5,7,10,.78);z-index:60;display:flex;align-items:center;justify-content:center;">
+      <div role="alertdialog" aria-label="Ativar estratégia em modo real" style="width:500px;background:#10141C;border:2px solid #C2323F;border-radius:10px;overflow:hidden;">
+        <div style="background:#C2323F;padding:8px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;color:#fff;">MODO REAL — DINHEIRO DE VERDADE</div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+          <div style="font-size:13px;line-height:1.6;color:#B7BFD2;">Você está ativando <strong style="color:#E8ECF4;">Funding Squeeze v2</strong> em modo real na <strong style="color:#E8ECF4;">Binance</strong>, operando <strong style="color:#E8ECF4;">bitcoin, ethereum e solana perpétuos</strong> com até <strong style="color:#E8ECF4;">dois por cento do capital por operação</strong> (hoje: <span style="font-family:'Geist Mono',monospace;">R$ 56.946,24</span> por trade).</div>
+          <div style="font-size:11px;color:#8A93A8;line-height:1.5;">Backtest não garante resultado futuro. O kill switch global interrompe esta estratégia imediatamente.</div>
+          <label style="font-size:11.5px;color:#8A93A8;">Digite <span style="font-family:'Geist Mono',monospace;color:#E8ECF4;">ativar modo real</span> para confirmar
+            <input value="{{ realText }}" onChange="{{ setRealText }}" style="margin-top:6px;width:100%;height:34px;padding:0 10px;background:#0A0C10;border:1px solid #222939;border-radius:6px;color:#E8ECF4;font-family:'Geist Mono',monospace;font-size:13px;outline:none;">
+          </label>
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button onClick="{{ closeReal }}" style="height:32px;padding:0 14px;background:#151A24;border:1px solid #222939;border-radius:6px;color:#B7BFD2;font-size:12px;cursor:pointer;font-family:inherit;">Manter em paper</button>
+            <button disabled="{{ realDisabled }}" onClick="{{ closeReal }}" style="height:32px;padding:0 14px;background:{{ realBg }};border:1px solid #7A2E36;border-radius:6px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;opacity:{{ realOp }};">Ativar em REAL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { realOpen: false, realText: '' };
+  renderVals() {
+    const up = '#21C77D', dn = '#F0525F', s = this.state;
+    const ST = (name, desc, state, pnl, dd, sharpe, wr, n, mode) => {
+      const map = { rodando: [up, '▶'], pausada: ['#8A93A8', '❚❚'], backtest: ['#7DA0FF', '◌'], erro: [dn, '✕'] };
+      return { name, desc, state, dd, sharpe, wr, n, icon: map[state][1], stColor: map[state][0], pnl, pnlColor: pnl.startsWith('+') ? up : dn, real: mode === 'real', paper: mode === 'paper', rowBg: mode === 'real' ? 'rgba(194,50,63,.04)' : 'transparent' };
+    };
+    const strats = [
+      ST('Funding Squeeze v2', 'cripto perp · funding + OI', 'rodando', '+R$ 84.212', '−8,4%', '1,92', '61%', '148', 'real'),
+      ST('Carry NTN-B', 'renda fixa · curva real', 'rodando', '+R$ 31.480', '−3,1%', '2,40', '74%', '23', 'real'),
+      ST('PLD Forward Convergence', 'energia · spot vs forward', 'backtest', '+R$ 12.904', '−11,2%', '1,31', '58%', '41', 'paper'),
+      ST('Pairs B3 (VALE/PETR)', 'ações BR · cointegração', 'erro', '−R$ 2.118', '−6,8%', '0,84', '52%', '67', 'paper'),
+    ];
+    const entries = [
+      { a: 'funding_8h', op: '<', b: '−0,010%' },
+      { a: 'open_interest_Δ48h', op: '>', b: '+5%' },
+      { a: 'preço', op: '≥', b: 'MA(21) no 4h' },
+      { a: 'convicção_IA', op: '≥', b: '40' },
+    ];
+    let seed = 42; const r = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    let eq = 110, bm = 115; const eqP = [], bmP = [];
+    for (let i = 0; i <= 62; i++) { eq += (r() - 0.42) * 7; eq = Math.min(118, Math.max(20, eq)); bm += (r() - 0.46) * 6; bm = Math.min(118, Math.max(30, bm)); eqP.push((i * 10) + ',' + eq.toFixed(1)); bmP.push((i * 10) + ',' + bm.toFixed(1)); }
+    const ddBars = Array.from({ length: 36 }, (_, i) => ({ x: 4 + i * 8, h: (r() * r() * 52).toFixed(1) }));
+    const hist = Array.from({ length: 19 }, (_, i) => { const c = Math.exp(-Math.pow(i - 10.5, 2) / 14) * 56; return { x: 6 + i * 15, y: (76 - c).toFixed(1), h: c.toFixed(1), c: i < 9 ? '#F0525F' : '#21C77D' }; });
+    const btStats = [
+      { k: 'Retorno total', v: '+214,8%', c: up }, { k: 'CAGR', v: '37,2%', c: up }, { k: 'Sharpe', v: '1,92', c: '#E8ECF4' },
+      { k: 'Máx. drawdown', v: '−18,4%', c: dn }, { k: 'Win rate', v: '61%', c: '#E8ECF4' }, { k: 'Profit factor', v: '2,14', c: up },
+    ];
+    const T = (d, a, sd, e, x, rr, dur) => ({ d, a, s: sd, sc: sd === 'LONG' ? up : dn, e, x, r: rr, rc: rr.startsWith('+') ? up : dn, dur });
+    const trades = [
+      T('12/08/26', 'BTC perp', 'LONG', '64.210', '67.980', '+5,9%', '4d 2h'),
+      T('28/07/26', 'ETH perp', 'LONG', '3.084', '3.312', '+7,4%', '6d'),
+      T('19/07/26', 'SOL perp', 'SHORT', '188,40', '194,10', '−3,0%', '1d 8h'),
+      T('02/07/26', 'BTC perp', 'LONG', '61.480', '65.120', '+5,9%', '5d 3h'),
+    ];
+    const ok = s.realText.trim().toLowerCase() === 'ativar modo real';
+    return {
+      strats, entries, equity: eqP.join(' '), bench: bmP.join(' '), ddBars, hist, btStats, trades,
+      realOpen: s.realOpen, realText: s.realText,
+      openReal: () => this.setState({ realOpen: true, realText: '' }),
+      closeReal: () => this.setState({ realOpen: false }),
+      setRealText: (e) => this.setState({ realText: e.target.value }),
+      realDisabled: !ok, realBg: ok ? '#C2323F' : '#3A1A20', realOp: ok ? 1 : .6,
+    };
+  }
+}
+</script>
+</body>
+</html>

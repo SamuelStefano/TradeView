@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #0a0c10;
+  --color-chrome: #0d1017;
+  --color-surface: #10141c;
+  --color-inset: #0d1017;
+  --color-hover: #151a24;
+  --color-active: #161d2e;
+
+  --color-border: #1a202e;
+  --color-border-strong: #222939;
+  --color-border-hover: #39435c;
+  --color-divider: #141926;
+
+  --color-text: #e8ecf4;
+  --color-text-secondary: #b7bfd2;
+  --color-text-muted: #8a93a8;
+  --color-text-faint: #5a6478;
+
+  --color-up: #21c77d;
+  --color-up-border: #1e4536;
+  --color-up-bg: #0d1712;
+  --color-down: #f0525f;
+  --color-down-bg: #1c0f12;
+  --color-down-strong: #2a1418;
+
+  --color-accent: #4e7cf6;
+  --color-accent-hover: #7da0ff;
+  --color-accent-bg: #16233f;
+  --color-accent-bg-soft: #1c2333;
+  --color-accent-border: #2e4370;
+
+  --color-ai: #a78bfa;
+  --color-ai-bg: #12101c;
+  --color-ai-border: #2a2440;
+
+  --color-warn: #e8a33d;
+  --color-warn-bg: #2a2113;
+  --color-warn-border: #6b5320;
+
+  --color-danger-border: #7a2e36;
+  --color-danger-solid: #c2323f;
+
+  --color-cyan: #38bdf8;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-base);
+  color: var(--color-text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 5px;
+  border: 2px solid var(--color-base);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.4s infinite;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.2s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

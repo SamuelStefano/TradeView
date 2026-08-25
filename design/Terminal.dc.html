@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;background:#0A0C10;color:#E8ECF4;font-family:'Geist',system-ui,sans-serif;}
+*{box-sizing:border-box;}
+a{color:#4E7CF6;text-decoration:none;} a:hover{color:#7DA0FF;text-decoration:underline;}
+::-webkit-scrollbar{width:10px;height:10px;} ::-webkit-scrollbar-thumb{background:#222939;border-radius:5px;border:2px solid #0A0C10;} ::-webkit-scrollbar-track{background:transparent;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important;}}
+:focus-visible{outline:2px solid #4E7CF6;outline-offset:1px;}
+</style>
+</helmet>
+<div data-screen-label="Terminal" style="display:flex;flex-direction:column;height:100vh;min-width:1360px;background:#0A0C10;color:#E8ECF4;font-family:'Geist',system-ui,sans-serif;font-size:13px;overflow:hidden;">
+  <!-- Topbar -->
+  <header style="display:flex;align-items:center;gap:16px;height:44px;padding:0 12px;background:#0D1017;border-bottom:1px solid #1A202E;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="width:20px;height:20px;border-radius:4px;background:#4E7CF6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;font-family:'Geist Mono',monospace;">TV</div>
+      <span style="font-weight:600;font-size:13px;letter-spacing:.2px;">TradeView</span>
+    </div>
+    <!-- global health -->
+    <div style="display:flex;align-items:center;gap:14px;padding:4px 10px;background:#10141C;border:1px solid #1A202E;border-radius:6px;font-family:'Geist Mono',monospace;font-size:11px;color:#8A93A8;">
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:7px;height:7px;border-radius:50%;background:#21C77D;display:inline-block;"></span>{{ connectedCount }}/52 mercados</span>
+      <span aria-label="latência média">▲ {{ latency }} ms</span>
+      <span style="color:#E8A33D;">2 degradados</span>
+      <span style="color:#F0525F;">1 offline</span>
+      <span title="última sincronização">sync {{ lastSync }}</span>
+    </div>
+    <sc-if value="{{ wsReconnecting }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:#2A2113;border:1px solid #6B5320;border-radius:6px;font-size:11px;color:#E8A33D;">
+        <span style="width:7px;height:7px;border-radius:50%;background:#E8A33D;display:inline-block;animation:pulse 1.2s infinite;"></span>
+        WebSocket reconectando… tentativa {{ wsAttempt }}/5
+      </div>
+    </sc-if>
+    <div style="flex:1;"></div>
+    <button onClick="{{ openPalette }}" aria-label="Busca global, atalho Control K" style="display:flex;align-items:center;gap:8px;height:28px;padding:0 10px;background:#10141C;border:1px solid #222939;border-radius:6px;color:#8A93A8;font-size:12px;cursor:pointer;font-family:inherit;min-width:220px;" style-hover="border-color:#39435C;color:#B7BFD2;">
+      <span style="font-size:12px;">⌕</span> Buscar ativo, mercado, ação…
+      <span style="margin-left:auto;font-family:'Geist Mono',monospace;font-size:10px;border:1px solid #222939;border-radius:4px;padding:1px 5px;color:#5A6478;">Ctrl K</span>
+    </button>
+    <div style="font-family:'Geist Mono',monospace;font-size:11px;color:#8A93A8;font-variant-numeric:tabular-nums;">{{ clock }} <span style="color:#5A6478;">GMT-3</span></div>
+    <button onClick="{{ openKill }}" aria-label="Kill switch global" style="display:flex;align-items:center;gap:6px;height:28px;padding:0 12px;background:#1C0F12;border:1px solid #7A2E36;border-radius:6px;color:#F0525F;font-weight:600;font-size:11px;letter-spacing:.5px;cursor:pointer;font-family:inherit;" style-hover="background:#2A1418;border-color:#F0525F;">
+      ⏻ KILL SWITCH
+    </button>
+  </header>
+  <div style="display:flex;flex:1;min-height:0;">
+    <!-- Nav -->
+    <nav aria-label="Navegação principal" style="width:196px;flex-shrink:0;background:#0D1017;border-right:1px solid #1A202E;display:flex;flex-direction:column;padding:8px;gap:2px;overflow-y:auto;">
+      <sc-for list="{{ navItems }}" as="nv" hint-placeholder-count="10">
+        <button onClick="{{ nv.go }}" aria-current="{{ nv.current }}" style="display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;border:none;background:{{ nv.bg }};color:{{ nv.color }};font-size:12.5px;font-weight:{{ nv.weight }};cursor:pointer;text-align:left;font-family:inherit;width:100%;" style-hover="background:#151A24;color:#E8ECF4;">
+          <span style="width:16px;text-align:center;font-size:13px;opacity:.9;">{{ nv.icon }}</span>{{ nv.label }}
+          <sc-if value="{{ nv.badge }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;font-family:'Geist Mono',monospace;font-size:10px;background:#1C2333;color:#7DA0FF;border-radius:8px;padding:1px 6px;">{{ nv.badge }}</span></sc-if>
+        </button>
+      </sc-for>
+      <div style="flex:1;"></div>
+      <div style="padding:8px 10px;border-top:1px solid #1A202E;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#8A93A8;">Densidade
+          <button onClick="{{ toggleDensity }}" style="margin-left:auto;font-size:10.5px;background:#151A24;border:1px solid #222939;border-radius:5px;color:#B7BFD2;padding:2px 8px;cursor:pointer;font-family:inherit;">{{ densityLabel }}</button>
+        </div>
+        <div style="font-size:10px;color:#5A6478;line-height:1.4;">Atalhos: <span style="font-family:'Geist Mono',monospace;">g o</span> overview · <span style="font-family:'Geist Mono',monospace;">g a</span> ativos · <span style="font-family:'Geist Mono',monospace;">?</span> lista completa</div>
+      </div>
+    </nav>
+    <!-- Screen -->
+    <main style="flex:1;min-width:0;overflow-y:auto;background:#0A0C10;">
+      <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}"><dc-import name="Overview" density="{{ density }}" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ isMarkets }}" hint-placeholder-val="{{ false }}"><dc-import name="Markets" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ isAsset }}" hint-placeholder-val="{{ false }}"><dc-import name="AssetDetail" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}"><dc-import name="AIChat" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ isStrategies }}" hint-placeholder-val="{{ false }}"><dc-import name="Strategies" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ isPortfolio }}" hint-placeholder-val="{{ false }}"><dc-import name="Portfolio" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ isAlerts }}" hint-placeholder-val="{{ false }}"><dc-import name="Alerts" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ isAnalytics }}" hint-placeholder-val="{{ false }}"><dc-import name="Analytics" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}"><dc-import name="Settings" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}"><dc-import name="Onboarding" hint-size="100%,900px"></dc-import></sc-if>
+    </main>
+  </div>
+  <!-- Disclaimer -->
+  <footer style="height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:16px;background:#0D1017;border-top:1px solid #1A202E;font-size:10px;color:#5A6478;">
+    Análise gerada por IA — não constitui recomendação de investimento.
+    <span style="font-family:'Geist Mono',monospace;">dados: tempo real e diferido conforme fonte</span>
+  </footer>
+  <!-- Command palette -->
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePalette }}" style="position:fixed;inset:0;background:rgba(5,7,10,.6);z-index:60;display:flex;justify-content:center;padding-top:12vh;">
+      <div onClick="{{ stop }}" role="dialog" aria-label="Busca global" style="width:560px;max-height:420px;background:#10141C;border:1px solid #2A3247;border-radius:10px;box-shadow:0 24px 64px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden;height:fit-content;">
+        <input ref="{{ paletteInput }}" value="{{ paletteQuery }}" onChange="{{ setQuery }}" placeholder="Digite um ativo, mercado ou ação…" style="height:44px;padding:0 16px;background:transparent;border:none;border-bottom:1px solid #1A202E;color:#E8ECF4;font-size:14px;font-family:inherit;outline:none;">
+        <div style="overflow-y:auto;padding:6px;">
+          <sc-for list="{{ paletteResults }}" as="r" hint-placeholder-count="6">
+            <button onClick="{{ r.go }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;background:transparent;border:none;border-radius:6px;color:#E8ECF4;font-size:12.5px;cursor:pointer;text-align:left;font-family:inherit;" style-hover="background:#151A24;">
+              <span style="font-size:10px;color:#5A6478;font-family:'Geist Mono',monospace;width:52px;">{{ r.kind }}</span>{{ r.label }}
+              <span style="margin-left:auto;color:#5A6478;font-size:11px;font-family:'Geist Mono',monospace;">{{ r.hint }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <!-- Kill switch modal -->
+  <sc-if value="{{ killOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(5,7,10,.75);z-index:70;display:flex;align-items:center;justify-content:center;">
+      <div role="alertdialog" aria-label="Confirmar kill switch" style="width:480px;background:#10141C;border:1px solid #7A2E36;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:14px;">
+        <div style="font-size:16px;font-weight:700;color:#F0525F;">⏻ Kill switch global</div>
+        <div style="font-size:13px;line-height:1.55;color:#B7BFD2;">Isto vai <strong style="color:#E8ECF4;">cancelar todas as ordens abertas</strong> (3 ordens, total <span style="font-family:'Geist Mono',monospace;">R$ 41.280,00</span>), <strong style="color:#E8ECF4;">pausar 2 estratégias reais</strong> e <strong style="color:#E8ECF4;">bloquear novas ordens</strong> em todas as 52 integrações até reativação manual.</div>
+        <label style="font-size:11.5px;color:#8A93A8;">Para confirmar, digite <span style="font-family:'Geist Mono',monospace;color:#E8ECF4;">desativar tudo</span>
+          <input value="{{ killText }}" onChange="{{ setKillText }}" style="margin-top:6px;width:100%;height:34px;padding:0 10px;background:#0A0C10;border:1px solid #222939;border-radius:6px;color:#E8ECF4;font-family:'Geist Mono',monospace;font-size:13px;outline:none;">
+        </label>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button onClick="{{ closeKill }}" style="height:32px;padding:0 14px;background:#151A24;border:1px solid #222939;border-radius:6px;color:#B7BFD2;font-size:12px;cursor:pointer;font-family:inherit;">Cancelar</button>
+          <button onClick="{{ confirmKill }}" disabled="{{ killDisabled }}" style="height:32px;padding:0 14px;background:{{ killBtnBg }};border:1px solid #7A2E36;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;opacity:{{ killBtnOpacity }};">Desativar tudo agora</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ killed }}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position:fixed;bottom:34px;left:50%;transform:translateX(-50%);z-index:80;background:#1C0F12;border:1px solid #F0525F;color:#F0525F;border-radius:8px;padding:10px 18px;font-size:12.5px;font-weight:600;display:flex;gap:12px;align-items:center;">
+      Kill switch ATIVO — ordens bloqueadas em todas as integrações
+      <button onClick="{{ unkill }}" style="background:#F0525F;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">Reativar</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;colorblindPalette&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Acessibilidade&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Aparência&quot;}}">
+class Component extends DCLogic {
+  state = { screen: 'overview', paletteOpen: false, paletteQuery: '', killOpen: false, killText: '', killed: false, density: 'confortavel', wsReconnecting: false, wsAttempt: 2, clock: '14:32:07', lastSync: 'há 3s' };
+  componentDidMount() {
+    this.keyH = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); this.setState({ paletteOpen: true }); }
+      if (e.key === 'Escape') this.setState({ paletteOpen: false, killOpen: false });
+    };
+    window.addEventListener('keydown', this.keyH);
+    this.timer = setInterval(() => {
+      const d = new Date();
+      const p = (n) => String(n).padStart(2, '0');
+      this.setState({ clock: p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()), lastSync: 'há ' + (1 + d.getSeconds() % 5) + 's' });
+    }, 1000);
+    this.wsTimer = setInterval(() => this.setState(s => ({ wsReconnecting: !s.wsReconnecting, wsAttempt: 1 + Math.floor(Math.random() * 4) })), 14000);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this.keyH); clearInterval(this.timer); clearInterval(this.wsTimer); }
+  renderVals() {
+    const s = this.state;
+    const go = (id) => () => this.setState({ screen: id, paletteOpen: false });
+    const items = [
+      ['overview', '◧', 'Overview'], ['markets', '⇄', 'Mercados', '52'], ['asset', '▤', 'Ativos'], ['chat', '✦', 'IA Analyst'],
+      ['strategies', '⚙', 'Estratégias', '4'], ['portfolio', '◔', 'Portfólio'], ['alerts', '◉', 'Alertas', '3'],
+      ['analytics', '∿', 'Analytics'], ['settings', '⚒', 'Configurações'], ['onboarding', '➔', 'Onboarding'],
+    ];
+    const navItems = items.map(([id, icon, label, badge]) => ({
+      icon, label, badge: badge || false, go: go(id),
+      current: s.screen === id ? 'page' : undefined,
+      bg: s.screen === id ? '#161D2E' : 'transparent',
+      color: s.screen === id ? '#E8ECF4' : '#8A93A8',
+      weight: s.screen === id ? 600 : 400,
+    }));
+    const all = [
+      { kind: 'ATIVO', label: 'BTC/USDT — Binance perp', hint: 'US$ 67.412', go: go('asset') },
+      { kind: 'ATIVO', label: 'PETR4 — B3', hint: 'R$ 38,42', go: go('asset') },
+      { kind: 'ATIVO', label: 'Tesouro IPCA+ 2035', hint: 'IPCA + 6,21%', go: go('asset') },
+      { kind: 'ATIVO', label: 'PLD Sudeste — spot', hint: 'R$ 141,20/MWh', go: go('asset') },
+      { kind: 'TELA', label: 'Portfólio consolidado', hint: 'g p', go: go('portfolio') },
+      { kind: 'TELA', label: 'Estratégias e bots', hint: 'g s', go: go('strategies') },
+      { kind: 'AÇÃO', label: 'Criar alerta em linguagem natural', hint: '', go: go('alerts') },
+      { kind: 'AÇÃO', label: 'Perguntar à IA sobre o portfólio', hint: '', go: go('chat') },
+    ];
+    const q = s.paletteQuery.toLowerCase();
+    return {
+      navItems, connectedCount: 48, latency: 42, clock: s.clock, lastSync: s.lastSync,
+      wsReconnecting: s.wsReconnecting, wsAttempt: s.wsAttempt,
+      isOverview: s.screen === 'overview', isMarkets: s.screen === 'markets', isAsset: s.screen === 'asset',
+      isChat: s.screen === 'chat', isStrategies: s.screen === 'strategies', isPortfolio: s.screen === 'portfolio',
+      isAlerts: s.screen === 'alerts', isAnalytics: s.screen === 'analytics', isSettings: s.screen === 'settings',
+      isOnboarding: s.screen === 'onboarding',
+      paletteOpen: s.paletteOpen, paletteQuery: s.paletteQuery,
+      paletteResults: q ? all.filter(r => r.label.toLowerCase().includes(q)) : all,
+      openPalette: () => this.setState({ paletteOpen: true, paletteQuery: '' }),
+      closePalette: () => this.setState({ paletteOpen: false }),
+      setQuery: (e) => this.setState({ paletteQuery: e.target.value }),
+      paletteInput: (el) => { if (el) setTimeout(() => el.focus(), 50); },
+      stop: (e) => e.stopPropagation(),
+      openKill: () => this.setState({ killOpen: true, killText: '' }),
+      closeKill: () => this.setState({ killOpen: false }),
+      setKillText: (e) => this.setState({ killText: e.target.value }),
+      killText: s.killText,
+      killDisabled: s.killText.trim().toLowerCase() !== 'desativar tudo',
+      killBtnBg: s.killText.trim().toLowerCase() === 'desativar tudo' ? '#C2323F' : '#3A1A20',
+      killBtnOpacity: s.killText.trim().toLowerCase() === 'desativar tudo' ? 1 : .6,
+      confirmKill: () => this.setState({ killOpen: false, killed: true }),
+      killed: s.killed, unkill: () => this.setState({ killed: false }),
+      killOpen: s.killOpen,
+      density: s.density, densityLabel: s.density === 'compacto' ? 'Compacto' : 'Confortável',
+      toggleDensity: () => this.setState(x => ({ density: x.density === 'compacto' ? 'confortavel' : 'compacto' })),
+    };
+  }
+}
+</script>
+</body>
+</html>

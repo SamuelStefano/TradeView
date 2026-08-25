@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#0A0C10;color:#E8ECF4;font-family:'Geist',system-ui,sans-serif;}*{box-sizing:border-box;}a{color:#4E7CF6;}a:hover{color:#7DA0FF;}</style>
+</helmet>
+<div data-screen-label="Onboarding" style="min-height:calc(100vh - 66px);display:flex;align-items:center;justify-content:center;font-size:13px;padding:24px;">
+  <div style="width:640px;display:flex;flex-direction:column;gap:20px;">
+    <div style="display:flex;gap:6px;">
+      <sc-for list="{{ dots }}" as="d" hint-placeholder-count="4"><div style="flex:1;height:3px;border-radius:2px;background:{{ d }};"></div></sc-for>
+    </div>
+    <sc-if value="{{ s1 }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;">Quais mercados você acompanha?</h1>
+        <p style="margin:0 0 16px;font-size:12.5px;color:#8A93A8;">Isso define o que aparece no seu overview. Dá pra mudar depois.</p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          <sc-for list="{{ classes }}" as="c" hint-placeholder-count="8">
+            <button onClick="{{ c.tg }}" aria-pressed="{{ c.on }}" style="padding:12px;background:{{ c.bg }};border:1px solid {{ c.bc }};border-radius:7px;cursor:pointer;font-family:inherit;text-align:left;">
+              <div style="font-size:12.5px;font-weight:600;color:{{ c.fg }};">{{ c.n }}</div><div style="font-size:9.5px;color:#5A6478;margin-top:2px;">{{ c.d }}</div>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ s2 }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;">Conecte sua primeira integração</h1>
+        <p style="margin:0 0 16px;font-size:12.5px;color:#8A93A8;">Começamos em somente leitura — o app não pode operar nada.</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          <sc-for list="{{ providers }}" as="p" hint-placeholder-count="6">
+            <button style="padding:14px 12px;background:#10141C;border:1px solid #1A202E;border-radius:7px;cursor:pointer;font-family:inherit;text-align:left;" style-hover="border-color:#2E4370;">
+              <div style="font-size:12.5px;font-weight:600;">{{ p.n }}</div><div style="font-size:9.5px;color:#5A6478;margin-top:2px;">{{ p.k }}</div>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ s3 }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;">Seu perfil de risco</h1>
+        <p style="margin:0 0 16px;font-size:12.5px;color:#8A93A8;">Define limites padrão de exposição, tamanho de ordem e quando os bots pausam sozinhos.</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ profiles }}" as="pr" hint-placeholder-count="3">
+            <button onClick="{{ pr.pick }}" style="display:flex;gap:12px;padding:13px 14px;background:{{ pr.bg }};border:1px solid {{ pr.bc }};border-radius:7px;cursor:pointer;font-family:inherit;text-align:left;align-items:center;">
+              <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#E8ECF4;">{{ pr.n }}</div><div style="font-size:11px;color:#8A93A8;margin-top:2px;">{{ pr.d }}</div></div>
+              <span style="font-family:'Geist Mono',monospace;font-size:11px;color:#8A93A8;">{{ pr.m }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ s4 }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;">Seu primeiro sinal</h1>
+        <p style="margin:0 0 16px;font-size:12.5px;color:#8A93A8;">A IA já analisou os mercados que você escolheu.</p>
+        <div style="background:#10141C;border:1px solid #2A2440;border-radius:8px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-family:'Geist Mono',monospace;font-weight:600;">BTC/USDT</span>
+            <span style="font-size:10.5px;font-weight:700;color:#21C77D;">▲ LONG</span>
+            <span style="font-size:10px;color:#5A6478;">3–7 dias</span>
+            <span style="margin-left:auto;font-family:'Geist Mono',monospace;font-size:11.5px;color:#A78BFA;">convicção 87</span>
+          </div>
+          <div style="font-size:12.5px;color:#B7BFD2;margin-top:8px;line-height:1.5;">Funding negativo com open interest subindo: posicionamento vendido esticado abre espaço para squeeze.</div>
+          <div style="font-size:10.5px;color:#5A6478;margin-top:8px;">Sinais são análise, não recomendação. Nada é executado sem você.</div>
+        </div>
+      </div>
+    </sc-if>
+    <div style="display:flex;gap:8px;justify-content:space-between;">
+      <button onClick="{{ back }}" style="height:32px;padding:0 14px;background:none;border:none;color:#5A6478;font-size:12px;cursor:pointer;font-family:inherit;">{{ backLabel }}</button>
+      <button onClick="{{ next }}" style="height:32px;padding:0 18px;background:#16233F;border:1px solid #2E4370;border-radius:6px;color:#7DA0FF;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ nextLabel }}</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { step: 1, sel: { cripto: true, 'renda fixa': true, energia: true }, profile: 'Moderado' };
+  renderVals() {
+    const s = this.state;
+    const defs = [['Cripto', 'spot + perpétuos'], ['Renda variável', 'B3 + US'], ['Renda fixa', 'Tesouro, CDB, curva'], ['Câmbio', 'majors + USD/BRL'], ['Energia', 'PLD, forwards, carbono'], ['Commodities', 'agro, metais, petróleo'], ['Índices', 'futuros + vol'], ['Fundos / FIIs', 'REITs, ETFs']];
+    const classes = defs.map(([n, d]) => { const on = !!s.sel[n.toLowerCase()] || (n === 'Cripto' && s.sel.cripto) || (n === 'Renda fixa' && s.sel['renda fixa']) || (n === 'Energia' && s.sel.energia); return { n, d, on, tg: () => this.setState(x => ({ sel: { ...x.sel, [n.toLowerCase()]: !x.sel[n.toLowerCase()] } })), bg: on ? '#161D2E' : '#10141C', bc: on ? '#2E4370' : '#1A202E', fg: on ? '#E8ECF4' : '#8A93A8' }; });
+    const providers = [{ n: 'Binance', k: 'cripto' }, { n: 'XP / Rico', k: 'B3' }, { n: 'Tesouro Direto', k: 'renda fixa' }, { n: 'Interactive Brokers', k: 'ações US' }, { n: 'CCEE', k: 'energia' }, { n: 'OANDA', k: 'câmbio' }];
+    const profiles = [
+      { n: 'Conservador', d: 'sem alavancagem, bots só em paper, ordem máx. R$ 20k', m: 'VaR alvo < 0,5%/d' },
+      { n: 'Moderado', d: 'alavancagem até 1,5x, bots reais com limites apertados', m: 'VaR alvo < 1,5%/d' },
+      { n: 'Agressivo', d: 'alavancagem até 3x, limites largos — exige dupla confirmação', m: 'VaR alvo < 3%/d' },
+    ].map(p => ({ ...p, pick: () => this.setState({ profile: p.n }), bg: s.profile === p.n ? '#161D2E' : '#10141C', bc: s.profile === p.n ? '#2E4370' : '#1A202E' }));
+    return {
+      dots: [1, 2, 3, 4].map(i => i <= s.step ? '#4E7CF6' : '#1A202E'),
+      s1: s.step === 1, s2: s.step === 2, s3: s.step === 3, s4: s.step === 4,
+      classes, providers, profiles,
+      next: () => this.setState(x => ({ step: Math.min(x.step + 1, 4) })),
+      back: () => this.setState(x => ({ step: Math.max(x.step - 1, 1) })),
+      backLabel: s.step === 1 ? 'Pular tudo' : '← Voltar',
+      nextLabel: s.step === 4 ? 'Abrir o terminal' : 'Continuar →',
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#0A0C10;color:#E8ECF4;font-family:'Geist',system-ui,sans-serif;}*{box-sizing:border-box;}a{color:#4E7CF6;}a:hover{color:#7DA0FF;}</style>
+</helmet>
+<div data-screen-label="Asset Detail" style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:13px;">
+  <!-- class toggle -->
+  <div role="tablist" aria-label="Classe de ativo" style="display:flex;gap:4px;flex-wrap:wrap;">
+    <sc-for list="{{ classes }}" as="cl" hint-placeholder-count="8">
+      <button role="tab" aria-selected="{{ cl.sel }}" onClick="{{ cl.go }}" style="height:26px;padding:0 11px;border-radius:6px;border:1px solid {{ cl.bc }};background:{{ cl.bg }};color:{{ cl.fg }};font-size:11.5px;font-weight:{{ cl.w }};cursor:pointer;font-family:inherit;" style-hover="border-color:#39435C;">{{ cl.label }}</button>
+    </sc-for>
+    <span style="margin-left:auto;font-size:10.5px;color:#5A6478;align-self:center;">mesma tela, painéis declarados pela classe</span>
+  </div>
+  <!-- asset header -->
+  <div style="display:flex;align-items:center;gap:16px;background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:10px 14px;">
+    <div>
+      <div style="display:flex;align-items:baseline;gap:8px;"><span style="font-size:16px;font-weight:700;font-family:'Geist Mono',monospace;">{{ a.sym }}</span><span style="font-size:11px;color:#5A6478;">{{ a.venue }}</span></div>
+      <div style="font-size:11px;color:#8A93A8;">{{ a.name }}</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:20px;font-weight:600;">{{ a.price }}</div>
+      <div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;color:{{ a.chgColor }};">{{ a.arrow }} {{ a.chg }}</div>
+    </div>
+    <div style="display:flex;gap:14px;margin-left:8px;padding-left:16px;border-left:1px solid #1A202E;">
+      <sc-for list="{{ a.stats }}" as="st" hint-placeholder-count="4">
+        <div><div style="font-size:9.5px;color:#5A6478;text-transform:uppercase;letter-spacing:.4px;">{{ st.k }}</div><div style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;text-align:right;">{{ st.v }}</div></div>
+      </sc-for>
+    </div>
+    <div style="flex:1;"></div>
+    <span style="font-size:10px;color:{{ a.freshColor }};border:1px solid {{ a.freshBorder }};border-radius:4px;padding:2px 7px;font-family:'Geist Mono',monospace;">{{ a.freshness }}</span>
+    <button style="height:30px;padding:0 14px;background:#151A24;border:1px solid #222939;border-radius:6px;color:#B7BFD2;font-size:12px;cursor:pointer;font-family:inherit;">+ Alerta</button>
+    <button style="height:30px;padding:0 14px;background:#16233F;border:1px solid #2E4370;border-radius:6px;color:#7DA0FF;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Ordem…</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 316px;gap:10px;align-items:start;">
+    <!-- CHART -->
+    <section aria-label="Gráfico" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:12px;min-width:0;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div role="tablist" aria-label="Timeframe" style="display:flex;gap:2px;background:#0D1017;border:1px solid #1A202E;border-radius:6px;padding:2px;">
+          <sc-for list="{{ tfs }}" as="tf" hint-placeholder-count="7">
+            <button onClick="{{ tf.go }}" style="height:22px;padding:0 8px;border:none;border-radius:4px;background:{{ tf.bg }};color:{{ tf.fg }};font-size:10.5px;font-family:'Geist Mono',monospace;cursor:pointer;">{{ tf.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <sc-for list="{{ inds }}" as="ind" hint-placeholder-count="6">
+            <button onClick="{{ ind.go }}" aria-pressed="{{ ind.on }}" style="height:22px;padding:0 8px;border:1px solid {{ ind.bc }};border-radius:4px;background:{{ ind.bg }};color:{{ ind.fg }};font-size:10px;font-family:'Geist Mono',monospace;cursor:pointer;">{{ ind.label }}</button>
+          </sc-for>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+          <button title="desenhar linha de tendência" style="height:22px;padding:0 8px;border:1px solid #222939;border-radius:4px;background:#0D1017;color:#8A93A8;font-size:10.5px;cursor:pointer;font-family:inherit;">✎ tendência</button>
+          <button onClick="{{ toggleTable }}" style="height:22px;padding:0 8px;border:1px solid #222939;border-radius:4px;background:#0D1017;color:#8A93A8;font-size:10.5px;cursor:pointer;font-family:inherit;">{{ tableLabel }}</button>
+        </div>
+      </div>
+      <sc-if value="{{ showChart }}" hint-placeholder-val="{{ true }}">
+        <svg viewBox="0 0 860 300" style="width:100%;display:block;" role="img" aria-label="Gráfico candlestick; alternativa em tabela disponível pelo botão tabela">
+          <sc-for list="{{ grid }}" as="g" hint-placeholder-count="5">
+            <line x1="0" x2="800" y1="{{ g.y }}" y2="{{ g.y }}" stroke="#161B26" stroke-width="1"></line>
+            <text x="806" y="{{ g.ty }}" fill="#5A6478" font-size="9" font-family="Geist Mono">{{ g.label }}</text>
+          </sc-for>
+          <sc-for list="{{ candles }}" as="c" hint-placeholder-count="40">
+            <line x1="{{ c.cx }}" x2="{{ c.cx }}" y1="{{ c.wt }}" y2="{{ c.wb }}" stroke="{{ c.col }}" stroke-width="1"></line>
+            <rect x="{{ c.x }}" y="{{ c.y }}" width="8" height="{{ c.h }}" fill="{{ c.col }}" rx="1"></rect>
+          </sc-for>
+          <sc-if value="{{ maOn }}" hint-placeholder-val="{{ true }}"><polyline points="{{ maLine }}" fill="none" stroke="#E8A33D" stroke-width="1.3" opacity=".9"></polyline></sc-if>
+          <sc-if value="{{ bbOn }}" hint-placeholder-val="{{ false }}"><polyline points="{{ bbU }}" fill="none" stroke="#4E7CF6" stroke-width="1" opacity=".5"></polyline><polyline points="{{ bbL }}" fill="none" stroke="#4E7CF6" stroke-width="1" opacity=".5"></polyline></sc-if>
+          <sc-for list="{{ markers }}" as="m" hint-placeholder-count="3">
+            <g><circle cx="{{ m.x }}" cy="{{ m.y }}" r="8" fill="{{ m.bg }}" stroke="{{ m.bc }}" stroke-width="1"></circle><text x="{{ m.x }}" y="{{ m.ty }}" fill="{{ m.fg }}" font-size="8.5" text-anchor="middle" font-family="Geist Mono">{{ m.t }}</text></g>
+          </sc-for>
+          <sc-for list="{{ vols }}" as="v" hint-placeholder-count="40">
+            <rect x="{{ v.x }}" y="{{ v.y }}" width="8" height="{{ v.h }}" fill="{{ v.col }}" opacity=".45"></rect>
+          </sc-for>
+          <line x1="0" x2="800" y1="248" y2="248" stroke="#1A202E" stroke-width="1"></line>
+        </svg>
+        <div style="display:flex;gap:14px;margin-top:6px;font-size:9.5px;color:#5A6478;font-family:'Geist Mono',monospace;">
+          <span><span style="color:#E8A33D;">—</span> MA(21)</span>
+          <span><span style="color:#A78BFA;">✦</span> sinal IA</span>
+          <span><span style="color:#21C77D;">▲</span>/<span style="color:#F0525F;">▼</span> trade executado</span>
+          <span style="margin-left:auto;">{{ chartFoot }}</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ showTable }}" hint-placeholder-val="{{ false }}">
+        <div role="table" aria-label="OHLC em tabela" style="max-height:300px;overflow-y:auto;">
+          <div style="display:grid;grid-template-columns:70px repeat(5,1fr);gap:0;font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;">
+            <div style="color:#5A6478;padding:4px 6px;">hora</div><div style="color:#5A6478;padding:4px 6px;text-align:right;">abert.</div><div style="color:#5A6478;padding:4px 6px;text-align:right;">máx.</div><div style="color:#5A6478;padding:4px 6px;text-align:right;">mín.</div><div style="color:#5A6478;padding:4px 6px;text-align:right;">fech.</div><div style="color:#5A6478;padding:4px 6px;text-align:right;">volume</div>
+            <sc-for list="{{ ohlcRows }}" as="r" hint-placeholder-count="8">
+              <div style="padding:4px 6px;color:#8A93A8;border-top:1px solid #141926;">{{ r.t }}</div><div style="padding:4px 6px;text-align:right;border-top:1px solid #141926;">{{ r.o }}</div><div style="padding:4px 6px;text-align:right;border-top:1px solid #141926;">{{ r.h }}</div><div style="padding:4px 6px;text-align:right;border-top:1px solid #141926;">{{ r.l }}</div><div style="padding:4px 6px;text-align:right;border-top:1px solid #141926;color:{{ r.col }};">{{ r.c }}</div><div style="padding:4px 6px;text-align:right;border-top:1px solid #141926;color:#8A93A8;">{{ r.v }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <!-- Tabs -->
+      <div role="tablist" aria-label="Análises" style="display:flex;gap:2px;margin-top:12px;border-bottom:1px solid #1A202E;">
+        <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="3">
+          <button role="tab" aria-selected="{{ tb.sel }}" onClick="{{ tb.go }}" style="height:30px;padding:0 14px;border:none;background:transparent;color:{{ tb.fg }};font-size:12px;font-weight:{{ tb.w }};cursor:pointer;font-family:inherit;border-bottom:2px solid {{ tb.line }};">{{ tb.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ tabAI }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:14px 2px;display:flex;flex-direction:column;gap:12px;">
+          <div style="font-size:12.5px;line-height:1.6;color:#B7BFD2;">{{ ai.thesis }}</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <sc-for list="{{ ai.scenarios }}" as="sc" hint-placeholder-count="3">
+              <div style="background:#0D1017;border:1px solid {{ sc.bc }};border-radius:7px;padding:10px 12px;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;font-weight:700;color:{{ sc.fg }};">{{ sc.label }}</span><span style="margin-left:auto;font-family:'Geist Mono',monospace;font-size:12px;color:{{ sc.fg }};">{{ sc.prob }}%</span></div>
+                <div role="img" aria-label="probabilidade {{ sc.prob }}%" style="height:4px;background:#1A202E;border-radius:2px;margin:7px 0;overflow:hidden;"><div style="height:100%;width:{{ sc.probW }};background:{{ sc.fg }};"></div></div>
+                <div style="font-family:'Geist Mono',monospace;font-size:11.5px;margin-bottom:4px;">{{ sc.target }}</div>
+                <div style="font-size:10.5px;color:#8A93A8;line-height:1.45;">{{ sc.txt }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div><div style="font-size:10.5px;color:#5A6478;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Riscos</div>
+              <sc-for list="{{ ai.risks }}" as="rk" hint-placeholder-count="3"><div style="font-size:11.5px;color:#B7BFD2;padding:3px 0;line-height:1.4;">· {{ rk }}</div></sc-for>
+            </div>
+            <div><div style="font-size:10.5px;color:#5A6478;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">O que invalidaria a tese</div>
+              <sc-for list="{{ ai.invalid }}" as="iv" hint-placeholder-count="2"><div style="font-size:11.5px;color:#E8A33D;padding:3px 0;line-height:1.4;">✕ {{ iv }}</div></sc-for>
+            </div>
+          </div>
+          <div style="font-size:10.5px;color:#5A6478;">fontes: <a href="#">{{ ai.src1 }}</a> · <a href="#">{{ ai.src2 }}</a> · <a href="#">{{ ai.src3 }}</a> <span style="margin-left:10px;font-family:'Geist Mono',monospace;">gerado há 4min · claude-sonnet-4-6</span></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ tabNews }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:12px 2px;display:flex;flex-direction:column;gap:2px;">
+          <sc-for list="{{ news }}" as="n" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid #141926;">
+              <span style="font-family:'Geist Mono',monospace;font-size:10px;color:#5A6478;width:36px;">{{ n.ago }}</span>
+              <a href="#" style="font-size:12px;color:#E8ECF4;flex:1;min-width:0;">{{ n.title }}</a>
+              <span style="font-size:10px;color:#5A6478;">{{ n.srcName }}</span>
+              <span title="sentimento" style="font-family:'Geist Mono',monospace;font-size:10.5px;color:{{ n.sc }};width:40px;text-align:right;">{{ n.sent }}</span>
+              <div role="img" aria-label="relevância" style="width:44px;height:4px;background:#1A202E;border-radius:2px;overflow:hidden;"><div style="height:100%;width:{{ n.relW }};background:#4E7CF6;"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ tabCorr }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:12px 2px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div><div style="font-size:10.5px;color:#5A6478;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Anda junto</div>
+            <sc-for list="{{ corrPos }}" as="cp" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><span style="font-family:'Geist Mono',monospace;font-size:11.5px;width:90px;">{{ cp.sym }}</span><div style="flex:1;height:5px;background:#1A202E;border-radius:3px;overflow:hidden;"><div style="height:100%;width:{{ cp.w }};background:#21C77D;"></div></div><span style="font-family:'Geist Mono',monospace;font-size:11px;color:#21C77D;width:40px;text-align:right;">{{ cp.v }}</span></div>
+            </sc-for>
+          </div>
+          <div><div style="font-size:10.5px;color:#5A6478;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Anda contra</div>
+            <sc-for list="{{ corrNeg }}" as="cn" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><span style="font-family:'Geist Mono',monospace;font-size:11.5px;width:90px;">{{ cn.sym }}</span><div style="flex:1;height:5px;background:#1A202E;border-radius:3px;overflow:hidden;"><div style="height:100%;width:{{ cn.w }};background:#F0525F;"></div></div><span style="font-family:'Geist Mono',monospace;font-size:11px;color:#F0525F;width:40px;text-align:right;">{{ cn.v }}</span></div>
+            </sc-for>
+          </div>
+          <div style="grid-column:1/-1;font-size:10px;color:#5A6478;">janela 90 dias · retornos diários · <a href="#">metodologia</a></div>
+        </div>
+      </sc-if>
+    </section>
+    <!-- ADAPTIVE PANELS -->
+    <aside aria-label="Painéis da classe" style="display:flex;flex-direction:column;gap:10px;">
+      <sc-for list="{{ panels }}" as="p" hint-placeholder-count="3">
+        <section style="background:#10141C;border:1px solid #1A202E;border-radius:8px;padding:12px;">
+          <div style="display:flex;align-items:center;margin-bottom:9px;"><span style="font-size:10.5px;color:#8A93A8;text-transform:uppercase;letter-spacing:.6px;">{{ p.title }}</span><span style="margin-left:auto;font-size:9.5px;color:#5A6478;font-family:'Geist Mono',monospace;">{{ p.meta }}</span></div>
+          <sc-if value="{{ p.isKV }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;">
+              <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="6">
+                <div style="display:flex;justify-content:space-between;gap-:8px;padding:4px 0;border-bottom:1px solid #141926;font-size:11.5px;"><span style="color:#8A93A8;">{{ r.k }}</span><span style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;color:{{ r.c }};text-align:right;">{{ r.v }}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ p.isBook }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:2px;font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:10.5px;">
+              <sc-for list="{{ p.asks }}" as="ak" hint-placeholder-count="5">
+                <div style="display:flex;position:relative;padding:2px 4px;"><div style="position:absolute;right:0;top:0;bottom:0;width:{{ ak.w }};background:rgba(240,82,95,.10);"></div><span style="color:#F0525F;z-index:1;">{{ ak.p }}</span><span style="margin-left:auto;color:#8A93A8;z-index:1;">{{ ak.q }}</span></div>
+              </sc-for>
+              <div style="display:flex;justify-content:space-between;padding:5px 4px;border-top:1px solid #1A202E;border-bottom:1px solid #1A202E;"><span style="color:#E8ECF4;font-weight:600;">{{ p.mid }}</span><span style="color:#5A6478;">spread {{ p.spread }}</span></div>
+              <sc-for list="{{ p.bids }}" as="bd" hint-placeholder-count="5">
+                <div style="display:flex;position:relative;padding:2px 4px;"><div style="position:absolute;right:0;top:0;bottom:0;width:{{ bd.w }};background:rgba(33,199,125,.10);"></div><span style="color:#21C77D;z-index:1;">{{ bd.p }}</span><span style="margin-left:auto;color:#8A93A8;z-index:1;">{{ bd.q }}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ p.isCurve }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 280 110" style="width:100%;display:block;" role="img" aria-label="{{ p.curveAlt }}">
+              <line x1="0" x2="280" y1="92" y2="92" stroke="#1A202E"></line>
+              <polyline points="{{ p.curve }}" fill="none" stroke="#4E7CF6" stroke-width="1.6"></polyline>
+              <sc-if value="{{ p.curve2 }}" hint-placeholder-val="{{ false }}"><polyline points="{{ p.curve2 }}" fill="none" stroke="#5A6478" stroke-width="1.2" stroke-dasharray="3 3"></polyline></sc-if>
+              <sc-for list="{{ p.curveLabels }}" as="lb" hint-placeholder-count="4"><text x="{{ lb.x }}" y="104" fill="#5A6478" font-size="8.5" font-family="Geist Mono" text-anchor="middle">{{ lb.t }}</text></sc-for>
+            </svg>
+            <sc-if value="{{ p.curveLegend }}" hint-placeholder-val="{{ false }}"><div style="font-size:9.5px;color:#5A6478;margin-top:4px;font-family:'Geist Mono',monospace;">{{ p.curveLegend }}</div></sc-if>
+          </sc-if>
+        </section>
+      </sc-for>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { cls: 'cripto', tf: '1h', tab: 'ai', inds: { 'MA': true, 'EMA': false, 'RSI': false, 'MACD': false, 'BB': false, 'VOL': true }, table: false };
+  renderVals() {
+    const up = '#21C77D', dn = '#F0525F', s = this.state;
+    const CL = ['cripto', 'ações', 'renda fixa', 'câmbio', 'energia', 'commodities', 'índices', 'fundos'];
+    const classes = CL.map(id => ({ label: id.charAt(0).toUpperCase() + id.slice(1), sel: s.cls === id, go: () => this.setState({ cls: id }), bg: s.cls === id ? '#161D2E' : '#0D1017', fg: s.cls === id ? '#E8ECF4' : '#8A93A8', bc: s.cls === id ? '#2E4370' : '#1A202E', w: s.cls === id ? 600 : 400 }));
+    const tfs = ['1m', '5m', '15m', '1h', '4h', '1D', '1S', '1M'].map(t => ({ label: t, go: () => this.setState({ tf: t }), bg: s.tf === t ? '#1C2333' : 'transparent', fg: s.tf === t ? '#E8ECF4' : '#5A6478' }));
+    const inds = Object.keys(s.inds).map(k => ({ label: k, on: s.inds[k], go: () => this.setState(x => ({ inds: { ...x.inds, [k]: !x.inds[k] } })), bg: s.inds[k] ? '#16233F' : '#0D1017', fg: s.inds[k] ? '#7DA0FF' : '#5A6478', bc: s.inds[k] ? '#2E4370' : '#1A202E' }));
+    // ---- per-class data ----
+    const KV = (title, meta, rows) => ({ title, meta, isKV: true, rows: rows.map(([k, v, c]) => ({ k, v, c: c || '#E8ECF4' })) });
+    const D = {
+      cripto: {
+        a: { sym: 'BTC/USDT', venue: 'Binance · perpétuo', name: 'Bitcoin / Tether — contrato perpétuo', price: 'US$ 67.412,50', chg: '+2,41% · +US$ 1.588', chgColor: up, arrow: '▲', freshness: 'tempo real · há 1s', freshColor: '#21C77D', freshBorder: '#1E4536', base: 67412, dec: 0, pre: '', stats: [['OI', 'US$ 12,4B'], ['Funding 8h', '−0,012%'], ['Vol 24h', 'US$ 31,2B'], ['Basis', '+4,1% aa']] },
+        panels: [
+          { title: 'Order book', meta: 'Binance · 0,1', isBook: true, mid: '67.412,5', spread: '0,5' },
+          KV('Derivativos & funding', 'agg 5 exchanges', [['Funding rate (8h)', '−0,012%', dn], ['Funding previsto', '−0,008%', dn], ['Open interest', 'US$ 12,4B'], ['Long/short ratio', '0,94'], ['Liquidações 24h', 'US$ 182M'], ['Basis 3m anualizado', '+4,1%', up]]),
+          KV('On-chain', 'Glassnode · há 10min', [['Reservas exchanges', '2,31M BTC', dn], ['Fluxo líquido 24h', '−12.480 BTC', up], ['Endereços ativos', '1,02M'], ['MVRV', '1,84'], ['Hashrate 7d', '712 EH/s']]),
+        ],
+        ai: { thesis: 'Estrutura de derivativos aponta posicionamento vendido esticado: funding negativo no percentil 10 histórico coexiste com open interest crescente e saída contínua de moedas de exchanges. O preço segura a MA(21) no 4h. O padrão favorece squeeze de vendidos no horizonte de 3–7 dias, com o fluxo on-chain como suporte estrutural.', scenarios: [{ label: 'BULL', prob: 45, target: 'US$ 72.800', txt: 'Squeeze acima de 68,5k liquida US$ 1,2B em shorts.' }, { label: 'BASE', prob: 38, target: 'US$ 66.000–69.500', txt: 'Consolidação com funding normalizando a neutro.' }, { label: 'BEAR', prob: 17, target: 'US$ 61.200', txt: 'Perda do suporte de 65,8k ativa stops em cascata.' }], risks: ['Vencimento de US$ 4,8B em opções sexta (max pain 64k)', 'FOMC minutes hoje 15:00 — vol de evento', 'Correlação com NDX em 0,72: aversão em tech contamina'], invalid: ['Fechamento diário abaixo de US$ 65.800', 'Funding virar positivo com OI caindo (desalavancagem long)'], src1: 'funding agregado (Coinalyze)', src2: 'reservas exchanges (Glassnode)', src3: 'opções (Deribit)' },
+      },
+      'ações': {
+        a: { sym: 'PETR4', venue: 'B3 · à vista', name: 'Petrobras PN', price: 'R$ 38,42', chg: '−1,21% · −R$ 0,47', chgColor: dn, arrow: '▼', freshness: 'tempo real · há 2s', freshColor: '#21C77D', freshBorder: '#1E4536', base: 38.42, dec: 2, pre: '', stats: [['P/L', '4,2x'], ['DY 12m', '13,8%'], ['Vol dia', 'R$ 1,1B'], ['Beta', '1,12']] },
+        panels: [
+          KV('Fundamentos (DRE TTM)', '2T26 · há 34d', [['Receita', 'R$ 512,4B'], ['EBITDA', 'R$ 241,8B'], ['Margem EBITDA', '47,2%', up], ['Lucro líquido', 'R$ 118,2B'], ['Dívida líq./EBITDA', '0,8x', up], ['ROE', '24,1%', up]]),
+          KV('Múltiplos vs setor', 'mediana O&G LatAm', [['P/L', '4,2x vs 6,1x', up], ['EV/EBITDA', '2,9x vs 4,0x', up], ['P/VP', '1,1x vs 1,3x'], ['FCF yield', '18,4%', up]]),
+          KV('Dividendos', 'próx. data-com 12/set', [['DY 12m', '13,8%', up], ['Último provento', 'R$ 1,12/ação'], ['Payout', '52%'], ['Frequência', 'trimestral']]),
+        ],
+        ai: { thesis: 'PETR4 negocia a 4,2x lucros com FCF yield de 18%, mas o driver de curto prazo é o Brent: a perda do suporte de US$ 74 comprime o caso de dividendos extraordinários no 3T. A defasagem de 3,2% frente ao par histórico com o Brent sugere ajuste antes de reconstrução de posição.', scenarios: [{ label: 'BULL', prob: 25, target: 'R$ 41,50', txt: 'Brent recupera 78 e anúncio de extraordinários.' }, { label: 'BASE', prob: 45, target: 'R$ 36,80–39,20', txt: 'Lateralização acompanhando petróleo fraco.' }, { label: 'BEAR', prob: 30, target: 'R$ 34,60', txt: 'Brent abaixo de 70 corta consenso de proventos.' }], risks: ['Risco de interferência em política de preços', 'Capex do plano estratégico acima do guidance', 'Fluxo estrangeiro negativo há 6 pregões na B3'], invalid: ['Brent sustentar acima de US$ 78', 'Anúncio de dividendo extraordinário no 3T'], src1: 'DRE 2T26 (RI Petrobras)', src2: 'consenso (LSEG)', src3: 'fluxo B3' },
+      },
+      'renda fixa': {
+        a: { sym: 'NTN-B 2035', venue: 'Tesouro Direto', name: 'Tesouro IPCA+ com juros semestrais 2035', price: 'IPCA + 6,21%', chg: '−4 bps hoje · PU R$ 4.412,08', chgColor: up, arrow: '▲', freshness: 'D+0 · há 4min', freshColor: '#E8A33D', freshBorder: '#6B5320', base: 4412, dec: 0, pre: '', stats: [['Duration', '8,9'], ['Convexidade', '96,4'], ['Venc.', '15/05/35'], ['Cupom', '6% aa']] },
+        panels: [
+          { title: 'Curva de juros real', meta: 'NTN-B · agora vs 30d', isCurve: true, curveKind: 'juros', curveAlt: 'Curva de juros real NTN-B, hoje versus 30 dias atrás', curveLegend: '— hoje  ┄ 30d atrás · eixo: vencimentos', labels: ['2027', '2030', '2035', '2045', '2060'] },
+          KV('Marcação a mercado', 'posição própria', [['PU compra', 'R$ 4.196,40'], ['PU atual', 'R$ 4.412,08'], ['Resultado MTM', '+R$ 21.568 (+5,1%)', up], ['Se levar ao venc.', 'IPCA + 6,58% aa'], ['DV01 da posição', 'R$ 392/bp']]),
+          KV('Sensibilidade', 'cenários de curva', [['−50 bps', '+R$ 19.600 (+4,4%)', up], ['−25 bps', '+R$ 9.800 (+2,2%)', up], ['+25 bps', '−R$ 9.500 (−2,2%)', dn], ['+50 bps', '−R$ 18.700 (−4,3%)', dn], ['Carrego 12m', 'IPCA + 6,21%']]),
+        ],
+        ai: { thesis: 'Juro real de 6,2% na ponta de 10 anos está 1,4 desvio acima da média de 5 anos, enquanto o IPCA-15 desacelera pelo terceiro mês. O breakeven implícito de 5,9% excede o Focus em 80bps — o mercado paga prêmio por um cenário de inflação que os dados correntes não sustentam. Duration de 8,9 dá alavancagem de 6,8% de MTM para cada 40bps de fechamento.', scenarios: [{ label: 'BULL', prob: 40, target: 'IPCA + 5,80%', txt: 'Copom sinaliza corte; curva fecha 40bps → +6,8% MTM.' }, { label: 'BASE', prob: 42, target: 'IPCA + 6,05–6,35%', txt: 'Curva de lado; retorno = carrego IPCA+6,2%.' }, { label: 'BEAR', prob: 18, target: 'IPCA + 6,70%', txt: 'Risco fiscal reabre prêmio; −4,3% MTM.' }], risks: ['Pauta fiscal no Congresso (setembro)', 'Treasury 10y acima de 4,6% pressiona ponta longa local', 'Liquidez menor em vencimentos 2035+'], invalid: ['IPCA-15 reacelerar acima de 0,35% m/m', 'Breakeven cair abaixo do Focus (prêmio já extraído)'], src1: 'curva ANBIMA', src2: 'Focus/BCB', src3: 'IPCA-15 (IBGE)' },
+      },
+      'câmbio': {
+        a: { sym: 'USD/BRL', venue: 'interbancário', name: 'Dólar americano / Real brasileiro', price: 'R$ 5,4610', chg: '−0,38% · −R$ 0,0208', chgColor: dn, arrow: '▼', freshness: 'tempo real · há 1s', freshColor: '#21C77D', freshBorder: '#1E4536', base: 5.461, dec: 4, pre: '', stats: [['Cupom', '4,9% aa'], ['Casado', 'R$ 5,4630'], ['Vol impl. 1m', '11,2%'], ['DXY', '101,4']] },
+        panels: [
+          KV('Diferencial de juros', 'carry trade', [['Selic', '14,75%'], ['Fed funds', '4,25%'], ['Diferencial', '10,50 pp', up], ['Carry 3m (hedge)', '+2,4%', up], ['Posição estrangeiro DI', 'R$ 412B']]),
+          KV('Fluxo cambial', 'BCB · semana', [['Comercial', '+US$ 1,8B', up], ['Financeiro', '−US$ 2,4B', dn], ['Saldo', '−US$ 0,6B', dn], ['Posição bancos', 'vendido US$ 42B']]),
+          { title: 'Curva de cupom cambial', meta: 'DDI · agora', isCurve: true, curveKind: 'fx', curveAlt: 'Curva de cupom cambial', labels: ['1m', '3m', '6m', '1a', '2a'] },
+        ],
+        ai: { thesis: 'Diferencial de juros de 10,5pp segue como âncora do real, mas o fluxo financeiro negativo de US$ 2,4B na semana mostra saída via dividendos. Sazonalidade de setembro é historicamente adversa. O balanço favorece range com viés comprador de dólar apenas acima de 5,52.', scenarios: [{ label: 'BULL BRL', prob: 35, target: 'R$ 5,32', txt: 'Corte do Fed em set amplia diferencial relativo.' }, { label: 'BASE', prob: 45, target: 'R$ 5,40–5,55', txt: 'Range com carry dominando.' }, { label: 'BEAR BRL', prob: 20, target: 'R$ 5,68', txt: 'Estresse fiscal doméstico + DXY forte.' }], risks: ['Pauta fiscal doméstica', 'Payroll dos EUA (sexta)', 'Rolagem de swaps do BCB'], invalid: ['Rompimento sustentado de 5,52', 'Fluxo comercial virar negativo'], src1: 'fluxo BCB', src2: 'CFTC positioning', src3: 'curva DDI (B3)' },
+      },
+      energia: {
+        a: { sym: 'PLD SE/CO', venue: 'CCEE · spot horário', name: 'Preço de Liquidação das Diferenças — Sudeste/Centro-Oeste', price: 'R$ 141,20/MWh', chg: '+3,40% · +R$ 4,64', chgColor: up, arrow: '▲', freshness: 'atrasado 15min · CCEE', freshColor: '#E8A33D', freshBorder: '#6B5320', base: 141.2, dec: 2, pre: '', stats: [['ENA SE/CO', '62% MLT'], ['Reserv.', '41,2%'], ['Carga', '78,4 GW'], ['Térmicas', '8,2 GW']] },
+        panels: [
+          { title: 'Curva forward', meta: 'BBCE · convencional SE', isCurve: true, curveKind: 'fwd', curveAlt: 'Curva forward de energia convencional Sudeste', labels: ['set', 'out', 'nov', 'dez', 'jan'], curveLegend: '— forward  ┄ mesma curva há 30d' },
+          KV('Hidrologia & sazonalidade', 'ONS · há 15min', [['ENA SE/CO', '62% da MLT', dn], ['Reservatórios SE/CO', '41,2%', dn], ['Tendência 15d (clima)', 'seco', dn], ['ENA histórica set', '71% MLT'], ['Despacho térmico', '8,2 GWmed', dn]]),
+          KV('Certificados & gás', 'sessão', [['Carbono (EUA ETS)', '€ 71,40', up], ['I-REC BR', 'R$ 4,82'], ['Gás TTF', '€ 32,10/MWh', dn], ['Henry Hub', 'US$ 2,84/MMBtu', up]]),
+        ],
+        ai: { thesis: 'ENA 38% abaixo da média de longo termo com reservatórios em 41% força despacho térmico crescente que a curva forward de setembro ainda não precifica. O spread spot–forward de R$ 22/MWh tende a fechar via alta do forward. Clima de 15 dias sem chuva relevante no SE reforça o quadro.', scenarios: [{ label: 'ALTA', prob: 52, target: 'R$ 168/MWh', txt: 'Forward set converge ao custo térmico marginal.' }, { label: 'BASE', prob: 33, target: 'R$ 138–152', txt: 'Chuva pontual segura o spot; forward de lado.' }, { label: 'BAIXA', prob: 15, target: 'R$ 118', txt: 'Frente fria antecipada recupera ENA.' }], risks: ['Modelo climático ECMWF diverge do GFS na semana 2', 'Decisão CMSE sobre despacho fora da ordem de mérito', 'Liquidez fina no forward de jan/27'], invalid: ['ENA voltar acima de 80% da MLT', 'Reservatórios recuperarem 46%+'], src1: 'ONS (ENA/reservatórios)', src2: 'BBCE forwards', src3: 'ECMWF 15d' },
+      },
+      commodities: {
+        a: { sym: 'CAFÉ ICE dez', venue: 'ICE · futuro KC Z6', name: 'Café arábica — dezembro/2026', price: 'US¢ 284,10/lb', chg: '+2,20% · +6,10', chgColor: up, arrow: '▲', freshness: 'tempo real · há 1s', freshColor: '#21C77D', freshBorder: '#1E4536', base: 284.1, dec: 2, pre: '', stats: [['OI', '212k'], ['Estoques ICE', '812k sc'], ['Basis BR', '−12'], ['Vol impl.', '38%']] },
+        panels: [
+          KV('Oferta & demanda', 'USDA/Conab', [['Safra BR 26/27', '62,4M sc'], ['Estoques certif. ICE', '812k sc', dn], ['Var. estoques 30d', '−18%', up], ['Export BR (jul)', '3,2M sc'], ['Vietnã robusta', 'aperto', up]]),
+          KV('Clima — cinturão do café', 'ECMWF · 15d', [['Risco geada', 'baixo'], ['Chuva MG 15d', '12mm (−60%)', dn], ['Florada set', 'em risco', up], ['El Niño/La Niña', 'neutro']]),
+          KV('Posicionamento', 'CFTC · sexta', [['Non-commercial net', '+38,2k', up], ['Var. semanal', '+4,1k', up], ['Percentil 3 anos', 'P82'], ['Commercials', 'vendidos −52k']]),
+        ],
+        ai: { thesis: 'Estoques certificados na ICE caíram 18% em 30 dias enquanto a chuva no sul de Minas roda 60% abaixo do normal a três semanas da florada. Fundos já estão comprados (P82), o que limita combustível novo, mas o risco de oferta domina o vetor de preço até outubro.', scenarios: [{ label: 'ALTA', prob: 44, target: 'US¢ 312', txt: 'Florada comprometida corta projeção 27/28.' }, { label: 'BASE', prob: 40, target: 'US¢ 270–295', txt: 'Chuva chega em set; prêmio de risco se mantém.' }, { label: 'BAIXA', prob: 16, target: 'US¢ 248', txt: 'Chuva ampla + liquidação de fundos.' }], risks: ['Posicionamento comprado esticado (P82)', 'Real forte reduz repasse ao produtor', 'Robusta do Vietnã surpreender na oferta'], invalid: ['Chuva acumulada 40mm+ em MG até 10/set', 'Estoques ICE voltarem a subir 2 semanas seguidas'], src1: 'estoques ICE', src2: 'ECMWF precipitação', src3: 'CFTC COT' },
+      },
+      'índices': {
+        a: { sym: 'WIN out', venue: 'B3 · mini-índice', name: 'Mini futuro de Ibovespa — outubro/2026', price: '134.280', chg: '−0,32% · −430 pts', chgColor: dn, arrow: '▼', freshness: 'tempo real · há 1s', freshColor: '#21C77D', freshBorder: '#1E4536', base: 134280, dec: 0, pre: '', stats: [['Basis', '+412'], ['OI', '1,84M'], ['VIX', '14,2'], ['Vol impl. IBOV', '18,4%']] },
+        panels: [
+          KV('Estrutura a termo', 'futuros IBOV', [['À vista', '133.868'], ['WIN out', '134.280 (+0,31%)'], ['WIN dez', '135.910 (+1,53%)'], ['Rolagem implícita', 'CDI − 0,4pp']]),
+          KV('Volatilidade', 'opções IBOV', [['Vol implícita ATM', '18,4%'], ['Vol realizada 21d', '15,1%', up], ['Prêmio de vol', '+3,3pp'], ['Skew 25Δ', '−4,2'], ['VIX (EUA)', '14,2']]),
+          KV('Amplitude de mercado', 'B3 · hoje', [['Altas/baixas', '31/54', dn], ['Acima da MM200', '48%'], ['Novas máx. 52s', '4'], ['Fluxo estrangeiro (D-2)', '−R$ 812M', dn]]),
+        ],
+        ai: { thesis: 'IBOV testa a região dos 134k com amplitude fraca (31 altas × 54 baixas) e sexto pregão de saída estrangeira. Prêmio de vol de 3,3pp torna venda coberta de calls mais atrativa que direcional. Sem gatilho doméstico até o Copom, o índice segue devedor do fluxo global.', scenarios: [{ label: 'ALTA', prob: 30, target: '138.500', txt: 'Fluxo global pró-EM com corte do Fed.' }, { label: 'BASE', prob: 48, target: '131.000–136.000', txt: 'Range até Copom; carrego via financiamento.' }, { label: 'BAIXA', prob: 22, target: '128.200', txt: 'Fiscal reabre prêmio de risco local.' }], risks: ['Concentração VALE3+PETR4+ITUB4 = 28% do índice', 'Vencimento de opções sobre índice (quarta)', 'Payroll EUA sexta'], invalid: ['Fluxo estrangeiro virar comprador 3 pregões seguidos', 'Fechamento acima de 136.200 com amplitude > 60%'], src1: 'fluxo B3', src2: 'superfície de vol (B3)', src3: 'amplitude interna' },
+      },
+      fundos: {
+        a: { sym: 'HGLG11', venue: 'B3 · FII logística', name: 'CSHG Logística FII', price: 'R$ 162,30', chg: '+0,22% · +R$ 0,36', chgColor: up, arrow: '▲', freshness: 'tempo real · há 3s', freshColor: '#21C77D', freshBorder: '#1E4536', base: 162.3, dec: 2, pre: '', stats: [['DY 12m', '8,9%'], ['P/VP', '0,96'], ['Liquidez', 'R$ 4,2M/d'], ['Vacância', '3,1%']] },
+        panels: [
+          KV('Portfólio do fundo', 'relatório jul/26', [['ABL', '1,42M m²'], ['Imóveis', '21'], ['Vacância física', '3,1%', up], ['Vacância financeira', '2,4%', up], ['Cap rate médio', '8,2%'], ['WAULT', '5,8 anos']]),
+          KV('Rendimentos', 'próx. data-com 30/ago', [['Último rendimento', 'R$ 1,20/cota'], ['DY 12m', '8,9%'], ['DY vs IFIX', '+0,7pp', up], ['Rendimento vs CDI líq.', '−2,1pp', dn]]),
+          KV('Valuation', 'vs pares logística', [['P/VP', '0,96 vs 0,92'], ['Spread vs NTN-B 35', '+2,7pp'], ['Preço/m² implícito', 'R$ 2.840'], ['Custo reposição/m²', 'R$ 3.400', up]]),
+        ],
+        ai: { thesis: 'HGLG11 negocia a 0,96 P/VP com spread de 2,7pp sobre a NTN-B — comprimido versus a média histórica de 3,5pp. O caso de curto prazo depende do fechamento da curva real: FIIs de tijolo são um proxy alavancado de duration. Fundamentos operacionais (vacância 3,1%, WAULT 5,8a) seguem sólidos.', scenarios: [{ label: 'ALTA', prob: 38, target: 'R$ 174', txt: 'Curva real fecha 40bps; IFIX reprecifica.' }, { label: 'BASE', prob: 44, target: 'R$ 158–166', txt: 'Renda de 8,9% aa com cota de lado.' }, { label: 'BAIXA', prob: 18, target: 'R$ 149', txt: 'Juro real longo reabre acima de 6,6%.' }], risks: ['Correlação 0,81 com NTN-B 2035 (duração implícita)', 'Emissões concorrentes pressionando P/VP do setor', 'Devolução de galpão âncora (risco idiossincrático)'], invalid: ['NTN-B 35 acima de IPCA+6,6%', 'Vacância acima de 6%'], src1: 'relatório gerencial (RI)', src2: 'curva ANBIMA', src3: 'consenso FIIs' },
+      },
+    };
+    const d = D[s.cls];
+    // ---- candles ----
+    let seed = s.cls.length * 7919 + s.tf.length * 331;
+    const r = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const n = 66, W = 12, top = 8, bot = 240;
+    let price = 100; const raw = [];
+    for (let i = 0; i < n; i++) { const o = price, c = o + (r() - 0.485) * 4, h = Math.max(o, c) + r() * 1.6, l = Math.min(o, c) - r() * 1.6; raw.push({ o, c, h, l, v: 0.3 + r() }); price = c; }
+    const lo = Math.min(...raw.map(k => k.l)), hi = Math.max(...raw.map(k => k.h));
+    const Y = (p) => top + (hi - p) / (hi - lo) * (bot - top);
+    const candles = raw.map((k, i) => { const upC = k.c >= k.o; const y1 = Y(Math.max(k.o, k.c)), y2 = Y(Math.min(k.o, k.c)); return { x: i * W + 2, cx: i * W + 6, y: y1.toFixed(1), h: Math.max(1.5, y2 - y1).toFixed(1), wt: Y(k.h).toFixed(1), wb: Y(k.l).toFixed(1), col: upC ? up : dn }; });
+    const vols = raw.map((k, i) => ({ x: i * W + 2, y: (298 - k.v * 44).toFixed(1), h: (k.v * 44).toFixed(1), col: k.c >= k.o ? up : dn }));
+    const ma = raw.map((k, i) => { const w = raw.slice(Math.max(0, i - 8), i + 1); return (i * W + 6) + ',' + Y(w.reduce((a, b) => a + b.c, 0) / w.length).toFixed(1); });
+    const bbU = raw.map((k, i) => (i * W + 6) + ',' + (Y(k.c) - 22).toFixed(1)).join(' ');
+    const bbL = raw.map((k, i) => (i * W + 6) + ',' + (Y(k.c) + 22).toFixed(1)).join(' ');
+    const scale = d.a.base / raw[n - 1].c;
+    const fmt = (v) => (v * scale).toLocaleString('pt-BR', { minimumFractionDigits: d.a.dec, maximumFractionDigits: d.a.dec });
+    const grid = [0.1, 0.3, 0.5, 0.7, 0.9].map(t => { const y = top + t * (bot - top); return { y: y.toFixed(0), ty: (y + 3).toFixed(0), label: fmt(hi - t * (hi - lo)) }; });
+    const markers = [
+      { x: 20 * W + 6, y: Y(raw[20].h) - 14, ty: Y(raw[20].h) - 11, t: '✦', bg: '#12101C', bc: '#A78BFA', fg: '#A78BFA' },
+      { x: 34 * W + 6, y: Y(raw[34].l) + 14, ty: Y(raw[34].l) + 17, t: '▲', bg: '#0D1712', bc: '#21C77D', fg: '#21C77D' },
+      { x: 52 * W + 6, y: Y(raw[52].h) - 14, ty: Y(raw[52].h) - 11, t: '▼', bg: '#1C0F12', bc: '#F0525F', fg: '#F0525F' },
+    ];
+    const ohlcRows = raw.slice(-14).reverse().map((k, i) => ({ t: (13 - i) + ':00', o: fmt(k.o), h: fmt(k.h), l: fmt(k.l), c: fmt(k.c), col: k.c >= k.o ? up : dn, v: (k.v * 1000).toFixed(0) }));
+    // ---- panels: fill book/curve data ----
+    const panels = d.panels.map(p => {
+      if (p.isBook) {
+        const mk = (i, side) => { const q = (r() * 8 + 0.4).toFixed(3); return { p: side === 'a' ? (67412.5 + (i + 1) * 0.5).toLocaleString('pt-BR', { minimumFractionDigits: 1 }) : (67412.0 - i * 0.5).toLocaleString('pt-BR', { minimumFractionDigits: 1 }), q, w: Math.min(parseFloat(q) * 12, 100).toFixed(0) + '%' }; };
+        return { ...p, asks: [4, 3, 2, 1, 0].map(i => mk(i, 'a')), bids: [0, 1, 2, 3, 4].map(i => mk(i, 'b')), isKV: false, isCurve: false };
+      }
+      if (p.isCurve) {
+        const pts = [], pts2 = [];
+        for (let i = 0; i <= 10; i++) { const x = i * 28; const base2 = p.curveKind === 'fwd' ? 80 - i * 4 + Math.sin(i) * 8 : 70 - Math.log(i + 1) * 16; pts.push(x + ',' + (base2).toFixed(1)); pts2.push(x + ',' + (base2 + 8 + Math.sin(i * 2) * 3).toFixed(1)); }
+        return { ...p, curve: pts.join(' '), curve2: p.curveLegend ? pts2.join(' ') : false, curveLabels: (p.labels || []).map((t, i) => ({ t, x: 20 + i * 60 })), isKV: false, isBook: false, curveLegend: p.curveLegend || false };
+      }
+      return { ...p, isBook: false, isCurve: false };
+    });
+    const tabs = [['ai', '✦ Análise da IA'], ['news', 'Notícias & sentimento'], ['corr', 'Correlações']].map(([id, label]) => ({ label, sel: s.tab === id, go: () => this.setState({ tab: id }), fg: s.tab === id ? '#E8ECF4' : '#8A93A8', w: s.tab === id ? 600 : 400, line: s.tab === id ? '#4E7CF6' : 'transparent' }));
+    const news = [
+      { ago: '12min', title: 'Fluxo para ETFs à vista soma US$ 480M no dia, maior desde junho', srcName: 'The Block', sent: '+0,72', sc: up, relW: '92%' },
+      { ago: '38min', title: 'FOMC minutes devem detalhar divisão sobre ritmo de cortes', srcName: 'Reuters', sent: '−0,10', sc: '#8A93A8', relW: '78%' },
+      { ago: '1h', title: 'Funding negativo persiste apesar da alta: shorts pagando para manter posição', srcName: 'Coindesk', sent: '+0,55', sc: up, relW: '84%' },
+      { ago: '3h', title: 'Mineradoras reduzem venda de tesouraria pelo 2º mês', srcName: 'Glassnode', sent: '+0,38', sc: up, relW: '61%' },
+      { ago: '5h', title: 'Regulador da UE consulta mercado sobre limites de alavancagem em perpétuos', srcName: 'FT', sent: '−0,44', sc: dn, relW: '58%' },
+    ];
+    const corrPos = [['NDX (Nasdaq)', 0.72], ['ETH/USDT', 0.88], ['SOL/USDT', 0.81], ['Ouro', 0.31]].map(([sym, v]) => ({ sym, v: v.toFixed(2).replace('.', ','), w: (v * 100) + '%' }));
+    const corrNeg = [['DXY', -0.58], ['VIX', -0.44], ['T10Y yield', -0.29], ['USD/BRL', -0.22]].map(([sym, v]) => ({ sym, v: v.toFixed(2).replace('.', ','), w: (Math.abs(v) * 100) + '%' }));
+    return {
+      classes, tfs, inds, a: d.a, panels, tabs, ai: d.ai, news, corrPos, corrNeg,
+      candles, vols, grid, markers, maLine: ma.join(' '), bbU, bbL, maOn: s.inds.MA, bbOn: s.inds.BB,
+      tabAI: s.tab === 'ai', tabNews: s.tab === 'news', tabCorr: s.tab === 'corr',
+      showChart: !s.table, showTable: s.table, tableLabel: s.table ? '▦ gráfico' : '≣ tabela', ohlcRows,
+      toggleTable: () => this.setState(x => ({ table: !x.table })),
+      chartFoot: s.tf + ' · ' + d.a.venue + ' · ' + d.a.freshness,
+    };
+  }
+}
+</script>
+</body>
+</html>

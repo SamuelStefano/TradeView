@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#0A0C10;color:#E8ECF4;font-family:'Geist',system-ui,sans-serif;}*{box-sizing:border-box;}a{color:#4E7CF6;}a:hover{color:#7DA0FF;}</style>
+</helmet>
+<div data-screen-label="Mercados" style="padding:16px;display:flex;flex-direction:column;gap:12px;font-size:13px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <h1 style="margin:0;font-size:16px;font-weight:700;">Mercados & integrações</h1>
+    <div style="display:flex;gap:10px;font-size:11px;color:#8A93A8;font-family:'Geist Mono',monospace;">
+      <span><span style="color:#21C77D;">●</span> 48 conectadas</span><span><span style="color:#E8A33D;">●</span> 2 degradadas</span><span><span style="color:#F0525F;">●</span> 1 offline</span><span><span style="color:#5A6478;">●</span> 4 não configuradas</span>
+    </div>
+    <div style="flex:1;"></div>
+    <input placeholder="Filtrar integrações…" style="height:30px;width:220px;padding:0 10px;background:#10141C;border:1px solid #222939;border-radius:6px;color:#E8ECF4;font-size:12px;font-family:inherit;outline:none;">
+    <button onClick="{{ openFlow }}" style="height:30px;padding:0 14px;background:#16233F;border:1px solid #2E4370;border-radius:6px;color:#7DA0FF;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">+ Conectar integração</button>
+  </div>
+  <!-- table -->
+  <div role="table" aria-label="Integrações" style="background:#10141C;border:1px solid #1A202E;border-radius:8px;overflow:hidden;">
+    <div style="display:grid;grid-template-columns:200px 110px 130px 150px 1fr 130px 110px;gap:0;padding:8px 14px;border-bottom:1px solid #1A202E;font-size:10px;color:#5A6478;text-transform:uppercase;letter-spacing:.5px;">
+      <div>Provedor</div><div>Status</div><div>Credencial</div><div>Permissões</div><div>Rate limit</div><div>Última resposta</div><div style="text-align:right;">Ações</div>
+    </div>
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+      <div style="display:grid;grid-template-columns:200px 110px 130px 150px 1fr 130px 110px;gap:0;padding:9px 14px;border-bottom:1px solid #141926;align-items:center;background:{{ r.rowBg }};" style-hover="background:#12161F;">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <div style="width:24px;height:24px;border-radius:5px;background:{{ r.logoBg }};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Geist Mono',monospace;">{{ r.logo }}</div>
+          <div><div style="font-size:12.5px;font-weight:600;">{{ r.name }}</div><div style="font-size:9.5px;color:#5A6478;">{{ r.kind }}</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:{{ r.stColor }};"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.stColor }};"></span>{{ r.status }}</div>
+        <div style="font-size:11px;color:#8A93A8;font-family:'Geist Mono',monospace;">{{ r.cred }}</div>
+        <div>
+          <sc-if value="{{ r.trade }}" hint-placeholder-val="{{ false }}">
+            <span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.5px;color:#F0525F;background:#1C0F12;border:1px solid #7A2E36;border-radius:4px;padding:3px 8px;">⚠ ORDEM + LEITURA</span>
+          </sc-if>
+          <sc-if value="{{ r.readOnly }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:10px;color:#8A93A8;background:#151A24;border:1px solid #222939;border-radius:4px;padding:3px 8px;">somente leitura</span>
+          </sc-if>
+          <sc-if value="{{ r.noCred }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;color:#5A6478;">—</span></sc-if>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding-right:16px;">
+          <div role="img" aria-label="rate limit {{ r.rl }}% consumido" style="flex:1;height:5px;background:#1A202E;border-radius:3px;overflow:hidden;max-width:120px;"><div style="height:100%;width:{{ r.rlW }};background:{{ r.rlColor }};"></div></div>
+          <span style="font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-size:10.5px;color:{{ r.rlColor }};width:34px;text-align:right;">{{ r.rlTxt }}</span>
+        </div>
+        <div style="font-family:'Geist Mono',monospace;font-size:10.5px;color:{{ r.lastColor }};">{{ r.last }}</div>
+        <div style="text-align:right;"><button style="height:24px;padding:0 10px;background:#151A24;border:1px solid #222939;border-radius:5px;color:#8A93A8;font-size:10.5px;cursor:pointer;font-family:inherit;">{{ r.action }}</button></div>
+      </div>
+    </sc-for>
+    <div style="padding:9px 14px;font-size:10.5px;color:#5A6478;">mostrando 13 de 55 · <a href="#">ver todas</a> · chaves nunca são exibidas por completo</div>
+  </div>
+  <!-- rate limit banner -->
+  <div role="alert" style="display:flex;align-items:center;gap:12px;background:#2A2113;border:1px solid #6B5320;border-radius:8px;padding:10px 14px;">
+    <span style="color:#E8A33D;">◉</span>
+    <div style="flex:1;font-size:12px;color:#E8A33D;">Rate limit da Alpha Vantage atingido — dados de ações US em cache desde <span style="font-family:'Geist Mono',monospace;">14:02 (há 31min)</span>. Renova em <span style="font-family:'Geist Mono',monospace;">12min</span>.</div>
+    <button style="height:26px;padding:0 12px;background:#3A2E13;border:1px solid #6B5320;border-radius:5px;color:#E8A33D;font-size:11px;cursor:pointer;font-family:inherit;">Trocar para fallback (IEX)</button>
+  </div>
+  <!-- connect flow modal -->
+  <sc-if value="{{ flowOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeFlow }}" style="position:fixed;inset:0;background:rgba(5,7,10,.7);z-index:50;display:flex;align-items:center;justify-content:center;">
+      <div onClick="{{ stop }}" role="dialog" aria-label="Conectar integração" style="width:520px;background:#10141C;border:1px solid #2A3247;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:14px;font-weight:700;">Conectar integração</span><span style="margin-left:auto;font-size:10.5px;color:#5A6478;font-family:'Geist Mono',monospace;">passo {{ stepN }}/5</span></div>
+        <div style="display:flex;gap:4px;">
+          <sc-for list="{{ stepDots }}" as="sd" hint-placeholder-count="5"><div style="flex:1;height:3px;border-radius:2px;background:{{ sd }};"></div></sc-for>
+        </div>
+        <sc-if value="{{ st1 }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <sc-for list="{{ providers }}" as="pv" hint-placeholder-count="9">
+              <button onClick="{{ next }}" style="display:flex;flex-direction:column;gap:5px;align-items:flex-start;padding:11px;background:#0D1017;border:1px solid #1A202E;border-radius:7px;cursor:pointer;font-family:inherit;text-align:left;" style-hover="border-color:#2E4370;">
+                <span style="font-size:12px;font-weight:600;color:#E8ECF4;">{{ pv.n }}</span><span style="font-size:9.5px;color:#5A6478;">{{ pv.k }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ st2 }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:12.5px;color:#B7BFD2;">Cole a chave de API da <strong style="color:#E8ECF4;">Binance</strong>. Ela é criptografada localmente e nunca aparece completa de novo.</div>
+            <label style="font-size:11px;color:#8A93A8;">API key<input value="AKfz••••••••••••••••3kQz" readonly style="margin-top:4px;width:100%;height:34px;padding:0 10px;background:#0A0C10;border:1px solid #222939;border-radius:6px;color:#8A93A8;font-family:'Geist Mono',monospace;font-size:12px;outline:none;"></label>
+            <label style="font-size:11px;color:#8A93A8;">Secret<input value="••••••••••••••••••••••••" readonly style="margin-top:4px;width:100%;height:34px;padding:0 10px;background:#0A0C10;border:1px solid #222939;border-radius:6px;color:#8A93A8;font-family:'Geist Mono',monospace;font-size:12px;outline:none;"></label>
+          </div>
+        </sc-if>
+        <sc-if value="{{ st3 }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:8px;font-family:'Geist Mono',monospace;font-size:11.5px;">
+            <div style="color:#21C77D;">✓ autenticação OK (182ms)</div>
+            <div style="color:#21C77D;">✓ leitura de saldos OK — 14 ativos encontrados</div>
+            <div style="color:#21C77D;">✓ websocket de preços OK</div>
+            <div style="color:#8A93A8;">· permissão de ordem: presente na chave (não será usada sem o passo 4)</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ st4 }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button onClick="{{ next }}" style="display:flex;gap:10px;align-items:flex-start;padding:12px;background:#0D1712;border:2px solid #21C77D;border-radius:7px;cursor:pointer;font-family:inherit;text-align:left;">
+              <span style="color:#21C77D;">●</span><div><div style="font-size:12.5px;font-weight:600;color:#E8ECF4;">Somente leitura <span style="font-size:9.5px;color:#21C77D;border:1px solid #1E4536;border-radius:3px;padding:1px 5px;margin-left:6px;">recomendado · padrão</span></div><div style="font-size:11px;color:#8A93A8;margin-top:2px;">Preços, saldos e histórico. Nenhuma ordem pode ser enviada.</div></div>
+            </button>
+            <button onClick="{{ next }}" style="display:flex;gap:10px;align-items:flex-start;padding:12px;background:#1C0F12;border:1px solid #7A2E36;border-radius:7px;cursor:pointer;font-family:inherit;text-align:left;">
+              <span style="color:#F0525F;">⚠</span><div><div style="font-size:12.5px;font-weight:600;color:#F0525F;">Leitura + envio de ORDENS</div><div style="font-size:11px;color:#B08087;margin-top:2px;">Este app poderá movimentar dinheiro real nesta conta. Cada ordem ainda exigirá sua confirmação explícita, mas trate esta permissão como perigosa.</div></div>
+            </button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ st5 }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:12.5px;color:#B7BFD2;line-height:1.55;">Confirme: conectar <strong style="color:#E8ECF4;">Binance</strong> em modo <strong style="color:#21C77D;">somente leitura</strong>, chave terminada em <span style="font-family:'Geist Mono',monospace;">3kQz</span>, rotação sugerida a cada 90 dias.</div>
+            <div style="font-size:11px;color:#5A6478;">Você pode revogar a qualquer momento em Configurações → Chaves.</div>
+          </div>
+        </sc-if>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button onClick="{{ closeFlow }}" style="height:30px;padding:0 12px;background:#151A24;border:1px solid #222939;border-radius:6px;color:#B7BFD2;font-size:12px;cursor:pointer;font-family:inherit;">Cancelar</button>
+          <sc-if value="{{ notLast }}" hint-placeholder-val="{{ true }}"><button onClick="{{ next }}" style="height:30px;padding:0 14px;background:#16233F;border:1px solid #2E4370;border-radius:6px;color:#7DA0FF;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ nextLabel }}</button></sc-if>
+          <sc-if value="{{ isLast }}" hint-placeholder-val="{{ false }}"><button onClick="{{ closeFlow }}" style="height:30px;padding:0 14px;background:#1E4536;border:1px solid #21C77D;border-radius:6px;color:#21C77D;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Confirmar conexão</button></sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { flowOpen: false, step: 1 };
+  renderVals() {
+    const up = '#21C77D', warn = '#E8A33D', dn = '#F0525F', mut = '#5A6478', s = this.state;
+    const R = (name, kind, logo, logoBg, status, cred, perm, rl, last) => {
+      const stMap = { conectado: up, degradado: warn, offline: dn, 'não configurado': mut };
+      return {
+        name, kind, logo, logoBg, status, cred, rl,
+        stColor: stMap[status], trade: perm === 'trade', readOnly: perm === 'ro', noCred: perm === '-',
+        rlW: rl + '%', rlTxt: rl >= 0 ? rl + '%' : '—', rlColor: rl > 85 ? dn : rl > 60 ? warn : '#4E7CF6',
+        last, lastColor: status === 'offline' ? dn : status === 'degradado' ? warn : '#8A93A8',
+        action: status === 'não configurado' ? 'Configurar' : 'Gerenciar',
+        rowBg: perm === 'trade' ? 'rgba(240,82,95,.025)' : 'transparent',
+      };
+    };
+    const rows = [
+      R('Binance', 'cripto · spot + perp', 'BN', '#2A2113', 'conectado', 'API key', 'trade', 42, '182ms · há 1s'),
+      R('B3 (via corretora)', 'ações + derivativos BR', 'B3', '#16233F', 'conectado', 'OAuth', 'trade', 18, '96ms · há 2s'),
+      R('Tesouro Direto', 'renda fixa BR', 'TD', '#1E4536', 'conectado', 'CPF + token', 'ro', 4, '410ms · há 4min'),
+      R('Coinbase', 'cripto · spot', 'CB', '#16233F', 'conectado', 'API key', 'ro', 22, '204ms · há 1s'),
+      R('Interactive Brokers', 'ações US + opções', 'IB', '#3A1A20', 'degradado', 'OAuth', 'trade', 91, 'timeouts · há 12s'),
+      R('Alpha Vantage', 'dados ações US', 'AV', '#151A24', 'degradado', 'API key', 'ro', 100, 'rate limit · 14:02'),
+      R('CCEE', 'energia · PLD', 'CC', '#2A2113', 'conectado', 'certificado', 'ro', 8, '890ms · há 15min'),
+      R('ENTSO-E', 'energia · Europa', 'EN', '#151A24', 'conectado', 'API key', 'ro', 12, '1,2s · há 32min'),
+      R('EIA', 'energia · EUA', 'EI', '#151A24', 'conectado', 'API key', 'ro', 6, '640ms · há 1h'),
+      R('Kraken', 'cripto · spot', 'KR', '#2A2440', 'offline', 'API key', 'ro', 0, 'sem resposta · 42min'),
+      R('Glassnode', 'on-chain', 'GN', '#1E4536', 'conectado', 'API key', 'ro', 71, '310ms · há 10min'),
+      R('CFTC / COT', 'posicionamento', 'CF', '#151A24', 'conectado', 'público', 'ro', 2, 'semanal · sexta'),
+      R('MetaTrader 5', 'câmbio', 'MT', '#151A24', 'não configurado', '—', '-', -1, '—'),
+    ];
+    const providers = [
+      { n: 'Binance', k: 'cripto' }, { n: 'Coinbase', k: 'cripto' }, { n: 'Bybit', k: 'cripto' },
+      { n: 'XP / Rico', k: 'B3' }, { n: 'Interactive Brokers', k: 'ações US' }, { n: 'Tesouro Direto', k: 'renda fixa' },
+      { n: 'CCEE', k: 'energia BR' }, { n: 'ENTSO-E', k: 'energia UE' }, { n: 'OANDA', k: 'câmbio' },
+    ];
+    const dots = [1, 2, 3, 4, 5].map(i => i <= s.step ? '#4E7CF6' : '#1A202E');
+    const nl = ['', 'Continuar', 'Testar conexão', 'Escolher escopo', 'Revisar', ''][s.step];
+    return {
+      rows, providers, flowOpen: s.flowOpen, stepN: s.step, stepDots: dots,
+      st1: s.step === 1, st2: s.step === 2, st3: s.step === 3, st4: s.step === 4, st5: s.step === 5,
+      notLast: s.step < 5, isLast: s.step === 5, nextLabel: nl,
+      openFlow: () => this.setState({ flowOpen: true, step: 1 }),
+      closeFlow: () => this.setState({ flowOpen: false }),
+      next: () => this.setState(x => ({ step: Math.min(x.step + 1, 5) })),
+      stop: (e) => e.stopPropagation(),
+    };
+  }
+}
+</script>
+</body>
+</html>
