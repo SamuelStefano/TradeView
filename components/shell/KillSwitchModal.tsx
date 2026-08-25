@@ -19,6 +19,7 @@ export function KillSwitchModal({ open, onClose, onConfirm }: KillSwitchModalPro
   useEffect(() => {
     if (!open) return;
 
+    const prev = document.activeElement as HTMLElement | null;
     const id = setTimeout(() => inputRef.current?.focus(), 50);
 
     function onKeyDown(e: KeyboardEvent) {
@@ -47,6 +48,7 @@ export function KillSwitchModal({ open, onClose, onConfirm }: KillSwitchModalPro
     return () => {
       clearTimeout(id);
       document.removeEventListener('keydown', onKeyDown);
+      prev?.focus();
     };
   }, [open, onClose]);
 
