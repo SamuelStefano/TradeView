@@ -149,7 +149,6 @@ export interface Strategy {
   state: StrategyState;
   mode: StrategyMode;
   pnl: string;
-  pnlPct: number;
   drawdownPct: number;
   sharpe: number;
   winRatePct: number;

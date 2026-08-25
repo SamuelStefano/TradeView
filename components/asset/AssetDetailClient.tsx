@@ -27,7 +27,7 @@ function OHLCTable({ candles }: { candles: Candle[] }) {
       h: c.high.toFixed(2),
       l: c.low.toFixed(2),
       c: c.close.toFixed(2),
-      col: isUp ? '#21C77D' : '#F0525F',
+      col: isUp ? 'var(--color-up)' : 'var(--color-down)',
       v: (c.volume * 1000).toFixed(0),
     };
   });
@@ -191,8 +191,8 @@ function AITab({ ai }: { ai: AssetDetailData['ai'] }) {
         {ai.scenarios.map((sc) => {
           const isUp = sc.label === 'BULL' || sc.label === 'ALTA';
           const isDown = sc.label === 'BEAR' || sc.label === 'BAIXA';
-          const color = isUp ? '#21C77D' : isDown ? '#F0525F' : '#4E7CF6';
-          const borderColor = isUp ? '#1E4536' : isDown ? '#7A2E36' : '#2E4370';
+          const color = isUp ? 'var(--color-up)' : isDown ? 'var(--color-down)' : 'var(--color-accent)';
+          const borderColor = isUp ? 'var(--color-up-border)' : isDown ? 'var(--color-danger-border)' : 'var(--color-accent-border)';
           return (
             <div
               key={sc.label}
@@ -323,9 +323,9 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
                 height: '26px',
                 padding: '0 11px',
                 borderRadius: '6px',
-                border: `1px solid ${isActive ? '#2E4370' : '#1A202E'}`,
-                background: isActive ? '#161D2E' : '#0D1017',
-                color: isActive ? '#E8ECF4' : '#8A93A8',
+                border: `1px solid ${isActive ? 'var(--color-accent-border)' : 'var(--color-border)'}`,
+                background: isActive ? 'var(--color-active)' : 'var(--color-chrome)',
+                color: isActive ? 'var(--color-text)' : 'var(--color-text-muted)',
                 fontSize: '11.5px',
                 fontWeight: isActive ? 600 : 400,
                 cursor: 'pointer',
@@ -368,7 +368,7 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
         </div>
         <div
           className="flex gap-3.5 ml-2 pl-4"
-          style={{ borderLeft: '1px solid #1A202E' }}
+          style={{ borderLeft: '1px solid var(--color-border)' }}
         >
           {asset.stats.map((st) => (
             <div key={st.key}>
@@ -394,10 +394,10 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
           style={{
             height: '30px',
             padding: '0 14px',
-            background: '#151A24',
-            border: '1px solid #222939',
+            background: 'var(--color-hover)',
+            border: '1px solid var(--color-border-strong)',
             borderRadius: '6px',
-            color: '#B7BFD2',
+            color: 'var(--color-text-secondary)',
             fontSize: '12px',
             fontFamily: 'inherit',
           }}
@@ -409,10 +409,10 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
           style={{
             height: '30px',
             padding: '0 14px',
-            background: '#16233F',
-            border: '1px solid #2E4370',
+            background: 'var(--color-accent-bg)',
+            border: '1px solid var(--color-accent-border)',
             borderRadius: '6px',
-            color: '#7DA0FF',
+            color: 'var(--color-accent-hover)',
             fontSize: '12px',
             fontWeight: 600,
             fontFamily: 'inherit',
@@ -446,8 +446,8 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
                       padding: '0 8px',
                       border: 'none',
                       borderRadius: '4px',
-                      background: isActive ? '#1C2333' : 'transparent',
-                      color: isActive ? '#E8ECF4' : '#5A6478',
+                      background: isActive ? 'var(--color-accent-bg-soft)' : 'transparent',
+                      color: isActive ? 'var(--color-text)' : 'var(--color-text-faint)',
                       fontSize: '10.5px',
                     }}
                   >
@@ -469,10 +469,10 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
                     style={{
                       height: '22px',
                       padding: '0 8px',
-                      border: `1px solid ${isOn ? '#2E4370' : '#1A202E'}`,
+                      border: `1px solid ${isOn ? 'var(--color-accent-border)' : 'var(--color-border)'}`,
                       borderRadius: '4px',
-                      background: isOn ? '#16233F' : '#0D1017',
-                      color: isOn ? '#7DA0FF' : '#5A6478',
+                      background: isOn ? 'var(--color-accent-bg)' : 'var(--color-chrome)',
+                      color: isOn ? 'var(--color-accent-hover)' : 'var(--color-text-faint)',
                       fontSize: '10px',
                     }}
                   >
@@ -489,10 +489,10 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
                 style={{
                   height: '22px',
                   padding: '0 8px',
-                  border: '1px solid #222939',
+                  border: '1px solid var(--color-border-strong)',
                   borderRadius: '4px',
-                  background: '#0D1017',
-                  color: '#8A93A8',
+                  background: 'var(--color-chrome)',
+                  color: 'var(--color-text-muted)',
                   fontSize: '10.5px',
                   fontFamily: 'inherit',
                 }}
@@ -506,10 +506,10 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
                 style={{
                   height: '22px',
                   padding: '0 8px',
-                  border: '1px solid #222939',
+                  border: '1px solid var(--color-border-strong)',
                   borderRadius: '4px',
-                  background: '#0D1017',
-                  color: '#8A93A8',
+                  background: 'var(--color-chrome)',
+                  color: 'var(--color-text-muted)',
                   fontSize: '10.5px',
                   fontFamily: 'inherit',
                 }}
@@ -531,14 +531,14 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
               />
               <div className="flex gap-3.5 mt-1.5 font-mono text-text-faint" style={{ fontSize: '9.5px' }}>
                 <span>
-                  <span style={{ color: '#E8A33D' }}>—</span> MA(21)
+                  <span style={{ color: 'var(--color-warn)' }}>—</span> MA(21)
                 </span>
                 <span>
-                  <span style={{ color: '#A78BFA' }}>✦</span> sinal IA
+                  <span style={{ color: 'var(--color-ai)' }}>✦</span> sinal IA
                 </span>
                 <span>
-                  <span style={{ color: '#21C77D' }}>▲</span>/
-                  <span style={{ color: '#F0525F' }}>▼</span> trade executado
+                  <span style={{ color: 'var(--color-up)' }}>▲</span>/
+                  <span style={{ color: 'var(--color-down)' }}>▼</span> trade executado
                 </span>
                 <span className="ml-auto">
                   {chartFooter}
@@ -568,10 +568,10 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
                     padding: '0 14px',
                     border: 'none',
                     background: 'transparent',
-                    color: isActive ? '#E8ECF4' : '#8A93A8',
+                    color: isActive ? 'var(--color-text)' : 'var(--color-text-muted)',
                     fontSize: '12px',
                     fontWeight: isActive ? 600 : 400,
-                    borderBottom: `2px solid ${isActive ? '#4E7CF6' : 'transparent'}`,
+                    borderBottom: `2px solid ${isActive ? 'var(--color-accent)' : 'transparent'}`,
                     marginBottom: '-1px',
                     fontFamily: 'inherit',
                   }}

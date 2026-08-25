@@ -79,7 +79,7 @@ export function AlertList({ alerts }: AlertListProps) {
                 className="h-6 px-2.5 bg-hover border border-border-strong rounded text-text-muted cursor-pointer font-sans hover:text-text hover:border-border-hover"
                 style={{ fontSize: '10.5px' }}
               >
-                Editar
+                Apagar
               </button>
             </div>
           );
