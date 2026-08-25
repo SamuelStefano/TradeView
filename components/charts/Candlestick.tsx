@@ -11,8 +11,8 @@ interface CandlestickProps {
   label: string;
 }
 
-const UP = '#21C77D';
-const DN = '#F0525F';
+const UP = 'var(--color-up)';
+const DN = 'var(--color-down)';
 const CANDLE_W = 12;
 const TOP = 8;
 const BOT = 240;
@@ -91,9 +91,9 @@ function buildMarkers(candles: Candle[], markers: ChartMarker[], scaleY: (p: num
       y: cy.toFixed(1),
       ty: (cy + 3).toFixed(1),
       t: m.label,
-      bg: isAI ? '#12101C' : isBuy ? '#0D1712' : '#1C0F12',
-      bc: isAI ? '#A78BFA' : isBuy ? '#21C77D' : '#F0525F',
-      fg: isAI ? '#A78BFA' : isBuy ? '#21C77D' : '#F0525F',
+      bg: isAI ? 'var(--color-ai-bg)' : isBuy ? 'var(--color-up-bg)' : 'var(--color-down-bg)',
+      bc: isAI ? 'var(--color-ai)' : isBuy ? 'var(--color-up)' : 'var(--color-down)',
+      fg: isAI ? 'var(--color-ai)' : isBuy ? 'var(--color-up)' : 'var(--color-down)',
     } as MarkerSpec;
   }).filter((m): m is MarkerSpec => m !== null);
 }
@@ -115,8 +115,8 @@ export function Candlestick({ candles, markers, showMA, showBB, showVOL, label }
       <desc>Gráfico de candlestick com 66 velas. Alternativa em tabela disponível pelo botão Tabela.</desc>
       {gridLines.map((g, i) => (
         <g key={i}>
-          <line x1="0" x2="800" y1={g.y} y2={g.y} stroke="#161B26" strokeWidth="1" />
-          <text x="806" y={g.ty} fill="#5A6478" fontSize="9" fontFamily="Geist Mono">
+          <line x1="0" x2="800" y1={g.y} y2={g.y} stroke="var(--color-grid)" strokeWidth="1" />
+          <text x="806" y={g.ty} fill="var(--color-text-faint)" fontSize="9" fontFamily="Geist Mono">
             {g.label}
           </text>
         </g>
@@ -128,12 +128,12 @@ export function Candlestick({ candles, markers, showMA, showBB, showVOL, label }
         </g>
       ))}
       {showMA && (
-        <polyline points={maLine} fill="none" stroke="#E8A33D" strokeWidth="1.3" opacity={0.9} />
+        <polyline points={maLine} fill="none" stroke="var(--color-warn)" strokeWidth="1.3" opacity={0.9} />
       )}
       {showBB && (
         <>
-          <polyline points={bbU} fill="none" stroke="#4E7CF6" strokeWidth="1" opacity={0.5} />
-          <polyline points={bbL} fill="none" stroke="#4E7CF6" strokeWidth="1" opacity={0.5} />
+          <polyline points={bbU} fill="none" stroke="var(--color-accent)" strokeWidth="1" opacity={0.5} />
+          <polyline points={bbL} fill="none" stroke="var(--color-accent)" strokeWidth="1" opacity={0.5} />
         </>
       )}
       {markerSpecs.map((m, i) => (
@@ -163,7 +163,7 @@ export function Candlestick({ candles, markers, showMA, showBB, showVOL, label }
             opacity={0.45}
           />
         ))}
-      <line x1="0" x2="800" y1="248" y2="248" stroke="#1A202E" strokeWidth="1" />
+      <line x1="0" x2="800" y1="248" y2="248" stroke="var(--color-border)" strokeWidth="1" />
     </svg>
   );
 }

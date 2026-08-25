@@ -13,7 +13,7 @@ export function StepDots({ total, current }: StepDotsProps) {
             flex: 1,
             height: 3,
             borderRadius: 2,
-            background: i + 1 <= current ? '#4E7CF6' : '#1A202E',
+            background: i + 1 <= current ? 'var(--color-accent)' : 'var(--color-border)',
           }}
         />
       ))}

@@ -60,7 +60,7 @@ export function Modal({ open, onClose, label, children, className = '' }: ModalP
   return (
     <div
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(5,7,10,.6)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--color-scrim) 60%, transparent)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
       <div
         ref={dialogRef}

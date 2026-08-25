@@ -65,7 +65,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   return (
     <div
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(5,7,10,.6)', zIndex: 60, display: 'flex', justifyContent: 'center', paddingTop: '12vh' }}
+      style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--color-scrim) 60%, transparent)', zIndex: 60, display: 'flex', justifyContent: 'center', paddingTop: '12vh' }}
     >
       <div
         role="dialog"

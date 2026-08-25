@@ -55,8 +55,8 @@ export function ExposurePanel({ byClass, byCurrency, byVenue, byCountry }: Expos
                 height: '24px',
                 fontSize: '11px',
                 fontFamily: 'inherit',
-                background: isActive ? '#1C2333' : 'transparent',
-                color: isActive ? '#E8ECF4' : '#5A6478',
+                background: isActive ? 'var(--color-accent-bg-soft)' : 'transparent',
+                color: isActive ? 'var(--color-text)' : 'var(--color-text-faint)',
               }}
             >
               {label}
@@ -72,7 +72,7 @@ export function ExposurePanel({ byClass, byCurrency, byVenue, byCountry }: Expos
             </span>
             <div
               className="flex-1 rounded overflow-hidden"
-              style={{ height: '12px', background: '#0D1017' }}
+              style={{ height: '12px', background: 'var(--color-chrome)' }}
               role="img"
               aria-label={`${row.label}: ${row.pct}%`}
             >

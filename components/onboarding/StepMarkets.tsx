@@ -37,8 +37,8 @@ export function StepMarkets({ selection, onToggle }: StepMarketsProps) {
               aria-pressed={on}
               style={{
                 padding: 12,
-                background: on ? '#161D2E' : '#10141C',
-                border: `1px solid ${on ? '#2E4370' : '#1A202E'}`,
+                background: on ? 'var(--color-active)' : 'var(--color-surface)',
+                border: `1px solid ${on ? 'var(--color-accent-border)' : 'var(--color-border)'}`,
                 borderRadius: 7,
                 cursor: 'pointer',
                 fontFamily: 'inherit',
@@ -49,12 +49,12 @@ export function StepMarkets({ selection, onToggle }: StepMarketsProps) {
                 style={{
                   fontSize: '12.5px',
                   fontWeight: 600,
-                  color: on ? '#E8ECF4' : '#8A93A8',
+                  color: on ? 'var(--color-text)' : 'var(--color-text-muted)',
                 }}
               >
                 {label}
               </div>
-              <div style={{ fontSize: '9.5px', color: '#5A6478', marginTop: 2 }}>
+              <div style={{ fontSize: '9.5px', color: 'var(--color-text-faint)', marginTop: 2 }}>
                 {description}
               </div>
             </button>

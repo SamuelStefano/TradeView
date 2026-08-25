@@ -53,18 +53,18 @@ export function CurvePanel({ title, meta, alt, legend, labels, series, series2 }
         aria-label={alt}
       >
         <title>{alt}</title>
-        <line x1="0" x2={W} y1={baselineY} y2={baselineY} stroke="#1A202E" />
+        <line x1="0" x2={W} y1={baselineY} y2={baselineY} stroke="var(--color-border)" />
         <polyline
           points={pts1}
           fill="none"
-          stroke="#4E7CF6"
+          stroke="var(--color-accent)"
           strokeWidth="1.6"
         />
         {pts2 && (
           <polyline
             points={pts2}
             fill="none"
-            stroke="#5A6478"
+            stroke="var(--color-text-faint)"
             strokeWidth="1.2"
             strokeDasharray="3 3"
           />
@@ -74,7 +74,7 @@ export function CurvePanel({ title, meta, alt, legend, labels, series, series2 }
             key={label}
             x={labels.length > 1 ? i * labelStep : W / 2}
             y={H - 4}
-            fill="#5A6478"
+            fill="var(--color-text-faint)"
             fontSize="8.5"
             fontFamily="Geist Mono"
             textAnchor="middle"

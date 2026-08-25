@@ -72,7 +72,7 @@ export function RealModeModal({ open, onClose, onConfirm }: RealModeModalProps) 
 
   return (
     <div
-      style={{ position: 'fixed', inset: 0, background: 'rgba(5,7,10,.78)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--color-scrim) 78%, transparent)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       onClick={handleClose}
     >
       <div

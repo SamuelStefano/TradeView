@@ -23,16 +23,16 @@ export function StepIntegrations() {
             className="hover:border-accent-border"
             style={{
               padding: '14px 12px',
-              background: '#10141C',
-              border: '1px solid #1A202E',
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
               borderRadius: 7,
               cursor: 'pointer',
               fontFamily: 'inherit',
               textAlign: 'left',
             }}
           >
-            <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#E8ECF4' }}>{p.n}</div>
-            <div style={{ fontSize: '9.5px', color: '#5A6478', marginTop: 2 }}>{p.k}</div>
+            <div style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--color-text)' }}>{p.n}</div>
+            <div style={{ fontSize: '9.5px', color: 'var(--color-text-faint)', marginTop: 2 }}>{p.k}</div>
           </button>
         ))}
       </div>

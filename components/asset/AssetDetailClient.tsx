@@ -7,6 +7,7 @@ import { ASSET_CLASSES } from '@/lib/types';
 import { TIMEFRAMES, INDICATORS } from '@/lib/data/mock/assets';
 import { toneOf, toneClass } from '@/lib/format';
 import { FreshnessTag } from '@/components/ui/FreshnessTag';
+import { Tabs } from '@/components/ui/Tabs';
 import { Candlestick } from '@/components/charts/Candlestick';
 import { PanelRenderer } from '@/components/panels/PanelRenderer';
 
@@ -291,10 +292,10 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
   const { asset, panels, candles, markers, ai, news, correlations } = data;
   const tone = toneOf(asset.changePct);
 
-  const tabs: { id: TabId; label: string }[] = [
-    { id: 'ai', label: '✦ Análise da IA' },
-    { id: 'news', label: 'Notícias & sentimento' },
-    { id: 'corr', label: 'Correlações' },
+  const tabs = [
+    { id: 'ai', label: '✦ Análise da IA', content: <AITab ai={ai} /> },
+    { id: 'news', label: 'Notícias & sentimento', content: <NewsTab news={news} /> },
+    { id: 'corr', label: 'Correlações', content: <CorrTab correlations={correlations} /> },
   ];
 
   function toggleIndicator(key: IndicatorKey) {
@@ -549,42 +550,12 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
           )}
           {showTable && <OHLCTable candles={candles} />}
 
-          <div
-            role="tablist"
-            aria-label="Análises"
-            className="flex gap-0.5 mt-3 border-b border-border"
-          >
-            {tabs.map((tb) => {
-              const isActive = activeTab === tb.id;
-              return (
-                <button
-                  key={tb.id}
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActiveTab(tb.id)}
-                  className="cursor-pointer transition-colors"
-                  style={{
-                    height: '30px',
-                    padding: '0 14px',
-                    border: 'none',
-                    background: 'transparent',
-                    color: isActive ? 'var(--color-text)' : 'var(--color-text-muted)',
-                    fontSize: '12px',
-                    fontWeight: isActive ? 600 : 400,
-                    borderBottom: `2px solid ${isActive ? 'var(--color-accent)' : 'transparent'}`,
-                    marginBottom: '-1px',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {tb.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {activeTab === 'ai' && <AITab ai={ai} />}
-          {activeTab === 'news' && <NewsTab news={news} />}
-          {activeTab === 'corr' && <CorrTab correlations={correlations} />}
+          <Tabs
+            items={tabs}
+            value={activeTab}
+            onChange={(id) => setActiveTab(id as TabId)}
+            className="mt-3"
+          />
         </section>
 
         <PanelRenderer panels={panels} />

@@ -92,10 +92,10 @@ export default function OnboardingPage() {
             style={{
               height: 32,
               padding: '0 18px',
-              background: '#16233F',
-              border: '1px solid #2E4370',
+              background: 'var(--color-accent-bg)',
+              border: '1px solid var(--color-accent-border)',
               borderRadius: 6,
-              color: '#7DA0FF',
+              color: 'var(--color-accent-hover)',
               fontSize: 12,
               fontFamily: 'inherit',
             }}

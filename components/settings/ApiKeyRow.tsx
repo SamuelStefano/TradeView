@@ -33,8 +33,8 @@ export function ApiKeyRow({ apiKey }: ApiKeyRowProps) {
           className="rounded font-semibold"
           style={{
             fontSize: '10px',
-            color: scopeDanger ? '#F0525F' : '#8A93A8',
-            background: scopeDanger ? '#1C0F12' : '#151A24',
+            color: scopeDanger ? 'var(--color-down)' : 'var(--color-text-muted)',
+            background: scopeDanger ? 'var(--color-down-bg)' : 'var(--color-hover)',
             padding: '2px 8px',
           }}
         >
@@ -44,21 +44,21 @@ export function ApiKeyRow({ apiKey }: ApiKeyRowProps) {
           className="ml-auto font-mono"
           style={{
             fontSize: '10.5px',
-            color: apiKey.old ? '#E8A33D' : '#5A6478',
+            color: apiKey.old ? 'var(--color-warn)' : 'var(--color-text-faint)',
           }}
         >
           rotação: {apiKey.rot}
         </span>
         <button
           className="border border-border-strong rounded-md text-text-muted hover:text-text cursor-pointer"
-          style={{ height: 24, padding: '0 10px', background: '#151A24', fontSize: '10.5px', fontFamily: 'inherit' }}
+          style={{ height: 24, padding: '0 10px', background: 'var(--color-hover)', fontSize: '10.5px', fontFamily: 'inherit' }}
         >
           Rotacionar
         </button>
         <button
           onClick={() => setRevokeOpen(true)}
           className="border border-danger-border rounded-md text-down cursor-pointer"
-          style={{ height: 24, padding: '0 10px', background: '#1C0F12', fontSize: '10.5px', fontFamily: 'inherit' }}
+          style={{ height: 24, padding: '0 10px', background: 'var(--color-down-bg)', fontSize: '10.5px', fontFamily: 'inherit' }}
         >
           Revogar
         </button>

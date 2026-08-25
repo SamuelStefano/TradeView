@@ -30,7 +30,7 @@ export function RiskSection() {
       ))}
       <div
         className="flex items-center gap-3 border border-danger-border rounded-lg"
-        style={{ background: '#1C0F12', padding: '10px 12px' }}
+        style={{ background: 'var(--color-down-bg)', padding: '10px 12px' }}
       >
         <div className="flex-1">
           <div className="font-semibold text-down" style={{ fontSize: '12px' }}>Kill switch global</div>

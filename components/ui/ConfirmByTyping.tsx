@@ -68,7 +68,7 @@ export function ConfirmByTyping({
           disabled={!matched}
           className="h-8 px-3.5 rounded-md text-white text-xs font-semibold cursor-pointer font-sans border border-danger-border transition-colors"
           style={{
-            background: matched ? 'var(--color-danger-solid)' : '#3A1A20',
+            background: matched ? 'var(--color-danger-solid)' : 'var(--color-danger-hover)',
             opacity: matched ? 1 : 0.6,
             cursor: matched ? 'pointer' : 'not-allowed',
           }}

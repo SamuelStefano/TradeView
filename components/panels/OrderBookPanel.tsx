@@ -11,7 +11,7 @@ interface OrderBookPanelProps {
 
 export function OrderBookPanel({ title, meta, mid, spread, asks, bids }: OrderBookPanelProps) {
   return (
-    <section className="bg-surface border border-border rounded-lg p-3">
+    <section aria-label={title} className="bg-surface border border-border rounded-lg p-3">
       <div className="flex items-center mb-2">
         <span
           className="text-text-muted font-medium"
@@ -25,10 +25,11 @@ export function OrderBookPanel({ title, meta, mid, spread, asks, bids }: OrderBo
       </div>
       <div className="flex flex-col gap-0.5 font-mono tabular-nums" style={{ fontSize: '10.5px' }}>
         {asks.map((level, i) => (
-          <div key={i} className="flex relative py-0.5 px-1">
+          <div key={i} className="flex relative py-0.5 px-1" aria-label={`venda ${level.price}, quantidade ${level.qty}`}>
             <div
-              className="absolute right-0 top-0 bottom-0"
-              style={{ width: `${level.depthPct}%`, background: 'rgba(240,82,95,0.10)' }}
+              aria-hidden="true"
+              className="absolute right-0 top-0 bottom-0 bg-down/10"
+              style={{ width: `${level.depthPct}%` }}
             />
             <span className="text-down z-10">{level.price}</span>
             <span className="ml-auto text-text-muted z-10">{level.qty}</span>
@@ -39,10 +40,11 @@ export function OrderBookPanel({ title, meta, mid, spread, asks, bids }: OrderBo
           <span className="text-text-faint">spread {spread}</span>
         </div>
         {bids.map((level, i) => (
-          <div key={i} className="flex relative py-0.5 px-1">
+          <div key={i} className="flex relative py-0.5 px-1" aria-label={`compra ${level.price}, quantidade ${level.qty}`}>
             <div
-              className="absolute right-0 top-0 bottom-0"
-              style={{ width: `${level.depthPct}%`, background: 'rgba(33,199,125,0.10)' }}
+              aria-hidden="true"
+              className="absolute right-0 top-0 bottom-0 bg-up/10"
+              style={{ width: `${level.depthPct}%` }}
             />
             <span className="text-up z-10">{level.price}</span>
             <span className="ml-auto text-text-muted z-10">{level.qty}</span>

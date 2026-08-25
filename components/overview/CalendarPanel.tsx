@@ -5,9 +5,9 @@ interface CalendarPanelProps {
 }
 
 const impactStyle: Record<EventImpact, { bg: string; fg: string }> = {
-  ALTO: { bg: '#2A1418', fg: '#F0525F' },
-  MÉDIO: { bg: '#2A2113', fg: '#E8A33D' },
-  BAIXO: { bg: '#151A24', fg: '#8A93A8' },
+  ALTO: { bg: 'var(--color-down-strong)', fg: 'var(--color-down)' },
+  MÉDIO: { bg: 'var(--color-warn-bg)', fg: 'var(--color-warn)' },
+  BAIXO: { bg: 'var(--color-hover)', fg: 'var(--color-text-muted)' },
 };
 
 export function CalendarPanel({ events }: CalendarPanelProps) {

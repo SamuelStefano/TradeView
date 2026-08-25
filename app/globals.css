@@ -43,6 +43,27 @@
   --color-danger-solid: #c2323f;
 
   --color-cyan: #38bdf8;
+
+  --color-scrim: #05070a;
+  --color-danger-hover: #3a1a20;
+  --color-grid: #161b26;
+
+  --color-class-cripto: #a78bfa;
+  --color-class-cripto-bg: #1c1630;
+  --color-class-acoes: #7da0ff;
+  --color-class-acoes-bg: #131c31;
+  --color-class-renda-fixa: #21c77d;
+  --color-class-renda-fixa-bg: #0d1f17;
+  --color-class-cambio: #38bdf8;
+  --color-class-cambio-bg: #0e1b26;
+  --color-class-energia: #e8a33d;
+  --color-class-energia-bg: #241c0d;
+  --color-class-commodities: #d4a574;
+  --color-class-commodities-bg: #221a10;
+  --color-class-indices: #8a93a8;
+  --color-class-indices-bg: #1a202e;
+  --color-class-fundos: #8fbf6a;
+  --color-class-fundos-bg: #151f0f;
 }
 
 html,

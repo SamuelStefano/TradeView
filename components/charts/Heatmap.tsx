@@ -17,7 +17,7 @@ function cellStyle(changePct: number): { background: string; color: string } {
     changePct >= 0
       ? `rgba(33,199,125,${alpha})`
       : `rgba(240,82,95,${alpha})`;
-  return { background: bg, color: '#E8ECF4' };
+  return { background: bg, color: 'var(--color-text)' };
 }
 
 function formatChg(changePct: number): string {

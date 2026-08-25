@@ -48,7 +48,7 @@ export function Topbar({
           <span
             style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-up)', display: 'inline-block' }}
           />
-          48/52 mercados
+          48/55 mercados
         </span>
         <span aria-label="latência média">▲ 42 ms</span>
         <span className="text-warn">2 degradados</span>

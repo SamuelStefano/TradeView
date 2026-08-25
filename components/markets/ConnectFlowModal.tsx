@@ -138,7 +138,7 @@ function Step2() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-text-secondary" style={{ fontSize: '12.5px' }}>
-        Cole a chave de API da <strong className="text-text">Binance</strong>. Ela é criptografada localmente e nunca aparece completa de novo.
+        Cole a chave de API da <strong className="text-text">Binance</strong>. Prefira uma chave somente-leitura — a permissão de ordem só é exigida no passo 4. Depois de salva, a chave não aparece completa de novo.
       </p>
       <label className="text-text-muted flex flex-col gap-1" style={{ fontSize: '11px' }}>
         API key

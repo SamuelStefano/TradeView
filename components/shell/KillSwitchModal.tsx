@@ -82,7 +82,7 @@ export function KillSwitchModal({ open, onClose, onConfirm }: KillSwitchModalPro
           <span className="font-mono">R$ 41.280,00</span>
           ),{' '}
           <strong className="text-text">pausar 2 estratégias reais</strong> e{' '}
-          <strong className="text-text">bloquear novas ordens</strong> em todas as 52 integrações até reativação manual.
+          <strong className="text-text">bloquear novas ordens</strong> em todas as 55 integrações até reativação manual.
         </p>
         <label className="text-xs text-text-muted flex flex-col">
           Para confirmar, digite{' '}
@@ -107,7 +107,7 @@ export function KillSwitchModal({ open, onClose, onConfirm }: KillSwitchModalPro
             disabled={!matched}
             className="h-8 px-3.5 rounded-md text-white text-xs font-semibold font-sans border border-danger-border"
             style={{
-              background: matched ? 'var(--color-danger-solid)' : '#3A1A20',
+              background: matched ? 'var(--color-danger-solid)' : 'var(--color-danger-hover)',
               opacity: matched ? 1 : 0.6,
               cursor: matched ? 'pointer' : 'not-allowed',
             }}

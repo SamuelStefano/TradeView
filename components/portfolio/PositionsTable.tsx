@@ -13,14 +13,14 @@ const CLASS_LABELS: Record<AssetClass, string> = {
 };
 
 const CLASS_COLORS: Record<AssetClass, { fg: string; bg: string }> = {
-  cripto: { fg: '#A78BFA', bg: '#1C1630' },
-  ações: { fg: '#7DA0FF', bg: '#131C31' },
-  'renda fixa': { fg: '#21C77D', bg: '#0D1F17' },
-  câmbio: { fg: '#38BDF8', bg: '#0E1B26' },
-  energia: { fg: '#E8A33D', bg: '#241C0D' },
-  commodities: { fg: '#D4A574', bg: '#221A10' },
-  índices: { fg: '#8A93A8', bg: '#1A202E' },
-  fundos: { fg: '#8FBF6A', bg: '#151F0F' },
+  cripto: { fg: 'var(--color-class-cripto)', bg: 'var(--color-class-cripto-bg)' },
+  ações: { fg: 'var(--color-class-acoes)', bg: 'var(--color-class-acoes-bg)' },
+  'renda fixa': { fg: 'var(--color-class-renda-fixa)', bg: 'var(--color-class-renda-fixa-bg)' },
+  câmbio: { fg: 'var(--color-class-cambio)', bg: 'var(--color-class-cambio-bg)' },
+  energia: { fg: 'var(--color-class-energia)', bg: 'var(--color-class-energia-bg)' },
+  commodities: { fg: 'var(--color-class-commodities)', bg: 'var(--color-class-commodities-bg)' },
+  índices: { fg: 'var(--color-class-indices)', bg: 'var(--color-class-indices-bg)' },
+  fundos: { fg: 'var(--color-class-fundos)', bg: 'var(--color-class-fundos-bg)' },
 };
 
 type PnlTone = 'up' | 'down' | 'neutral';

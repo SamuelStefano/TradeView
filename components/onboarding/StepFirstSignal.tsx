@@ -9,13 +9,13 @@ export function StepFirstSignal() {
       </p>
       <div
         className="border rounded-lg"
-        style={{ background: '#10141C', borderColor: '#2A2440', padding: 14 }}
+        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-ai-border)', padding: 14 }}
       >
         <div className="flex items-center gap-2.5">
           <span className="font-mono font-semibold text-text">BTC/USDT</span>
           <span className="font-bold text-up" style={{ fontSize: '10.5px' }}>▲ LONG</span>
           <span className="text-text-faint" style={{ fontSize: '10px' }}>3–7 dias</span>
-          <span className="ml-auto font-mono" style={{ fontSize: '11.5px', color: '#A78BFA' }}>
+          <span className="ml-auto font-mono" style={{ fontSize: '11.5px', color: 'var(--color-ai)' }}>
             convicção 87
           </span>
         </div>

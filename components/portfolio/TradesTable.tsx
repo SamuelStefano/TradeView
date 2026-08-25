@@ -79,7 +79,7 @@ export function TradesTable({ trades }: TradesTableProps) {
                 <td className="py-1.5 px-2">{h.asset}</td>
                 <td
                   className="py-1.5 px-2"
-                  style={{ color: h.side === 'COMPRA' ? '#21C77D' : '#F0525F' }}
+                  style={{ color: h.side === 'COMPRA' ? 'var(--color-up)' : 'var(--color-down)' }}
                 >
                   {h.side}
                 </td>
