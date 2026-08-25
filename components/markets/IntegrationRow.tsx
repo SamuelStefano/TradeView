@@ -1,5 +1,6 @@
 import type { MarketIntegration } from '@/lib/data/mock/markets';
 import type { IntegrationStatus } from '@/lib/types';
+import { Bar } from '@/components/ui/Bar';
 
 const STATUS_LABEL: Record<IntegrationStatus, string> = {
   conectado: 'conectado',
@@ -32,10 +33,10 @@ function rateLimitColorClass(pct: number): string {
   return 'text-accent';
 }
 
-function rateLimitBarClass(pct: number): string {
-  if (pct > 85) return 'bg-down';
-  if (pct > 60) return 'bg-warn';
-  return 'bg-accent';
+function rateLimitVariant(pct: number): 'down' | 'warn' | 'accent' {
+  if (pct > 85) return 'down';
+  if (pct > 60) return 'warn';
+  return 'accent';
 }
 
 function lastResponseColorClass(status: IntegrationStatus): string {
@@ -127,17 +128,13 @@ export function IntegrationRow({ integration: r }: IntegrationRowProps) {
       <div role="cell" className="flex items-center gap-2 pr-4">
         {!isUnconfigured ? (
           <>
-            <div
-              role="img"
-              aria-label={`rate limit ${rlPct}% consumido`}
-              className="flex-1 bg-border rounded-full overflow-hidden"
-              style={{ height: 5, maxWidth: 120 }}
-            >
-              <div
-                className={`h-full rounded-full ${rateLimitBarClass(rlPct)}`}
-                style={{ width: `${rlPct}%` }}
-              />
-            </div>
+            <Bar
+              value={rlPct}
+              variant={rateLimitVariant(rlPct)}
+              height={5}
+              label={`rate limit ${rlPct}% consumido`}
+              className="flex-1 max-w-[120px]"
+            />
             <span
               className={`font-mono tabular-nums ${rateLimitColorClass(rlPct)}`}
               style={{ fontSize: '10.5px', width: 34, textAlign: 'right' }}

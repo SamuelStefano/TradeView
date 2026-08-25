@@ -11,9 +11,9 @@ interface PaletteResult {
 }
 
 const ALL_RESULTS: PaletteResult[] = [
-  { kind: 'ATIVO', label: 'BTC/USDT — Binance perp', hint: 'US$ 67.412', href: '/asset/BTC' },
+  { kind: 'ATIVO', label: 'BTC/USDT — Binance perp', hint: 'US$ 67.412', href: '/asset/BTC-USD' },
   { kind: 'ATIVO', label: 'PETR4 — B3', hint: 'R$ 38,42', href: '/asset/PETR4' },
-  { kind: 'ATIVO', label: 'Tesouro IPCA+ 2035', hint: 'IPCA + 6,21%', href: '/asset/IPCA2035' },
+  { kind: 'ATIVO', label: 'Tesouro IPCA+ 2035', hint: 'IPCA + 6,21%', href: '/asset/NTNB-2035' },
   { kind: 'ATIVO', label: 'PLD Sudeste — spot', hint: 'R$ 141,20/MWh', href: '/asset/PLD-SE' },
   { kind: 'TELA', label: 'Portfólio consolidado', hint: 'g p', href: '/portfolio' },
   { kind: 'TELA', label: 'Estratégias e bots', hint: 'g s', href: '/strategies' },

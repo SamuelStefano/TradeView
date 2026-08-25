@@ -13,7 +13,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { id: 'overview', icon: '◧', label: 'Overview', href: '/' },
   { id: 'markets', icon: '⇄', label: 'Mercados', href: '/markets', badge: '55' },
-  { id: 'asset', icon: '▤', label: 'Ativos', href: '/asset/BTC' },
+  { id: 'asset', icon: '▤', label: 'Ativos', href: '/asset/BTC-USD' },
   { id: 'chat', icon: '✦', label: 'IA Analyst', href: '/chat' },
   { id: 'strategies', icon: '⚙', label: 'Estratégias', href: '/strategies', badge: '4' },
   { id: 'portfolio', icon: '◔', label: 'Portfólio', href: '/portfolio' },

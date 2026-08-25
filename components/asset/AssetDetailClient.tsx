@@ -8,6 +8,7 @@ import { TIMEFRAMES, INDICATORS } from '@/lib/data/mock/assets';
 import { toneOf, toneClass } from '@/lib/format';
 import { FreshnessTag } from '@/components/ui/FreshnessTag';
 import { Tabs } from '@/components/ui/Tabs';
+import { Bar } from '@/components/ui/Bar';
 import { Candlestick } from '@/components/charts/Candlestick';
 import { PanelRenderer } from '@/components/panels/PanelRenderer';
 
@@ -97,16 +98,12 @@ function NewsTab({ news }: { news: NewsItem[] }) {
           >
             {n.sentimentScore}
           </span>
-          <div
-            role="img"
-            aria-label={`relevância ${n.relevancePct}%`}
-            className="w-11 h-1 bg-border rounded-full overflow-hidden shrink-0"
-          >
-            <div
-              className="h-full bg-accent rounded-full"
-              style={{ width: `${n.relevancePct}%` }}
-            />
-          </div>
+          <Bar
+            value={n.relevancePct}
+            variant="accent"
+            label={`relevância ${n.relevancePct}%`}
+            className="w-11 shrink-0"
+          />
         </div>
       ))}
     </div>
@@ -134,12 +131,12 @@ function CorrTab({ correlations }: { correlations: { symbol: string; value: numb
             <span className="font-mono text-text shrink-0" style={{ fontSize: '11.5px', width: '90px' }}>
               {c.symbol}
             </span>
-            <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
-              <div
-                className="h-full bg-up rounded-full"
-                style={{ width: `${c.value * 100}%` }}
-              />
-            </div>
+            <Bar
+              value={c.value * 100}
+              variant="up"
+              label={`correlação positiva ${c.value.toFixed(2).replace('.', ',')}`}
+              className="flex-1"
+            />
             <span className="font-mono text-up w-10 text-right shrink-0" style={{ fontSize: '11px' }}>
               {c.value.toFixed(2).replace('.', ',')}
             </span>
@@ -158,12 +155,12 @@ function CorrTab({ correlations }: { correlations: { symbol: string; value: numb
             <span className="font-mono text-text shrink-0" style={{ fontSize: '11.5px', width: '90px' }}>
               {c.symbol}
             </span>
-            <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
-              <div
-                className="h-full bg-down rounded-full"
-                style={{ width: `${Math.abs(c.value) * 100}%` }}
-              />
-            </div>
+            <Bar
+              value={Math.abs(c.value) * 100}
+              variant="down"
+              label={`correlação negativa ${c.value.toFixed(2).replace('.', ',')}`}
+              className="flex-1"
+            />
             <span className="font-mono text-down w-10 text-right shrink-0" style={{ fontSize: '11px' }}>
               {c.value.toFixed(2).replace('.', ',')}
             </span>
@@ -208,16 +205,12 @@ function AITab({ ai }: { ai: AssetDetailData['ai'] }) {
                   {sc.prob}%
                 </span>
               </div>
-              <div
-                role="img"
-                aria-label={`probabilidade ${sc.prob}%`}
-                className="h-1 bg-border rounded-full overflow-hidden my-1.5"
-              >
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${sc.prob}%`, background: color }}
-                />
-              </div>
+              <Bar
+                value={sc.prob}
+                variant={isUp ? 'up' : isDown ? 'down' : 'accent'}
+                label={`probabilidade ${sc.prob}%`}
+                className="my-1.5"
+              />
               <div className="font-mono mb-1" style={{ fontSize: '11.5px' }}>
                 {sc.target}
               </div>

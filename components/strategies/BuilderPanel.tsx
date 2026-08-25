@@ -1,5 +1,7 @@
 'use client';
 
+import { Bar } from '@/components/ui/Bar';
+
 interface BuilderPanelProps {
   onActivateReal: () => void;
 }
@@ -84,13 +86,7 @@ export function BuilderPanel({ onActivateReal }: BuilderPanelProps) {
           <span>Peso da IA na decisão</span>
           <span className="font-mono text-ai">35%</span>
         </div>
-        <div
-          className="h-[5px] bg-border rounded-full overflow-hidden"
-          role="img"
-          aria-label="Peso da IA na decisão: 35%"
-        >
-          <div className="h-full w-[35%] bg-ai rounded-full" />
-        </div>
+        <Bar value={35} variant="ai" height={5} label="Peso da IA na decisão: 35%" />
         <p className="text-[10px] text-text-faint mt-[5px] leading-[1.4]">
           Com 35%, a IA pode vetar entradas (convicção &lt; 40) mas não pode abrir posição sozinha.
         </p>
