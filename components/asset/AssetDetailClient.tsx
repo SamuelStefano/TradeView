@@ -81,13 +81,12 @@ function NewsTab({ news }: { news: NewsItem[] }) {
           <span className="font-mono text-text-faint w-9 shrink-0" style={{ fontSize: '10px' }}>
             {n.ago}
           </span>
-          <a
-            href={n.url}
-            className="text-text flex-1 min-w-0 hover:text-accent-hover transition-colors"
-            style={{ fontSize: '12px' }}
+          <SourceRef
+            source={n.source}
+            className="text-text flex-1 min-w-0 decoration-transparent hover:text-accent-hover transition-colors"
           >
             {n.title}
-          </a>
+          </SourceRef>
           <span className="text-text-faint shrink-0" style={{ fontSize: '10px' }}>
             {n.source}
           </span>
@@ -258,9 +257,9 @@ function AITab({ ai }: { ai: AssetDetailData['ai'] }) {
         fontes:{' '}
         {ai.sources.map((s, i) => (
           <span key={i}>
-            <a href={s.url} className="text-accent hover:text-accent-hover">
+            <SourceRef source={s.label} className="text-accent">
               {s.label}
-            </a>
+            </SourceRef>
             {i < ai.sources.length - 1 && ' · '}
           </span>
         ))}

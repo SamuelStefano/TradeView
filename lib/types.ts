@@ -82,7 +82,6 @@ export type Panel =
 
 export interface Source {
   label: string;
-  url: string;
 }
 
 export interface Scenario {

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Signal } from '@/lib/types';
+import { SourceRef } from '@/components/ui/SourceRef';
 
 interface SignalsFeedProps {
   signals: Signal[];
@@ -133,9 +134,9 @@ export function SignalsFeed({ signals, analyzing }: SignalsFeedProps) {
                     {signal.sources.map((src, i) => (
                       <span key={src.label}>
                         {i > 0 && ' · '}
-                        <a href={src.url} className="text-accent hover:text-accent-hover">
+                        <SourceRef source={src.label} className="text-accent">
                           {src.label}
-                        </a>
+                        </SourceRef>
                       </span>
                     ))}
                   </div>
