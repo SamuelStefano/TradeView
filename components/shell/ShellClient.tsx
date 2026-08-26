@@ -1,13 +1,33 @@
 'use client';
 
-import { useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { Topbar } from './Topbar';
 import { Nav } from './Nav';
 import { CommandPalette } from './CommandPalette';
 import { KillSwitchModal } from './KillSwitchModal';
+import { ShortcutsModal } from './ShortcutsModal';
 
 interface ShellClientProps {
   children: ReactNode;
+}
+
+const GOTO: Record<string, string> = {
+  o: '/',
+  a: '/asset/BTC-USD',
+  p: '/portfolio',
+  s: '/strategies',
+};
+
+function isTyping(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  if (!el) return false;
+  return (
+    el.tagName === 'INPUT' ||
+    el.tagName === 'TEXTAREA' ||
+    el.tagName === 'SELECT' ||
+    el.isContentEditable
+  );
 }
 
 export function ShellClient({ children }: ShellClientProps) {
@@ -17,13 +37,17 @@ export function ShellClient({ children }: ShellClientProps) {
   const [wsAttempt, setWsAttempt] = useState(2);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [killOpen, setKillOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [killed, setKilled] = useState(false);
   const [density, setDensity] = useState<'compacto' | 'confortavel'>('confortavel');
+  const chordRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const router = useRouter();
 
   const openPalette = useCallback(() => setPaletteOpen(true), []);
   const closePalette = useCallback(() => setPaletteOpen(false), []);
   const openKill = useCallback(() => setKillOpen(true), []);
   const closeKill = useCallback(() => setKillOpen(false), []);
+  const closeShortcuts = useCallback(() => setShortcutsOpen(false), []);
 
   useEffect(() => {
     function pad(n: number) {
@@ -54,15 +78,55 @@ export function ShellClient({ children }: ShellClientProps) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setPaletteOpen(true);
+        return;
       }
+
       if (e.key === 'Escape') {
         setPaletteOpen(false);
         setKillOpen(false);
+        setShortcutsOpen(false);
+        return;
+      }
+
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (paletteOpen || killOpen || shortcutsOpen || isTyping(e.target)) return;
+
+      const key = e.key.toLowerCase();
+
+      if (e.key === '?') {
+        e.preventDefault();
+        setShortcutsOpen(true);
+        return;
+      }
+
+      if (chordRef.current) {
+        clearTimeout(chordRef.current);
+        chordRef.current = null;
+        const href = GOTO[key];
+        if (href) {
+          e.preventDefault();
+          router.push(href);
+        }
+        return;
+      }
+
+      if (key === 'g') {
+        e.preventDefault();
+        chordRef.current = setTimeout(() => {
+          chordRef.current = null;
+        }, 1500);
       }
     }
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
+  }, [paletteOpen, killOpen, shortcutsOpen, router]);
+
+  useEffect(() => {
+    const chord = chordRef;
+    return () => {
+      if (chord.current) clearTimeout(chord.current);
+    };
   }, []);
 
   function toggleDensity() {
@@ -105,6 +169,7 @@ export function ShellClient({ children }: ShellClientProps) {
 
       <CommandPalette open={paletteOpen} onClose={closePalette} />
       <KillSwitchModal open={killOpen} onClose={closeKill} onConfirm={confirmKill} />
+      <ShortcutsModal open={shortcutsOpen} onClose={closeShortcuts} />
 
       {killed && (
         <div
