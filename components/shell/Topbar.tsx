@@ -1,6 +1,6 @@
 'use client';
 
-import type { ShellHealth } from './ShellClient';
+import type { ShellHealth } from './health-context';
 
 interface TopbarProps {
   clock: string;

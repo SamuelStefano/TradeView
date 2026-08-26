@@ -7,14 +7,7 @@ import { Nav } from './Nav';
 import { CommandPalette } from './CommandPalette';
 import { KillSwitchModal } from './KillSwitchModal';
 import { ShortcutsModal } from './ShortcutsModal';
-
-export interface ShellHealth {
-  connected: number;
-  total: number;
-  degraded: number;
-  offline: number;
-  latencyMs: number;
-}
+import { ShellHealthProvider, type ShellHealth } from './health-context';
 
 interface ShellClientProps {
   children: ReactNode;
@@ -173,6 +166,7 @@ export function ShellClient({ children, health }: ShellClientProps) {
   }
 
   return (
+    <ShellHealthProvider value={health}>
     <div
       className="relative flex flex-col overflow-hidden bg-base text-text font-sans"
       style={{ height: '100vh', minWidth: 1180, fontSize: 13 }}
@@ -239,5 +233,6 @@ export function ShellClient({ children, health }: ShellClientProps) {
         </div>
       )}
     </div>
+    </ShellHealthProvider>
   );
 }

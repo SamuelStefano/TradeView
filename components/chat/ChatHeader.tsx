@@ -1,5 +1,7 @@
 'use client';
 
+import { useShellHealth } from '@/components/shell/health-context';
+
 const MODELS = [
   'claude-sonnet-4-6',
   'claude-opus-4-2',
@@ -15,11 +17,13 @@ interface ChatHeaderProps {
 }
 
 export function ChatHeader({ model, onModelChange }: ChatHeaderProps) {
+  const { connected } = useShellHealth();
+
   return (
     <div className="flex items-center gap-2.5 px-[18px] py-2.5 border-b border-border">
       <span className="font-semibold text-sm">✦ IA Analyst</span>
       <span className="text-text-faint" style={{ fontSize: '10.5px' }}>
-        contexto: portfólio completo · 55 mercados
+        contexto: portfólio completo · {connected} mercados
       </span>
       <div className="ml-auto flex gap-1.5 items-center">
         <label

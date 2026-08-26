@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useShellHealth } from './health-context';
 
 interface KillSwitchModalProps {
   open: boolean;
@@ -11,6 +12,7 @@ interface KillSwitchModalProps {
 const PHRASE = 'desativar tudo';
 
 export function KillSwitchModal({ open, onClose, onConfirm }: KillSwitchModalProps) {
+  const { realStrategies, connected } = useShellHealth();
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -79,12 +81,12 @@ export function KillSwitchModal({ open, onClose, onConfirm }: KillSwitchModalPro
         <div className="text-base font-bold text-down">⏻ Kill switch global</div>
         <p className="text-sm leading-relaxed text-text-secondary">
           Isto vai{' '}
-          <strong className="text-text">cancelar todas as ordens abertas</strong>{' '}
-          (3 ordens, total{' '}
-          <span className="font-mono">R$ 41.280,00</span>
-          ),{' '}
-          <strong className="text-text">pausar 2 estratégias reais</strong> e{' '}
-          <strong className="text-text">bloquear novas ordens</strong> em todas as 55 integrações até reativação manual.
+          <strong className="text-text">cancelar todas as ordens abertas</strong>,{' '}
+          <strong className="text-text">
+            pausar {realStrategies} {realStrategies === 1 ? 'estratégia real' : 'estratégias reais'}
+          </strong>{' '}
+          e <strong className="text-text">bloquear novas ordens</strong> nas {connected} integrações
+          conectadas até reativação manual.
         </p>
         <label className="text-xs text-text-muted flex flex-col">
           Para confirmar, digite{' '}
