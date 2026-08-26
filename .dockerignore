@@ -1,0 +1,8 @@
+*
+!package.json
+!package-lock.json
+!tsconfig.json
+!lib
+!runner
+lib/**/*.test.ts
+.claude

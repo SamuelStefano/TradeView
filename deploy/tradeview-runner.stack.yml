@@ -1,0 +1,58 @@
+# Deployed with `docker stack deploy`. Read deploy/RUNNER.md first — the secrets
+# and the image have to exist on the host before this file means anything.
+
+version: '3.8'
+
+services:
+  runner:
+    image: ${TRADEVIEW_IMAGE:-tradeview-runner:latest}
+
+    # Pinned so the runner keeps its identity across restarts. Left to the
+    # container ID, every restart would register as a new runner and the
+    # heartbeat table would grow a row per deploy instead of telling you
+    # whether the bot is alive right now.
+    hostname: tradeview-runner
+
+    # No `ports`, no Traefik labels, no published anything, on purpose. The
+    # runner opens outbound connections and listens on nothing, so there is no
+    # inbound path to it and no reason to put it behind the proxy.
+
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${TRADEVIEW_SUPABASE_URL}
+      SUPABASE_SECRET_KEY_FILE: /run/secrets/tradeview_supabase_secret_key
+      TRADEVIEW_VERSION: ${TRADEVIEW_IMAGE:-tradeview-runner:latest}
+      TRADEVIEW_RUNNER_TICK_MS: '15000'
+      TRADEVIEW_RUNNER_BATCH: '10'
+
+    secrets:
+      - tradeview_supabase_secret_key
+
+    # One replica. Leasing exists so a second runner is safe, not so it is
+    # useful: two of them split the same strategies and double the venue calls
+    # for the same decisions.
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 10s
+      update_config:
+        order: stop-first
+        failure_action: rollback
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '5'
+
+    # Long enough for the strategy in flight to finish and for the leases to be
+    # released; a SIGKILL here leaves them held until they expire.
+    stop_grace_period: 60s
+
+secrets:
+  tradeview_supabase_secret_key:
+    external: true

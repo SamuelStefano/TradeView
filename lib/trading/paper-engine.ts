@@ -1,6 +1,6 @@
 import { Decimal } from 'decimal.js';
 import { money } from '../money';
-import type { BookLevel, OrderBookSnapshot } from '../markets/exchange';
+import type { BookLevel, OrderBookSnapshot } from '../core/exchange';
 
 export type Side = 'buy' | 'sell';
 export type OrderType = 'market' | 'limit';
