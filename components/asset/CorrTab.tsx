@@ -8,11 +8,23 @@ interface Correlation {
 
 interface CorrTabProps {
   correlations: Correlation[];
+  venue: string;
 }
 
-export function CorrTab({ correlations }: CorrTabProps) {
+export function CorrTab({ correlations, venue }: CorrTabProps) {
   const pos = correlations.filter((c) => c.value >= 0);
   const neg = correlations.filter((c) => c.value < 0);
+
+  if (correlations.length === 0) {
+    return (
+      <div className="py-4 max-w-[620px]">
+        <p className="m-0 text-text-muted leading-relaxed" style={{ fontSize: '12px' }}>
+          Sem histórico diário suficiente para correlacionar este ativo com os demais pares
+          da mesma venue.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -69,7 +81,7 @@ export function CorrTab({ correlations }: CorrTabProps) {
       </div>
       <div style={{ gridColumn: '1 / -1' }}>
         <span className="text-text-faint" style={{ fontSize: '10px' }}>
-          janela 90 dias · retornos diários ·{' '}
+          janela 90 dias · retornos diários · pares de {venue} ·{' '}
           <SourceRef source="correlação de Pearson sobre retornos diários, janela móvel de 90 dias" className="text-accent">
             metodologia
           </SourceRef>

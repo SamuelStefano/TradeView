@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
+import { safeNextPath } from '@/lib/auth/next-path';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensureUserSetup } from '@/lib/provision';
 
@@ -41,7 +42,7 @@ export async function signInAction(_prev: AuthState, form: FormData): Promise<Au
   await ensureUserSetup(data.user.id, email.split('@')[0]);
 
   revalidatePath('/', 'layout');
-  redirect('/trade');
+  redirect(safeNextPath(String(form.get('next') ?? '')));
 }
 
 export async function signUpAction(_prev: AuthState, form: FormData): Promise<AuthState> {
@@ -66,7 +67,7 @@ export async function signUpAction(_prev: AuthState, form: FormData): Promise<Au
   await ensureUserSetup(data.user.id, email.split('@')[0]);
 
   revalidatePath('/', 'layout');
-  redirect('/trade');
+  redirect(safeNextPath(String(form.get('next') ?? '')));
 }
 
 export async function signOutAction(): Promise<void> {

@@ -24,7 +24,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 export default async function TradePage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; symbol?: string }>;
 }) {
   if (!supabaseConfigured) {
     return (
@@ -37,10 +37,17 @@ export default async function TradePage({
     );
   }
 
-  const userId = await getSessionUserId();
-  if (!userId) redirect('/login');
-
   const params = await searchParams;
+
+  const userId = await getSessionUserId();
+  if (!userId) {
+    const query = new URLSearchParams();
+    if (params.mode) query.set('mode', params.mode);
+    if (params.symbol) query.set('symbol', params.symbol);
+    const target = query.size > 0 ? `/trade?${query}` : '/trade';
+    redirect(`/login?next=${encodeURIComponent(target)}`);
+  }
+
   const mode: 'paper' | 'real' = params.mode === 'real' ? 'real' : 'paper';
 
   const supabase = await createSupabaseServerClient();
@@ -136,6 +143,7 @@ export default async function TradePage({
         <Card title="Nova ordem">
           <OrderTicket
             instruments={instruments}
+            initialSymbol={params.symbol}
             mode={mode}
             realEnabled={Boolean(settings?.real_trading_enabled)}
           />

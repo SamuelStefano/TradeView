@@ -16,7 +16,7 @@ interface ShellClientProps {
 
 const GOTO: Record<string, string> = {
   o: '/',
-  a: '/asset/BTC-USD',
+  a: '/asset/BTC-BRL',
   p: '/portfolio',
   s: '/strategies',
   m: '/trade',

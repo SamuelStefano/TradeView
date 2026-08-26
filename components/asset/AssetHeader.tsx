@@ -7,10 +7,9 @@ import { FreshnessTag } from '@/components/ui/FreshnessTag';
 interface AssetHeaderProps {
   asset: AssetDetailData['asset'];
   tone: Tone;
-  onOrderClick: () => void;
 }
 
-export function AssetHeader({ asset, tone, onOrderClick }: AssetHeaderProps) {
+export function AssetHeader({ asset, tone }: AssetHeaderProps) {
   return (
     <div className="flex items-center gap-4 bg-surface border border-border rounded-lg px-3.5 py-2.5">
       <div>
@@ -76,9 +75,9 @@ export function AssetHeader({ asset, tone, onOrderClick }: AssetHeaderProps) {
       >
         + Alerta
       </Link>
-      <button
-        onClick={onOrderClick}
-        className="cursor-pointer"
+      <Link
+        href={`/trade?symbol=${encodeURIComponent(asset.symbol)}`}
+        className="cursor-pointer flex items-center no-underline"
         style={{
           height: '30px',
           padding: '0 14px',
@@ -91,8 +90,8 @@ export function AssetHeader({ asset, tone, onOrderClick }: AssetHeaderProps) {
           fontFamily: 'inherit',
         }}
       >
-        Ordem…
-      </button>
+        Operar na mesa
+      </Link>
     </div>
   );
 }

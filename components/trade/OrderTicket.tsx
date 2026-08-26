@@ -16,12 +16,15 @@ interface Props {
   instruments: TradableInstrument[];
   mode: 'paper' | 'real';
   realEnabled: boolean;
+  initialSymbol?: string;
 }
 
-export function OrderTicket({ instruments, mode, realEnabled }: Props) {
+export function OrderTicket({ instruments, mode, realEnabled, initialSymbol }: Props) {
   const [sendState, send, sending] = useActionState(placeOrderAction, initial);
   const [previewState, preview, previewing] = useActionState(previewOrderAction, initial);
-  const [symbol, setSymbol] = useState(instruments[0]?.symbol ?? '');
+  const [symbol, setSymbol] = useState(
+    instruments.find((i) => i.symbol === initialSymbol)?.symbol ?? instruments[0]?.symbol ?? '',
+  );
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
   const [type, setType] = useState<'market' | 'limit'>('market');
   const [lastAction, setLastAction] = useState<'send' | 'preview' | null>(null);

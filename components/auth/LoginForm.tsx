@@ -5,13 +5,14 @@ import { signInAction, signUpAction, type AuthState } from '@/app/actions/auth';
 
 const initial: AuthState = { ok: false, message: '' };
 
-export function LoginForm() {
+export function LoginForm({ next }: { next: string }) {
   const [mode, setMode] = useState<'in' | 'up'>('in');
   const action = mode === 'in' ? signInAction : signUpAction;
   const [state, formAction, pending] = useActionState(action, initial);
 
   return (
     <form action={formAction} className="flex flex-col gap-3 w-full max-w-[340px]">
+      <input type="hidden" name="next" value={next} />
       <div className="flex gap-1" role="tablist" aria-label="Entrar ou criar conta">
         {(['in', 'up'] as const).map((m) => (
           <button

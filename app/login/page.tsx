@@ -2,12 +2,17 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { LoginForm } from '@/components/auth/LoginForm';
+import { safeNextPath } from '@/lib/auth/next-path';
 import { supabaseConfigured } from '@/lib/supabase/config';
 import { getSessionUserId } from '@/lib/supabase/server';
 
 export const metadata = { title: 'Entrar · TradeView' };
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
   if (!supabaseConfigured) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center gap-3 p-6">
@@ -25,7 +30,8 @@ export default async function LoginPage() {
     );
   }
 
-  if (await getSessionUserId()) redirect('/trade');
+  const next = safeNextPath((await searchParams).next);
+  if (await getSessionUserId()) redirect(next);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-5 p-6">
@@ -34,7 +40,7 @@ export default async function LoginPage() {
         <p className="text-[11.5px] text-text-muted m-0">terminal multimercado com camada de IA</p>
       </div>
 
-      <LoginForm />
+      <LoginForm next={next} />
 
       <p className="text-[11px] text-text-faint text-center max-w-[340px] m-0">
         Contas novas começam em modo paper, com saldo zero e trading real desligado.

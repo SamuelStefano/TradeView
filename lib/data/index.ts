@@ -1,7 +1,9 @@
-import type { AssetClass, Strategy } from '../types';
+import type { Strategy } from '../types';
 import { type AlertsData, alertsMock } from './views/alerts';
 import { type AnalyticsData, analyticsMock } from './views/analytics';
-import { type AssetDetailData, assetsMock, defaultSymbolByClass } from './views/assets';
+import type { AssetDetailData } from './views/assets';
+import { getLiveAsset } from './live/asset';
+import type { Timeframe } from '../markets/timeframes';
 import type { MarketsData } from './views/markets';
 import { getLiveMarkets } from './live/venues';
 import { type OverviewData, overviewMock } from './views/overview';
@@ -12,8 +14,7 @@ import { supabaseConfigured } from '../supabase/config';
 
 export interface DataSource {
   getOverview(): Promise<OverviewData>;
-  getAsset(symbol: string): Promise<AssetDetailData | null>;
-  getDefaultSymbols(): Promise<Record<AssetClass, string>>;
+  getAsset(slug: string, timeframe?: Timeframe): Promise<AssetDetailData | null>;
   getMarkets(): Promise<MarketsData>;
   getPortfolio(): Promise<PortfolioData>;
   getStrategies(): Promise<Strategy[]>;
@@ -25,11 +26,8 @@ const mockDataSource: DataSource = {
   async getOverview() {
     return overviewMock;
   },
-  async getAsset(symbol) {
-    return assetsMock[symbol] ?? null;
-  },
-  async getDefaultSymbols() {
-    return defaultSymbolByClass;
+  async getAsset(slug, timeframe) {
+    return getLiveAsset(slug, timeframe);
   },
   async getMarkets() {
     return getLiveMarkets();

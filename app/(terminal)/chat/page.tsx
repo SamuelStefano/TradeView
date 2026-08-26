@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import { ChatHeader, type Model } from '@/components/chat/ChatHeader';
 import { ChatInput } from '@/components/chat/ChatInput';
@@ -20,7 +21,8 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState('');
-  const [draft, setDraft] = useState('');
+  const subject = useSearchParams().get('assunto');
+  const [draft, setDraft] = useState(subject ? `Sobre ${subject}: ` : '');
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);

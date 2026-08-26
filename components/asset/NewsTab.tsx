@@ -7,6 +7,18 @@ interface NewsTabProps {
 }
 
 export function NewsTab({ news }: NewsTabProps) {
+  if (news.length === 0) {
+    return (
+      <div className="py-4 max-w-[620px]">
+        <p className="m-0 text-text-muted leading-relaxed" style={{ fontSize: '12px' }}>
+          Nenhum provedor de notícias está conectado. As venues que alimentam esta tela servem
+          preço, book e candles — manchete e sentimento viriam de outra fonte, que ainda não
+          existe aqui.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="py-3 flex flex-col gap-0.5">
       {news.map((n, i) => (

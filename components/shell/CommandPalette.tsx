@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { TRADABLE, VENUE_INFO, toSlug } from '@/lib/markets/catalogue';
 
 interface PaletteResult {
   kind: string;
@@ -10,17 +11,21 @@ interface PaletteResult {
   href: string;
 }
 
+// Built from the catalogue so the palette can only offer symbols the asset page
+// can actually open. The hint is the venue, not a price: the palette renders
+// without a fetch and a stale quote here would be worse than none.
 const ALL_RESULTS: PaletteResult[] = [
-  { kind: 'ATIVO', label: 'BTC/USDT — Binance perp', hint: 'US$ 67.412', href: '/asset/BTC-USD' },
-  { kind: 'ATIVO', label: 'PETR4 — B3', hint: 'R$ 38,42', href: '/asset/PETR4' },
-  { kind: 'ATIVO', label: 'Tesouro IPCA+ 2035', hint: 'IPCA + 6,21%', href: '/asset/NTNB-2035' },
-  { kind: 'ATIVO', label: 'PLD Sudeste — spot', hint: 'R$ 141,20/MWh', href: '/asset/PLD-SE' },
+  ...TRADABLE.map((t) => ({
+    kind: 'ATIVO',
+    label: t.symbol,
+    hint: VENUE_INFO[t.venue]?.name ?? t.venue,
+    href: `/asset/${toSlug(t.symbol)}`,
+  })),
   { kind: 'TELA', label: 'Portfólio consolidado', hint: 'g p', href: '/portfolio' },
-  { kind: 'TELA', label: 'Estratégias e bots', hint: 'g s', href: '/strategies' },
+  { kind: 'TELA', label: 'Mercados conectados', hint: '', href: '/markets' },
   { kind: 'TELA', label: 'Mesa de operações', hint: 'g m', href: '/trade' },
   { kind: 'AÇÃO', label: 'Depositar saldo na conta paper', hint: '', href: '/trade' },
-  { kind: 'AÇÃO', label: 'Criar alerta em linguagem natural', hint: '', href: '/alerts' },
-  { kind: 'AÇÃO', label: 'Perguntar à IA sobre o portfólio', hint: '', href: '/chat' },
+  { kind: 'AÇÃO', label: 'Abrir o Analyst', hint: '', href: '/chat' },
 ];
 
 interface CommandPaletteProps {
