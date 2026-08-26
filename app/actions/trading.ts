@@ -6,6 +6,8 @@ import { getSessionUserId } from '@/lib/supabase/server';
 import { placeOrder } from '@/lib/trading/place-order';
 import { recordTransfer } from '@/lib/trading/transfer';
 import type { Side, OrderType } from '@/lib/trading/paper-engine';
+import { TradingError } from '@/lib/trading/errors';
+import { checkRate } from '@/lib/rate-limit';
 
 export interface ActionState {
   ok: boolean;
@@ -17,30 +19,36 @@ export interface ActionState {
 // itself instead of trusting that layer.
 async function requireUser(): Promise<string> {
   const userId = await getSessionUserId();
-  if (!userId) throw new Error('sessão expirada — entre novamente');
+  if (!userId) throw new TradingError('sessão expirada — entre novamente');
+  checkRate(userId);
   return userId;
 }
 
 function field(form: FormData, name: string): string {
   const value = form.get(name);
-  if (typeof value !== 'string') throw new Error(`campo obrigatório: ${name}`);
+  if (typeof value !== 'string') throw new TradingError(`campo obrigatório: ${name}`);
   return value.trim();
 }
 
 // The inputs accept the Brazilian decimal comma; Decimal only parses a dot.
 function numericField(form: FormData, name: string): string {
   const raw = field(form, name).replace(',', '.');
-  if (!/^\d+(\.\d+)?$/.test(raw)) throw new Error(`valor inválido em ${name}`);
+  if (!/^\d+(\.\d+)?$/.test(raw)) throw new TradingError(`valor inválido em ${name}`);
   return raw;
 }
 
 function parseMode(raw: string): 'paper' | 'real' {
-  if (raw !== 'paper' && raw !== 'real') throw new Error('modo inválido');
+  if (raw !== 'paper' && raw !== 'real') throw new TradingError('modo inválido');
   return raw;
 }
 
+// Only messages we wrote ourselves reach the browser. Everything else is logged
+// server-side and replaced, so a stack or a query fragment never renders.
 function failure(error: unknown): ActionState {
-  return { ok: false, message: error instanceof Error ? error.message : 'erro inesperado' };
+  if (error instanceof TradingError) return { ok: false, message: error.message };
+
+  console.error('[trading action]', error);
+  return { ok: false, message: 'erro inesperado — tente novamente' };
 }
 
 export async function depositAction(_prev: ActionState, form: FormData): Promise<ActionState> {
@@ -86,14 +94,14 @@ export async function placeOrderAction(_prev: ActionState, form: FormData): Prom
     const userId = await requireUser();
 
     const side = field(form, 'side');
-    if (side !== 'buy' && side !== 'sell') throw new Error('lado inválido');
+    if (side !== 'buy' && side !== 'sell') throw new TradingError('lado inválido');
 
     const type = field(form, 'type');
-    if (type !== 'market' && type !== 'limit') throw new Error('tipo inválido');
+    if (type !== 'market' && type !== 'limit') throw new TradingError('tipo inválido');
 
     const limitPrice = form.get('limitPrice');
     if (type === 'limit' && (typeof limitPrice !== 'string' || !limitPrice.trim())) {
-      throw new Error('ordem limitada exige preço');
+      throw new TradingError('ordem limitada exige preço');
     }
 
     const result = await placeOrder({

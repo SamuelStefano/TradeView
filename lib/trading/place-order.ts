@@ -4,6 +4,7 @@ import { createSupabaseAdminClient } from '../supabase/server';
 import { fetchOrderBook } from '../markets/exchange';
 import { realTradingAllowed } from '../env';
 import { money, toDbString } from '../money';
+import { TradingError, fromDatabase } from './errors';
 import { simulateFill, cashEffect, type Side, type OrderType } from './paper-engine';
 
 export interface PlaceOrderInput {
@@ -37,14 +38,14 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     .eq('user_id', input.userId)
     .single();
 
-  if (settingsError || !settings) throw new Error('configuração de risco não encontrada');
-  if (settings.kill_switch_active) throw new Error('kill switch ativo — ordens bloqueadas');
+  if (settingsError || !settings) throw new TradingError('configuração de risco não encontrada');
+  if (settings.kill_switch_active) throw new TradingError('kill switch ativo — ordens bloqueadas');
 
   if (input.mode === 'real') {
     // Two independent gates: a deploy-time env var and a per-user flag. Either
     // one off keeps real capital out of reach.
-    if (!realTradingAllowed()) throw new Error('trading real desabilitado neste ambiente');
-    if (!settings.real_trading_enabled) throw new Error('trading real desabilitado na sua conta');
+    if (!realTradingAllowed()) throw new TradingError('trading real desabilitado neste ambiente');
+    if (!settings.real_trading_enabled) throw new TradingError('trading real desabilitado na sua conta');
   }
 
   const { data: instrument, error: instrumentError } = await supabase
@@ -53,8 +54,8 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     .eq('symbol', input.symbol)
     .single();
 
-  if (instrumentError || !instrument) throw new Error(`instrumento desconhecido: ${input.symbol}`);
-  if (!instrument.active) throw new Error(`instrumento inativo: ${input.symbol}`);
+  if (instrumentError || !instrument) throw new TradingError(`instrumento desconhecido: ${input.symbol}`);
+  if (!instrument.active) throw new TradingError(`instrumento inativo: ${input.symbol}`);
 
   const book = await fetchOrderBook(instrument.venue, instrument.symbol);
 
@@ -66,10 +67,10 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     limitPrice: input.limitPrice,
   });
 
-  if (fill.filledQty.lte(0)) throw new Error('sem liquidez no preço pedido');
+  if (fill.filledQty.lte(0)) throw new TradingError('sem liquidez no preço pedido');
 
   if (fill.notional.gt(money(settings.max_order_notional))) {
-    throw new Error(
+    throw new TradingError(
       `ordem de ${fill.notional.toFixed(2)} excede o limite de ${settings.max_order_notional}`,
     );
   }
@@ -94,7 +95,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     p_client_ref: input.clientRef ?? null,
   });
 
-  if (error) throw new Error(error.message);
+  if (error) throw fromDatabase(error, 'record_fill');
 
   return {
     orderId: orderId as string,

@@ -2,6 +2,7 @@ import 'server-only';
 
 import { createSupabaseAdminClient } from '../supabase/server';
 import { money } from '../money';
+import { TradingError, fromDatabase } from './errors';
 
 export type TransferKind = 'deposit' | 'withdrawal';
 
@@ -20,8 +21,8 @@ const MAX_TRANSFER = money('1000000');
 export async function recordTransfer(input: TransferInput): Promise<string> {
   const amount = money(input.amount);
 
-  if (!amount.isFinite() || amount.lte(0)) throw new Error('valor deve ser positivo');
-  if (amount.gt(MAX_TRANSFER)) throw new Error('valor acima do limite de 1.000.000 por operação');
+  if (!amount.isFinite() || amount.lte(0)) throw new TradingError('valor deve ser positivo');
+  if (amount.gt(MAX_TRANSFER)) throw new TradingError('valor acima do limite de 1.000.000 por operação');
 
   const supabase = createSupabaseAdminClient();
 
@@ -31,8 +32,8 @@ export async function recordTransfer(input: TransferInput): Promise<string> {
     .eq('user_id', input.userId)
     .single();
 
-  if (settingsError || !settings) throw new Error('configuração de risco não encontrada');
-  if (settings.kill_switch_active) throw new Error('kill switch ativo — transferências bloqueadas');
+  if (settingsError || !settings) throw new TradingError('configuração de risco não encontrada');
+  if (settings.kill_switch_active) throw new TradingError('kill switch ativo — transferências bloqueadas');
 
   const { data, error } = await supabase.rpc('record_transfer', {
     p_user_id: input.userId,
@@ -44,6 +45,6 @@ export async function recordTransfer(input: TransferInput): Promise<string> {
     p_account_kind: input.mode,
   });
 
-  if (error) throw new Error(error.message);
+  if (error) throw fromDatabase(error, 'record_transfer');
   return data as string;
 }

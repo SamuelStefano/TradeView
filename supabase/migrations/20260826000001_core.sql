@@ -88,7 +88,8 @@ create index ledger_entries_account_idx on ledger_entries (account_id);
 create index ledger_entries_transaction_idx on ledger_entries (transaction_id);
 
 create or replace function assert_transaction_balanced() returns trigger
-language plpgsql as $$
+language plpgsql
+set search_path = public, pg_temp as $$
 declare
   offending text;
 begin
@@ -115,7 +116,8 @@ create constraint trigger ledger_entries_balanced
 -- The ledger is append-only. Corrections are made with a reversing entry, so
 -- history stays auditable.
 create or replace function reject_ledger_mutation() returns trigger
-language plpgsql as $$
+language plpgsql
+set search_path = public, pg_temp as $$
 begin
   raise exception 'ledger é append-only; registre um lançamento de estorno';
 end;

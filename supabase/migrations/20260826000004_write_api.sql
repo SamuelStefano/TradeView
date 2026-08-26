@@ -13,7 +13,8 @@ create or replace function ensure_account(
   p_kind account_kind,
   p_currency text
 ) returns uuid
-language plpgsql as $$
+language plpgsql
+set search_path = public, pg_temp as $$
 declare
   v_id uuid;
 begin
@@ -29,7 +30,8 @@ end;
 $$;
 
 create or replace function account_balance(p_account_id uuid) returns numeric
-language sql stable as $$
+language sql stable
+set search_path = public, pg_temp as $$
   select coalesce(sum(amount), 0) from ledger_entries where account_id = p_account_id;
 $$;
 
@@ -44,7 +46,8 @@ create or replace function record_transfer(
   p_provider_ref text,
   p_account_kind account_kind
 ) returns uuid
-language plpgsql as $$
+language plpgsql
+set search_path = public, pg_temp as $$
 declare
   v_account uuid;
   v_external uuid;
@@ -108,7 +111,8 @@ create or replace function record_fill(
   p_quote_currency text,
   p_client_ref text
 ) returns uuid
-language plpgsql as $$
+language plpgsql
+set search_path = public, pg_temp as $$
 declare
   v_quote uuid;
   v_base uuid;

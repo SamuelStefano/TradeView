@@ -20,8 +20,38 @@ npm run build && npm start
 
 ## Estado atual
 
-Fase 1: todas as 10 telas construídas e navegáveis, alimentadas por dados mockados.
-Fase 2 (pendente): adaptadores reais de mercado e camada de IA.
+As 10 telas de análise rodam sobre dados mockados. A mesa de operações (`/trade`) é real:
+conta, saldo, depósito, saque e envio de ordem gravam num ledger de dupla entrada no
+Postgres, com a execução simulada contra o book ao vivo da venue via CCXT.
+
+Sem as variáveis do Supabase o app sobe em modo demonstração — as telas de análise
+funcionam e `/trade` e `/login` avisam que o banco não está configurado.
+
+## Banco e conta
+
+```bash
+cp .env.example .env.local        # preencher com o projeto Supabase
+bash supabase/tests/run.sh        # sobe um Postgres descartável e roda o suite SQL
+```
+
+As migrations em `supabase/migrations/` são a fonte do schema. Aplicar em ordem.
+
+**Modelo de dinheiro:** nenhum saldo é coluna mutável. Todo saldo é a soma de lançamentos
+imutáveis em `ledger_entries`, e um constraint trigger recusa qualquer transação que não
+feche em zero por moeda. Um saldo errado não tem como ser gravado; só uma transação
+desbalanceada teria, e essa o banco rejeita. Correção se faz por estorno — o ledger é
+append-only.
+
+**Execução paper:** `lib/trading/paper-engine.ts` percorre o book de verdade, nível a nível,
+cobrando taxa taker e slippage. Não existe atalho de "executa no preço médio" — é a maior
+fonte de auto-engano em backtest.
+
+## Testes
+
+```bash
+npm test           # motor de execução (12 casos)
+npm run test:db    # invariantes de dinheiro e isolamento por RLS
+```
 
 ## Camada de dados
 
@@ -70,6 +100,19 @@ Nada de credencial no cliente. Chave de API nunca é renderizada por completo, n
 `localStorage`/`sessionStorage`. As duas ações destrutivas — kill switch global e modo real —
 exigem confirmação por frase digitada.
 
+- **RLS default-deny** em todas as tabelas, com `force row level security` para valer também
+  para o dono. Os grants de escrita foram revogados de `anon` e `authenticated`: sem isso, um
+  UPDATE sem policy vira um no-op silencioso de zero linhas em vez de erro.
+- **A chave secreta ignora RLS.** Toda leitura do servidor que a usa filtra por `user_id` na
+  mão; nada depende do banco para fazer o recorte.
+- **Server actions reverificam a sessão.** São POSTs na própria rota, e uma mudança no matcher
+  do proxy pode deixá-las descobertas — confiar só nessa camada não serve para dinheiro.
+- **Dois gates independentes para capital real:** a env `TRADEVIEW_ALLOW_REAL_TRADING` do
+  deploy e o flag `real_trading_enabled` por usuário. Qualquer um desligado bloqueia.
+- **Credencial de exchange é ciphertext.** AES-256-GCM com chave que nunca chega ao Postgres,
+  em schema fora do alcance da API. Um dump do banco sozinho não devolve credencial usável.
+- **Erro de banco não vaza para o browser.** Só mensagem escrita por nós chega ao formulário.
+
 ## Estrutura
 
 ```
@@ -80,6 +123,10 @@ components/
   charts/              candlestick, donut, heatmap
   panels/              painéis adaptativos por classe de ativo
 lib/data/              DataSource + mocks
+lib/trading/           motor paper, ordens, transferências
+lib/supabase/          clientes server/browser
+supabase/migrations/   schema, RLS e write API
+supabase/tests/        suite SQL de dinheiro e isolamento
 design/                export original do Claude Design (referência)
 PLANO.md               plano de construção por tela
 ```

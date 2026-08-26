@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # A secret behind NEXT_PUBLIC_ is inlined into the browser bundle at build
+      # time, so grepping the source for the pattern is the cheap early catch.
+      - name: Nenhum segredo atras de prefixo publico
+        run: |
+          if grep -rnE "NEXT_PUBLIC_[A-Z_]*(SECRET|SERVICE_ROLE|PRIVATE|TOKEN)" \
+             --include='*.ts' --include='*.tsx' --include='*.js' \
+             app components lib; then
+            echo "segredo atras de prefixo client-exposed" >&2
+            exit 1
+          fi
+      - name: Nenhuma credencial literal no repo
+        run: |
+          if grep -rnE "sb_secret_[A-Za-z0-9]|ghp_[A-Za-z0-9]{20}|github_pat_[A-Za-z0-9]{20}|AKIA[0-9A-Z]{16}|BEGIN (RSA |EC )?PRIVATE KEY" \
+             --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github .; then
+            echo "credencial literal encontrada" >&2
+            exit 1
+          fi
