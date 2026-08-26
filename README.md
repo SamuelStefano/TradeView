@@ -36,6 +36,16 @@ bash supabase/tests/run.sh        # sobe um Postgres descartável e roda o suite
 
 As migrations em `supabase/migrations/` são a fonte do schema. Aplicar em ordem.
 
+**Projeto compartilhado:** o Supabase é o mesmo de outro app, que é dono de `public`. Tudo
+daqui vive em `tradeview` e `tradeview_private` — nenhum objeto é criado em `public` e
+nenhum grant é revogado lá. `supabase/tests/run.sh` cria uma tabela vizinha em `public`
+antes das migrations e o suite falha se ela perder privilégio. Os clientes fixam
+`db: { schema: 'tradeview' }`, então nem o browser nem o servidor alcançam o outro app.
+
+`auth.users` é do projeto inteiro e não dá para separar. Por isso não existe trigger de
+signup: entrar no TradeView é o que provisiona a conta (`ensureUserSetup`), e quem só usa
+o outro app não ganha carteira aqui.
+
 **Modelo de dinheiro:** nenhum saldo é coluna mutável. Todo saldo é a soma de lançamentos
 imutáveis em `ledger_entries`, e um constraint trigger recusa qualquer transação que não
 feche em zero por moeda. Um saldo errado não tem como ser gravado; só uma transação
@@ -45,6 +55,10 @@ append-only.
 **Execução paper:** `lib/trading/paper-engine.ts` percorre o book de verdade, nível a nível,
 cobrando taxa taker e slippage. Não existe atalho de "executa no preço médio" — é a maior
 fonte de auto-engano em backtest.
+
+**Venues:** Foxbit (BRL) e OKX (USDT). Binance responde 451 e Mercado Bitcoin 403 para IP
+de datacenter, o que inclui as funções da Vercel — a escolha é por alcance real, não por
+preferência. Trocar de venue é editar `20260826000003_instruments.sql`.
 
 ## Testes
 

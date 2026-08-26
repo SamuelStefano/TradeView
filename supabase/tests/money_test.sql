@@ -1,5 +1,7 @@
 \set ON_ERROR_STOP on
 
+set search_path = tradeview, public;
+
 insert into auth.users (id, email) values
   ('33333333-3333-3333-3333-333333333333', 'trader@test.local');
 

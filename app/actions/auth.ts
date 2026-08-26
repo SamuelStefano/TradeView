@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { ensureUserSetup } from '@/lib/provision';
 
 export interface AuthState {
   ok: boolean;
@@ -31,11 +32,13 @@ export async function signInAction(_prev: AuthState, form: FormData): Promise<Au
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   // Supabase already returns a generic message here; keep it generic so the form
   // cannot be used to tell which e-mails have accounts.
-  if (error) return { ok: false, message: 'e-mail ou senha incorretos' };
+  if (error || !data.user) return { ok: false, message: 'e-mail ou senha incorretos' };
+
+  await ensureUserSetup(data.user.id, email.split('@')[0]);
 
   revalidatePath('/', 'layout');
   redirect('/trade');
@@ -56,9 +59,11 @@ export async function signUpAction(_prev: AuthState, form: FormData): Promise<Au
 
   if (error) return { ok: false, message: error.message };
 
-  if (!data.session) {
+  if (!data.session || !data.user) {
     return { ok: true, message: 'conta criada — confirme o e-mail para entrar' };
   }
+
+  await ensureUserSetup(data.user.id, email.split('@')[0]);
 
   revalidatePath('/', 'layout');
   redirect('/trade');

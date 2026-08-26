@@ -1,19 +1,33 @@
 -- Tradable universe for the paper engine. Symbols use CCXT's unified form so
 -- the same string addresses the exchange without a translation table.
+--
+-- Venue choice is constrained by what actually answers from a datacenter IP:
+-- Binance returns 451 and Mercado Bitcoin 403 from both this host and Vercel.
+-- Foxbit covers BRL and OKX covers USDT, and every row below was confirmed
+-- against a live order book.
 
-insert into instruments (symbol, venue, asset_class, base, quote, price_precision, qty_precision) values
-  ('BTC/USDT',  'binance', 'cripto',      'BTC',  'USDT', 2,  6),
-  ('ETH/USDT',  'binance', 'cripto',      'ETH',  'USDT', 2,  5),
-  ('SOL/USDT',  'binance', 'cripto',      'SOL',  'USDT', 3,  3),
-  ('BNB/USDT',  'binance', 'cripto',      'BNB',  'USDT', 2,  4),
-  ('XRP/USDT',  'binance', 'cripto',      'XRP',  'USDT', 4,  1),
-  ('ADA/USDT',  'binance', 'cripto',      'ADA',  'USDT', 4,  1),
-  ('DOGE/USDT', 'binance', 'cripto',      'DOGE', 'USDT', 5,  0),
-  ('AVAX/USDT', 'binance', 'cripto',      'AVAX', 'USDT', 3,  2),
-  ('LINK/USDT', 'binance', 'cripto',      'LINK', 'USDT', 3,  2),
-  ('MATIC/USDT','binance', 'cripto',      'MATIC','USDT', 4,  1),
-  ('BTC/BRL',   'mercadobitcoin', 'cripto', 'BTC', 'BRL', 0,  8),
-  ('ETH/BRL',   'mercadobitcoin', 'cripto', 'ETH', 'BRL', 0,  6),
-  ('SOL/BRL',   'mercadobitcoin', 'cripto', 'SOL', 'BRL', 2,  4),
-  ('USDT/BRL',  'mercadobitcoin', 'cambio', 'USDT','BRL', 4,  2)
+insert into tradeview.instruments (symbol, venue, asset_class, base, quote, price_precision, qty_precision) values
+  ('BTC/BRL', 'foxbit', 'cripto', 'BTC', 'BRL', 2, 8),
+  ('ETH/BRL', 'foxbit', 'cripto', 'ETH', 'BRL', 2, 8),
+  ('SOL/BRL', 'foxbit', 'cripto', 'SOL', 'BRL', 2, 8),
+  ('USDT/BRL', 'foxbit', 'cambio', 'USDT', 'BRL', 2, 8),
+  ('USDC/BRL', 'foxbit', 'cambio', 'USDC', 'BRL', 2, 8),
+  ('XRP/BRL', 'foxbit', 'cripto', 'XRP', 'BRL', 2, 6),
+  ('ADA/BRL', 'foxbit', 'cripto', 'ADA', 'BRL', 2, 8),
+  ('DOGE/BRL', 'foxbit', 'cripto', 'DOGE', 'BRL', 2, 8),
+  ('AVAX/BRL', 'foxbit', 'cripto', 'AVAX', 'BRL', 2, 8),
+  ('LINK/BRL', 'foxbit', 'cripto', 'LINK', 'BRL', 2, 8),
+  ('LTC/BRL', 'foxbit', 'cripto', 'LTC', 'BRL', 2, 8),
+  ('DOT/BRL', 'foxbit', 'cripto', 'DOT', 'BRL', 2, 8),
+  ('BTC/USDT', 'okx', 'cripto', 'BTC', 'USDT', 1, 8),
+  ('ETH/USDT', 'okx', 'cripto', 'ETH', 'USDT', 2, 6),
+  ('SOL/USDT', 'okx', 'cripto', 'SOL', 'USDT', 2, 6),
+  ('XRP/USDT', 'okx', 'cripto', 'XRP', 'USDT', 4, 6),
+  ('ADA/USDT', 'okx', 'cripto', 'ADA', 'USDT', 4, 4),
+  ('DOGE/USDT', 'okx', 'cripto', 'DOGE', 'USDT', 5, 6),
+  ('AVAX/USDT', 'okx', 'cripto', 'AVAX', 'USDT', 3, 6),
+  ('LINK/USDT', 'okx', 'cripto', 'LINK', 'USDT', 3, 6),
+  ('LTC/USDT', 'okx', 'cripto', 'LTC', 'USDT', 2, 6),
+  ('DOT/USDT', 'okx', 'cripto', 'DOT', 'USDT', 4, 6),
+  ('TRX/USDT', 'okx', 'cripto', 'TRX', 'USDT', 5, 6)
 on conflict (symbol) do nothing;

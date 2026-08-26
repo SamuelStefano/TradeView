@@ -3,7 +3,7 @@ import 'server-only';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './config';
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, DB_SCHEMA } from './config';
 import { supabaseSecretKey } from '../env';
 
 // Session-scoped client. Every query it makes is filtered by RLS, so this is
@@ -12,6 +12,7 @@ export async function createSupabaseServerClient() {
   const store = await cookies();
 
   return createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    db: { schema: DB_SCHEMA },
     cookies: {
       getAll() {
         return store.getAll();
@@ -35,6 +36,7 @@ export async function createSupabaseServerClient() {
 // database will not do it for you.
 export function createSupabaseAdminClient() {
   return createClient(SUPABASE_URL, supabaseSecretKey(), {
+    db: { schema: DB_SCHEMA },
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

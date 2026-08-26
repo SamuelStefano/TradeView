@@ -1,10 +1,16 @@
 \set ON_ERROR_STOP on
 
+set search_path = tradeview, public;
+
+-- B never signs into TradeView. It stands for a user of the other app that
+-- shares this project's auth tables.
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'a@test.local'),
   ('22222222-2222-2222-2222-222222222222', 'b@test.local');
 
--- 1. signup trigger provisions profile, settings and a paper account
+select tradeview.ensure_user_setup('11111111-1111-1111-1111-111111111111', 'a');
+
+-- 1. provisioning creates profile, settings and a paper account
 do $$
 begin
   if (select count(*) from accounts where user_id = '11111111-1111-1111-1111-111111111111') <> 1
@@ -13,6 +19,8 @@ begin
     then raise exception 'FALHA 1b: trading_settings nao provisionado'; end if;
   if (select real_trading_enabled from trading_settings where user_id = '11111111-1111-1111-1111-111111111111')
     then raise exception 'FALHA 1c: trading real veio habilitado por padrao'; end if;
+  if exists (select 1 from accounts where user_id = '22222222-2222-2222-2222-222222222222')
+    then raise exception 'FALHA 1d: usuario que nunca entrou no TradeView foi provisionado'; end if;
 end $$;
 
 -- seed: fund A with 10.000 BRL from an external funding account
@@ -130,9 +138,11 @@ begin;
   declare n int;
   begin
     begin
-      select count(*) into n from private.exchange_credentials;
-      raise exception 'FALHA 7: authenticated leu private.exchange_credentials';
-    exception when insufficient_privilege then null;
+      select count(*) into n from tradeview_private.exchange_credentials;
+      raise exception 'FALHA 7: authenticated leu tradeview_private.exchange_credentials';
+    -- No usage on the schema means the table does not even resolve, which is a
+    -- stronger denial than a privilege error on a visible table.
+    exception when insufficient_privilege or undefined_table then null;
     end;
   end $$;
 rollback;
@@ -146,9 +156,21 @@ begin;
     begin
       select count(*) into n from accounts;
       if n <> 0 then raise exception 'FALHA 8: anon leu % contas', n; end if;
-    exception when insufficient_privilege then null;
+    exception when insufficient_privilege or undefined_table then null;
     end;
   end $$;
 rollback;
+
+-- 9. the other app's schema is untouched
+do $$
+begin
+  if not has_table_privilege('authenticated', 'public.neighbour_app', 'select')
+    then raise exception 'FALHA 9a: migration revogou select do vizinho em public'; end if;
+  if not has_table_privilege('authenticated', 'public.neighbour_app', 'insert')
+    then raise exception 'FALHA 9b: migration revogou insert do vizinho em public'; end if;
+  if exists (
+    select 1 from pg_tables where schemaname = 'public' and tablename <> 'neighbour_app'
+  ) then raise exception 'FALHA 9c: migration criou tabela em public'; end if;
+end $$;
 
 select 'TODOS OS TESTES DE RLS PASSARAM' as resultado;

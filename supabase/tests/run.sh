@@ -17,6 +17,14 @@ docker run -d --name "$CONTAINER" -e POSTGRES_PASSWORD=tvlocal \
 until docker exec "$CONTAINER" pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
 sleep 3
 
+# Stands in for the other app that owns `public` in the shared project. The
+# suite asserts the migrations leave it untouched, because a schema-wide revoke
+# aimed at the wrong schema would silently break it.
+docker exec -i "$CONTAINER" psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -q <<'SQL'
+create table public.neighbour_app (id int primary key);
+grant select, insert on public.neighbour_app to authenticated;
+SQL
+
 for f in "$ROOT"/supabase/migrations/*.sql; do
   echo "aplicando $(basename "$f")"
   docker exec -i "$CONTAINER" psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -q < "$f"
