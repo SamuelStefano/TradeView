@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Topbar } from './Topbar';
 import { Nav } from './Nav';
@@ -30,6 +30,31 @@ function isTyping(target: EventTarget | null): boolean {
   );
 }
 
+const DENSITY_KEY = 'tradeview:density';
+type Density = 'compacto' | 'confortavel';
+
+const densityListeners = new Set<() => void>();
+
+function subscribeDensity(onChange: () => void) {
+  densityListeners.add(onChange);
+  return () => {
+    densityListeners.delete(onChange);
+  };
+}
+
+function readDensity(): Density {
+  return localStorage.getItem(DENSITY_KEY) === 'compacto' ? 'compacto' : 'confortavel';
+}
+
+function serverDensity(): Density {
+  return 'confortavel';
+}
+
+function writeDensity(next: Density) {
+  localStorage.setItem(DENSITY_KEY, next);
+  densityListeners.forEach((onChange) => onChange());
+}
+
 export function ShellClient({ children }: ShellClientProps) {
   const [clock, setClock] = useState('--:--:--');
   const [lastSync, setLastSync] = useState('há 1s');
@@ -39,7 +64,7 @@ export function ShellClient({ children }: ShellClientProps) {
   const [killOpen, setKillOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [killed, setKilled] = useState(false);
-  const [density, setDensity] = useState<'compacto' | 'confortavel'>('confortavel');
+  const density = useSyncExternalStore(subscribeDensity, readDensity, serverDensity);
   const chordRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
@@ -130,7 +155,7 @@ export function ShellClient({ children }: ShellClientProps) {
   }, []);
 
   function toggleDensity() {
-    setDensity((d) => (d === 'compacto' ? 'confortavel' : 'compacto'));
+    writeDensity(density === 'compacto' ? 'confortavel' : 'compacto');
   }
 
   function confirmKill() {
@@ -140,9 +165,16 @@ export function ShellClient({ children }: ShellClientProps) {
 
   return (
     <div
-      className="flex flex-col overflow-hidden bg-base text-text font-sans"
+      className="relative flex flex-col overflow-hidden bg-base text-text font-sans"
       style={{ height: '100vh', minWidth: 1180, fontSize: 13 }}
     >
+      <a
+        href="#conteudo"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[80] focus:h-8 focus:px-3 focus:flex focus:items-center focus:bg-accent-bg focus:border focus:border-accent-border focus:rounded-md focus:text-accent-hover focus:text-xs focus:font-semibold focus:no-underline"
+      >
+        Pular para o conteúdo
+      </a>
+
       <Topbar
         clock={clock}
         lastSync={lastSync}
@@ -154,7 +186,7 @@ export function ShellClient({ children }: ShellClientProps) {
 
       <div className="flex flex-1 min-h-0">
         <Nav density={density} onToggleDensity={toggleDensity} />
-        <main className="flex-1 min-w-0 overflow-y-auto bg-base">
+        <main id="conteudo" tabIndex={-1} className="flex-1 min-w-0 overflow-y-auto bg-base outline-none">
           {children}
         </main>
       </div>
