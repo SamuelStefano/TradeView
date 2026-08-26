@@ -1,4 +1,4 @@
-import type { NewsItem } from '@/lib/data/mock/assets';
+import type { NewsItem } from '@/lib/data/views/assets';
 import { SourceRef } from '@/components/ui/SourceRef';
 import { Bar } from '@/components/ui/Bar';
 

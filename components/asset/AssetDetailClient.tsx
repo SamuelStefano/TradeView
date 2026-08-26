@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import type { AssetClass } from '@/lib/types';
-import type { AssetDetailData } from '@/lib/data/mock/assets';
+import type { AssetDetailData } from '@/lib/data/views/assets';
 import { ASSET_CLASSES } from '@/lib/types';
-import { TIMEFRAMES, INDICATORS } from '@/lib/data/mock/assets';
+import { TIMEFRAMES, INDICATORS } from '@/lib/data/views/assets';
 import { toneOf } from '@/lib/format';
 import { FreshnessTag } from '@/components/ui/FreshnessTag';
 import { Tabs } from '@/components/ui/Tabs';

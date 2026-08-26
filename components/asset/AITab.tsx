@@ -1,4 +1,4 @@
-import type { AssetDetailData } from '@/lib/data/mock/assets';
+import type { AssetDetailData } from '@/lib/data/views/assets';
 import { Bar } from '@/components/ui/Bar';
 import { SourceRef } from '@/components/ui/SourceRef';
 

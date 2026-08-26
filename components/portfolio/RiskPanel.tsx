@@ -1,9 +1,10 @@
-import type { RiskMetric } from '@/lib/data/mock/portfolio';
+import type { RiskMetric } from '@/lib/data/views/portfolio';
 import { SourceRef } from '@/components/ui/SourceRef';
 
 interface RiskPanelProps {
   metrics: RiskMetric[];
   concentrationWarning: string;
+  concentrationSevere: boolean;
 }
 
 const TONE_CLASSES: Record<'up' | 'down' | 'neutral', string> = {
@@ -12,7 +13,11 @@ const TONE_CLASSES: Record<'up' | 'down' | 'neutral', string> = {
   neutral: 'text-text',
 };
 
-export function RiskPanel({ metrics, concentrationWarning }: RiskPanelProps) {
+export function RiskPanel({
+  metrics,
+  concentrationWarning,
+  concentrationSevere,
+}: RiskPanelProps) {
   return (
     <section
       aria-label="Risco do portfólio"
@@ -24,6 +29,11 @@ export function RiskPanel({ metrics, concentrationWarning }: RiskPanelProps) {
       >
         Risco do portfólio
       </div>
+      {metrics.length === 0 && (
+        <p className="text-text-faint m-0" style={{ fontSize: '11.5px', lineHeight: 1.5 }}>
+          Sem posições para medir risco.
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-2">
         {metrics.map((m) => (
           <div
@@ -45,16 +55,25 @@ export function RiskPanel({ metrics, concentrationWarning }: RiskPanelProps) {
           </div>
         ))}
       </div>
-      <div
-        className="mt-2.5 rounded-md px-3 py-2 text-warn border border-warn-border bg-warn-bg"
-        style={{ fontSize: '11px', lineHeight: '1.5' }}
-      >
-        <span>⚠ {concentrationWarning}</span>
-        {' '}
-        <SourceRef source="decomposição de fatores de risco do portfólio" className="text-warn">
-          ver decomposição
-        </SourceRef>
-      </div>
+      {concentrationWarning &&
+        (concentrationSevere ? (
+          <div
+            className="mt-2.5 rounded-md px-3 py-2 text-warn border border-warn-border bg-warn-bg"
+            style={{ fontSize: '11px', lineHeight: '1.5' }}
+          >
+            <span>⚠ {concentrationWarning}</span>{' '}
+            <SourceRef source="decomposição de fatores de risco do portfólio" className="text-warn">
+              ver decomposição
+            </SourceRef>
+          </div>
+        ) : (
+          <p
+            className="mt-2.5 rounded-md px-3 py-2 text-text-faint bg-inset border border-border m-0"
+            style={{ fontSize: '10.5px', lineHeight: '1.55' }}
+          >
+            {concentrationWarning}
+          </p>
+        ))}
     </section>
   );
 }

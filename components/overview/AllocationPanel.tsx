@@ -1,4 +1,4 @@
-import type { AllocationSlice } from '@/lib/data/mock/overview';
+import type { AllocationSlice } from '@/lib/data/views/overview';
 import { Donut } from '@/components/charts/Donut';
 
 const LABELS: Record<string, string> = {

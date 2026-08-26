@@ -1,4 +1,4 @@
-import type { FiredEntry } from '@/lib/data/mock/alerts';
+import type { FiredEntry } from '@/lib/data/views/alerts';
 
 interface FiredHistoryProps {
   fired: FiredEntry[];

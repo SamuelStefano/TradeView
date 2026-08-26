@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { MarketsData } from '@/lib/data/mock/markets';
+import type { MarketsData } from '@/lib/data/views/markets';
 import { IntegrationRow } from './IntegrationRow';
 import { ConnectFlowModal } from './ConnectFlowModal';
 import { RateLimitBanner } from './RateLimitBanner';

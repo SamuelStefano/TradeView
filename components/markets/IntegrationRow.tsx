@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { MarketIntegration } from '@/lib/data/mock/markets';
+import type { MarketIntegration } from '@/lib/data/views/markets';
 import type { IntegrationStatus } from '@/lib/types';
 import { Bar } from '@/components/ui/Bar';
 

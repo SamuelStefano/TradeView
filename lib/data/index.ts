@@ -1,11 +1,13 @@
 import type { AssetClass, Strategy } from '../types';
-import { type AlertsData, alertsMock } from './mock/alerts';
-import { type AnalyticsData, analyticsMock } from './mock/analytics';
-import { type AssetDetailData, assetsMock, defaultSymbolByClass } from './mock/assets';
-import { type MarketsData, marketsMock } from './mock/markets';
-import { type OverviewData, overviewMock } from './mock/overview';
-import { type PortfolioData, portfolioMock } from './mock/portfolio';
-import { strategiesMock } from './mock/strategies';
+import { type AlertsData, alertsMock } from './views/alerts';
+import { type AnalyticsData, analyticsMock } from './views/analytics';
+import { type AssetDetailData, assetsMock, defaultSymbolByClass } from './views/assets';
+import { type MarketsData, marketsMock } from './views/markets';
+import { type OverviewData, overviewMock } from './views/overview';
+import type { PortfolioData } from './views/portfolio';
+import { emptyPortfolio, getLivePortfolio } from './live/portfolio';
+import { strategiesMock } from './views/strategies';
+import { supabaseConfigured } from '../supabase/config';
 
 export interface DataSource {
   getOverview(): Promise<OverviewData>;
@@ -31,8 +33,12 @@ const mockDataSource: DataSource = {
   async getMarkets() {
     return marketsMock;
   },
+  // The portfolio is the one screen that must never show a number the user did
+  // not put there. Without a database there is nothing to report, so it reports
+  // nothing rather than a demonstration balance.
   async getPortfolio() {
-    return portfolioMock;
+    if (!supabaseConfigured) return emptyPortfolio;
+    return getLivePortfolio('paper');
   },
   async getStrategies() {
     return strategiesMock;

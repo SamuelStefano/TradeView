@@ -1,4 +1,4 @@
-import type { EconomicEvent, EventImpact } from '@/lib/data/mock/overview';
+import type { EconomicEvent, EventImpact } from '@/lib/data/views/overview';
 
 interface CalendarPanelProps {
   events: EconomicEvent[];

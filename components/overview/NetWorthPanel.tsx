@@ -1,4 +1,4 @@
-import type { NetWorth, PnlCard } from '@/lib/data/mock/overview';
+import type { NetWorth, PnlCard } from '@/lib/data/views/overview';
 import { toneOf } from '@/lib/format';
 
 interface NetWorthPanelProps {

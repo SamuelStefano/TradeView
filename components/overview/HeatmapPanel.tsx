@@ -1,4 +1,4 @@
-import type { HeatmapCell } from '@/lib/data/mock/overview';
+import type { HeatmapCell } from '@/lib/data/views/overview';
 import { Heatmap } from '@/components/charts/Heatmap';
 
 const ROW_LABELS: Record<number, string> = {

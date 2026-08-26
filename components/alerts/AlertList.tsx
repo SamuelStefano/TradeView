@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ConfirmByTyping } from '@/components/ui/ConfirmByTyping';
-import type { AlertItem, AlertKind, AlertChannel } from '@/lib/data/mock/alerts';
+import type { AlertItem, AlertKind, AlertChannel } from '@/lib/data/views/alerts';
 
 const kindStyles: Record<AlertKind, { fg: string; bg: string }> = {
   'PREÇO':      { fg: 'text-accent-hover', bg: 'bg-accent-bg' },

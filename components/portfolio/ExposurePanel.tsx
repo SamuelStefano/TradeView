@@ -1,33 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import type { ExposureRow } from '@/lib/data/mock/portfolio';
+import type { ExposureRow } from '@/lib/data/views/portfolio';
 import { useRadioGroup } from '@/components/ui/useRadioGroup';
 
-type ExpTab = 'classe' | 'moeda' | 'setor' | 'país';
+type ExpTab = 'classe' | 'ativo' | 'venue';
 
 const TAB_LABELS: { id: ExpTab; label: string }[] = [
   { id: 'classe', label: 'Classe' },
-  { id: 'moeda', label: 'Moeda' },
-  { id: 'setor', label: 'Setor' },
-  { id: 'país', label: 'País' },
+  { id: 'ativo', label: 'Ativo' },
+  { id: 'venue', label: 'Venue' },
 ];
 
 interface ExposurePanelProps {
   byClass: ExposureRow[];
   byCurrency: ExposureRow[];
   byVenue: ExposureRow[];
-  byCountry: ExposureRow[];
 }
 
-export function ExposurePanel({ byClass, byCurrency, byVenue, byCountry }: ExposurePanelProps) {
+export function ExposurePanel({ byClass, byCurrency, byVenue }: ExposurePanelProps) {
   const [active, setActive] = useState<ExpTab>('classe');
 
   const dataMap: Record<ExpTab, ExposureRow[]> = {
     classe: byClass,
-    moeda: byCurrency,
-    setor: byVenue,
-    'país': byCountry,
+    ativo: byCurrency,
+    venue: byVenue,
   };
 
   const rows = dataMap[active];
@@ -69,6 +66,11 @@ export function ExposurePanel({ byClass, byCurrency, byVenue, byCountry }: Expos
         })}
       </div>
       <div className="flex flex-col gap-1.5">
+        {rows.length === 0 && (
+          <p className="text-text-faint m-0" style={{ fontSize: '11.5px' }}>
+            Sem posições para distribuir.
+          </p>
+        )}
         {rows.map((row) => (
           <div key={row.label} className="flex items-center gap-2.5">
             <span className="text-text-secondary shrink-0" style={{ fontSize: '11.5px', width: '110px' }}>

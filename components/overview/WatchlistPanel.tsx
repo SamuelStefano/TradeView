@@ -1,4 +1,4 @@
-import type { WatchlistItem } from '@/lib/data/mock/overview';
+import type { WatchlistItem } from '@/lib/data/views/overview';
 import { Sparkline } from '@/components/ui/Sparkline';
 import { toneOf } from '@/lib/format';
 

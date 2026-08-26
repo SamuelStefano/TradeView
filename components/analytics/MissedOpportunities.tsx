@@ -1,4 +1,4 @@
-import type { MissedEntry } from '@/lib/data/mock/analytics';
+import type { MissedEntry } from '@/lib/data/views/analytics';
 
 interface MissedOpportunitiesProps {
   opportunityCost: string;

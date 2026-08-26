@@ -1,4 +1,4 @@
-import type { HeatmapCell } from '@/lib/data/mock/overview';
+import type { HeatmapCell } from '@/lib/data/views/overview';
 
 interface HeatmapRow {
   label: string;

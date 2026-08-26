@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getDataSource } from '@/lib/data';
 import { ASSET_CLASSES } from '@/lib/types';
 import type { AssetClass } from '@/lib/types';
-import type { AssetDetailData } from '@/lib/data/mock/assets';
+import type { AssetDetailData } from '@/lib/data/views/assets';
 import { AssetDetailClient } from '@/components/asset/AssetDetailClient';
 
 export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }) {

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Tone } from '@/lib/types';
-import type { AssetDetailData } from '@/lib/data/mock/assets';
+import type { AssetDetailData } from '@/lib/data/views/assets';
 import { toneClass } from '@/lib/format';
 import { FreshnessTag } from '@/components/ui/FreshnessTag';
 

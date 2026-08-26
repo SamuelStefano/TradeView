@@ -1,4 +1,4 @@
-import type { CostBar } from '@/lib/data/mock/analytics';
+import type { CostBar } from '@/lib/data/views/analytics';
 
 interface CostPanelProps {
   costTokens: string;

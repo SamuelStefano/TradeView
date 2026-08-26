@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { TradeRecord } from '@/lib/data/mock/portfolio';
+import type { TradeRecord } from '@/lib/data/views/portfolio';
 import { ExportCsvButton } from '@/components/ui/ExportCsvButton';
 
 interface TradesTableProps {

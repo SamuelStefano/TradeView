@@ -1,4 +1,4 @@
-import type { AccuracyRow } from '@/lib/data/mock/analytics';
+import type { AccuracyRow } from '@/lib/data/views/analytics';
 
 const HORIZONS = ['1–3 dias', '1–2 sem', '1 mês', '3 meses'];
 
