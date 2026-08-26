@@ -25,14 +25,6 @@ loopback, e prova o ciclo contra candles de verdade: reivindicar sob lease,
 decidir na vela fechada, colocar ordem, mexer no razão, liberar a lease. Não toca
 o Supabase real. Rodar depois de qualquer mudança no runner ou nas migrations.
 
-## Build
-
-A imagem é construída no próprio host — não há registry, e não precisa haver:
-
-```bash
-docker build -t tradeview-runner:latest .
-```
-
 ## Segredo
 
 A chave vai como arquivo montado, nunca como variável de ambiente: `docker
@@ -55,8 +47,12 @@ export TRADEVIEW_SUPABASE_URL=https://SEU_PROJETO.supabase.co
 export TRADEVIEW_SECRET_FILE=$HOME/.tradeview-supabase-secret-key
 export TRADEVIEW_VERSION=$(git rev-parse --short HEAD)
 
-docker compose -f deploy/docker-compose.yml up -d
+docker compose -f deploy/docker-compose.yml up -d --build
 ```
+
+A imagem é construída aqui mesmo — não existe registry para ela, e não precisa
+existir. `--build` é o que garante que o container reflete o commit atual; sem
+ele o compose reaproveita a imagem antiga se ela já existir.
 
 As duas primeiras variáveis não têm default de propósito: sem elas o compose
 recusa em vez de subir um runner que não sabe com qual banco falar.

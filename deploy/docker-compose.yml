@@ -1,10 +1,20 @@
 # O runner na VPS pessoal. Leia deploy/RUNNER.md antes: a imagem e o arquivo de
 # segredo precisam existir no host para este arquivo significar alguma coisa.
 
+# Sem isto o projeto herda o nome do diretório, que é `deploy` — genérico o
+# bastante para colidir com qualquer outro compose desta VPS.
+name: tradeview
+
 services:
   runner:
     image: tradeview-runner:latest
     container_name: tradeview-runner
+
+    # Constrói do próprio repositório. Sem isto o compose tenta puxar
+    # `tradeview-runner` de um registry que não existe e falha no `up`.
+    build:
+      context: ..
+      dockerfile: Dockerfile
 
     # Sem `ports` e sem proxy, de propósito. O runner abre conexões de saída e
     # não escuta em nada, então não existe caminho de entrada até ele.
