@@ -1,4 +1,7 @@
 import { fetchedAt, getDataSource } from '@/lib/data/index';
+import { readKillSwitch } from '@/lib/trading/kill-switch';
+import { getSessionUserId } from '@/lib/supabase/server';
+import { supabaseConfigured } from '@/lib/supabase/config';
 import { ShellClient } from '@/components/shell/ShellClient';
 
 // The shell reports live venue latency and the topbar sync clock. Prerendering
@@ -6,11 +9,17 @@ import { ShellClient } from '@/components/shell/ShellClient';
 // claim a market status measured whenever the last deploy happened.
 export const dynamic = 'force-dynamic';
 
+async function killSwitchState(): Promise<boolean> {
+  if (!supabaseConfigured) return false;
+  const userId = await getSessionUserId();
+  if (!userId) return false;
+  return readKillSwitch(userId).catch(() => false);
+}
+
 export default async function TerminalLayout({ children }: LayoutProps<'/'>) {
-  const source = getDataSource();
-  const [markets, strategies, at] = await Promise.all([
-    source.getMarkets(),
-    source.getStrategies(),
+  const [markets, killed, at] = await Promise.all([
+    getDataSource().getMarkets(),
+    killSwitchState(),
     fetchedAt(),
   ]);
 
@@ -22,7 +31,7 @@ export default async function TerminalLayout({ children }: LayoutProps<'/'>) {
         degraded: markets.degradedCount,
         offline: markets.offlineCount,
         latencyMs: markets.medianLatencyMs,
-        realStrategies: strategies.filter((s) => s.mode === 'REAL').length,
+        killSwitchActive: killed,
         fetchedAt: at,
       }}
     >

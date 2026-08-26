@@ -8,6 +8,7 @@ import { CommandPalette } from './CommandPalette';
 import { KillSwitchModal } from './KillSwitchModal';
 import { ShortcutsModal } from './ShortcutsModal';
 import { ShellHealthProvider, type ShellHealth } from './health-context';
+import { setKillSwitchAction } from '@/app/actions/trading';
 
 interface ShellClientProps {
   children: ReactNode;
@@ -49,7 +50,8 @@ export function ShellClient({ children, health }: ShellClientProps) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [killOpen, setKillOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const [killed, setKilled] = useState(false);
+  const [killError, setKillError] = useState('');
+  const killed = health.killSwitchActive;
   const chordRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
@@ -132,9 +134,13 @@ export function ShellClient({ children, health }: ShellClientProps) {
   }, []);
 
 
-  function confirmKill() {
+  // The flag lives in the database, where place-order and transfer read it. A
+  // local boolean would have blocked nothing.
+  async function toggleKill(active: boolean) {
     setKillOpen(false);
-    setKilled(true);
+    const result = await setKillSwitchAction(active);
+    setKillError(result.ok ? '' : result.message);
+    router.refresh();
   }
 
   return (
@@ -174,8 +180,27 @@ export function ShellClient({ children, health }: ShellClientProps) {
       </footer>
 
       <CommandPalette open={paletteOpen} onClose={closePalette} />
-      <KillSwitchModal open={killOpen} onClose={closeKill} onConfirm={confirmKill} />
+      <KillSwitchModal open={killOpen} onClose={closeKill} onConfirm={() => toggleKill(true)} />
       <ShortcutsModal open={shortcutsOpen} onClose={closeShortcuts} />
+
+      {killError && (
+        <div
+          role="alert"
+          className="flex items-center gap-3 border border-down rounded-lg text-down"
+          style={{
+            position: 'fixed',
+            bottom: killed ? 76 : 34,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 80,
+            background: 'var(--color-down-bg)',
+            padding: '10px 18px',
+            fontSize: 12.5,
+          }}
+        >
+          {killError}
+        </div>
+      )}
 
       {killed && (
         <div
@@ -192,9 +217,9 @@ export function ShellClient({ children, health }: ShellClientProps) {
             fontSize: 12.5,
           }}
         >
-          Kill switch ATIVO — ordens bloqueadas em todas as integrações
+          Kill switch ATIVO — ordens e transferências bloqueadas no servidor
           <button
-            onClick={() => setKilled(false)}
+            onClick={() => toggleKill(false)}
             className="bg-down text-white border-none rounded font-semibold cursor-pointer font-sans"
             style={{ padding: '4px 10px', fontSize: 11 }}
           >

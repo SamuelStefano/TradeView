@@ -1,6 +1,3 @@
-import type { Strategy } from '../types';
-import { type AlertsData, alertsMock } from './views/alerts';
-import { type AnalyticsData, analyticsMock } from './views/analytics';
 import type { AssetDetailData } from './views/assets';
 import { getLiveAsset } from './live/asset';
 import type { Timeframe } from '../markets/timeframes';
@@ -10,7 +7,6 @@ import type { OverviewData } from './views/overview';
 import { getLiveOverview } from './live/overview';
 import type { PortfolioData } from './views/portfolio';
 import { emptyPortfolio, getLivePortfolio } from './live/portfolio';
-import { strategiesMock } from './views/strategies';
 import { supabaseConfigured } from '../supabase/config';
 
 export interface DataSource {
@@ -18,9 +14,6 @@ export interface DataSource {
   getAsset(slug: string, timeframe?: Timeframe): Promise<AssetDetailData | null>;
   getMarkets(): Promise<MarketsData>;
   getPortfolio(): Promise<PortfolioData>;
-  getStrategies(): Promise<Strategy[]>;
-  getAlerts(): Promise<AlertsData>;
-  getAnalytics(): Promise<AnalyticsData>;
 }
 
 const dataSource: DataSource = {
@@ -39,15 +32,6 @@ const dataSource: DataSource = {
   async getPortfolio() {
     if (!supabaseConfigured) return emptyPortfolio;
     return getLivePortfolio('paper');
-  },
-  async getStrategies() {
-    return strategiesMock;
-  },
-  async getAlerts() {
-    return alertsMock;
-  },
-  async getAnalytics() {
-    return analyticsMock;
   },
 };
 

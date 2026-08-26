@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getSessionUserId } from '@/lib/supabase/server';
 import { placeOrder, quoteOrder } from '@/lib/trading/place-order';
 import { recordTransfer } from '@/lib/trading/transfer';
+import { setKillSwitch } from '@/lib/trading/kill-switch';
 import type { Side, OrderType } from '@/lib/trading/paper-engine';
 import { TradingError } from '@/lib/trading/errors';
 import { checkRate } from '@/lib/rate-limit';
@@ -160,6 +161,24 @@ export async function placeOrderAction(_prev: ActionState, form: FormData): Prom
     return {
       ok: true,
       message: `ordem ${label}: ${result.filledQty} @ ${result.avgPrice} · slippage ${result.slippagePct}%`,
+    };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export async function setKillSwitchAction(active: boolean): Promise<ActionState> {
+  try {
+    const userId = await requireUser();
+    await setKillSwitch(userId, active);
+
+    revalidatePath('/', 'layout');
+
+    return {
+      ok: true,
+      message: active
+        ? 'kill switch ativo — ordens e transferências bloqueadas'
+        : 'kill switch desligado',
     };
   } catch (error) {
     return failure(error);

@@ -8,6 +8,9 @@ interface NavItem {
   icon: string;
   label: string;
   href: string;
+  // The screen still has a route, but nothing behind it yet. Dimmed here so the
+  // sidebar stops implying a working feature.
+  unbuilt?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -15,11 +18,11 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'markets', icon: '⇄', label: 'Mercados', href: '/markets' },
   { id: 'asset', icon: '▤', label: 'Ativos', href: '/asset/BTC-BRL' },
   { id: 'chat', icon: '✦', label: 'IA Analyst', href: '/chat' },
-  { id: 'strategies', icon: '⚙', label: 'Estratégias', href: '/strategies' },
+  { id: 'strategies', icon: '⚙', label: 'Estratégias', href: '/strategies', unbuilt: true },
   { id: 'portfolio', icon: '◔', label: 'Portfólio', href: '/portfolio' },
   { id: 'trade', icon: '⊞', label: 'Mesa', href: '/trade' },
-  { id: 'alerts', icon: '◉', label: 'Alertas', href: '/alerts' },
-  { id: 'analytics', icon: '∿', label: 'Analytics', href: '/analytics' },
+  { id: 'alerts', icon: '◉', label: 'Alertas', href: '/alerts', unbuilt: true },
+  { id: 'analytics', icon: '∿', label: 'Analytics', href: '/analytics', unbuilt: true },
   { id: 'settings', icon: '⚒', label: 'Configurações', href: '/settings' },
   { id: 'onboarding', icon: '➔', label: 'Onboarding', href: '/onboarding' },
 ];
@@ -58,12 +61,19 @@ export function Nav() {
               color: current ? 'var(--color-text)' : 'var(--color-text-muted)',
               fontSize: 12.5,
               fontWeight: current ? 600 : 400,
+              opacity: item.unbuilt ? 0.5 : 1,
             }}
+            title={item.unbuilt ? 'ainda não construída' : undefined}
           >
             <span style={{ width: 16, textAlign: 'center', fontSize: 13, opacity: 0.9 }}>
               {item.icon}
             </span>
             {item.label}
+            {item.unbuilt && (
+              <span className="ml-auto font-mono text-text-faint" style={{ fontSize: 9 }}>
+                ○
+              </span>
+            )}
             {badge && (
               <span
                 className="ml-auto font-mono bg-accent-bg-soft text-accent-hover rounded-full"
@@ -84,6 +94,9 @@ export function Nav() {
           <span className="font-mono">g o</span> overview ·{' '}
           <span className="font-mono">g a</span> ativos ·{' '}
           <span className="font-mono">?</span> lista completa
+        </div>
+        <div className="text-text-faint leading-snug" style={{ fontSize: 10 }}>
+          <span className="font-mono">○</span> tela ainda não construída
         </div>
       </div>
     </nav>

@@ -8,7 +8,7 @@ export interface ShellHealth {
   degraded: number;
   offline: number;
   latencyMs: number | null;
-  realStrategies: number;
+  killSwitchActive: boolean;
   fetchedAt: number;
 }
 

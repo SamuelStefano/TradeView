@@ -1,26 +1,23 @@
-import { getDataSource } from '@/lib/data/index';
-import { AlertList } from '@/components/alerts/AlertList';
-import { FiredHistory } from '@/components/alerts/FiredHistory';
-import { CreateAlertPanel } from '@/components/alerts/CreateAlertPanel';
+import { NotBuilt } from '@/components/ui/NotBuilt';
 
 export const metadata = {
   title: 'Alertas — TradeView',
 };
 
-export default async function AlertsPage() {
-  const data = await getDataSource().getAlerts();
-
+export default function AlertsPage() {
   return (
-    <div
-      className="p-4 grid gap-3"
-      style={{ gridTemplateColumns: '1fr 360px', fontSize: '13px', alignItems: 'start' }}
-    >
-      <div className="flex flex-col gap-3 min-w-0">
-        <AlertList alerts={data.alerts} firedToday={data.firedToday} />
-        <FiredHistory fired={data.fired} />
-      </div>
-
-      <CreateAlertPanel />
-    </div>
+    <NotBuilt
+      title="Alertas"
+      missing={[
+        'uma tabela de alertas — o banco não tem nenhuma',
+        'um processo que avalie a condição fora do request, já que a página só roda quando aberta',
+        'um canal de entrega ligado de verdade (push, e-mail, Telegram: nenhum existe)',
+        'registro de disparo, sem o qual não dá para dizer se o alerta acertou',
+      ]}
+      goes={[
+        { label: 'Ver um ativo', href: '/asset/BTC-BRL' },
+        { label: 'Ver os mercados conectados', href: '/markets' },
+      ]}
+    />
   );
 }

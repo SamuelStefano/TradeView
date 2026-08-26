@@ -12,7 +12,7 @@ interface KillSwitchModalProps {
 const PHRASE = 'desativar tudo';
 
 export function KillSwitchModal({ open, onClose, onConfirm }: KillSwitchModalProps) {
-  const { realStrategies, connected } = useShellHealth();
+  const { connected } = useShellHealth();
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -80,13 +80,14 @@ export function KillSwitchModal({ open, onClose, onConfirm }: KillSwitchModalPro
       >
         <div className="text-base font-bold text-down">⏻ Kill switch global</div>
         <p className="text-sm leading-relaxed text-text-secondary">
-          Isto vai{' '}
-          <strong className="text-text">cancelar todas as ordens abertas</strong>,{' '}
-          <strong className="text-text">
-            pausar {realStrategies} {realStrategies === 1 ? 'estratégia real' : 'estratégias reais'}
-          </strong>{' '}
-          e <strong className="text-text">bloquear novas ordens</strong> nas {connected} integrações
-          conectadas até reativação manual.
+          Isto grava o bloqueio no servidor: toda{' '}
+          <strong className="text-text">ordem</strong> e toda{' '}
+          <strong className="text-text">transferência</strong> passam a ser recusadas nas{' '}
+          {connected} venues conectadas, até você reativar.
+        </p>
+        <p className="text-xs text-text-muted m-0">
+          Ordens já abertas na venue não são canceladas — este app ainda não roteia ordem real,
+          então não há nada lá fora para cancelar.
         </p>
         <label className="text-xs text-text-muted flex flex-col">
           Para confirmar, digite{' '}
