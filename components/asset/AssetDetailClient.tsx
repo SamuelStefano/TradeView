@@ -1,20 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import type { AssetClass, Candle } from '@/lib/types';
-import type { AssetDetailData, NewsItem } from '@/lib/data/mock/assets';
+import type { AssetClass } from '@/lib/types';
+import type { AssetDetailData } from '@/lib/data/mock/assets';
 import { ASSET_CLASSES } from '@/lib/types';
 import { TIMEFRAMES, INDICATORS } from '@/lib/data/mock/assets';
-import { toneOf, toneClass } from '@/lib/format';
+import { toneOf } from '@/lib/format';
 import { FreshnessTag } from '@/components/ui/FreshnessTag';
-import { SourceRef } from '@/components/ui/SourceRef';
 import { Tabs } from '@/components/ui/Tabs';
-import { Bar } from '@/components/ui/Bar';
 import { Modal } from '@/components/ui/Modal';
 import { useRadioGroup } from '@/components/ui/useRadioGroup';
 import { Candlestick } from '@/components/charts/Candlestick';
 import { PanelRenderer } from '@/components/panels/PanelRenderer';
+import { OHLCTable } from './OHLCTable';
+import { NewsTab } from './NewsTab';
+import { CorrTab } from './CorrTab';
+import { AITab } from './AITab';
+import { AssetHeader } from './AssetHeader';
 
 interface Props {
   initialClass: AssetClass;
@@ -23,253 +25,6 @@ interface Props {
 
 type TabId = 'ai' | 'news' | 'corr';
 type IndicatorKey = (typeof INDICATORS)[number];
-
-function OHLCTable({ candles }: { candles: Candle[] }) {
-  const rows = candles.slice(-14).reverse().map((c, i) => {
-    const isUp = c.close >= c.open;
-    return {
-      t: `${String(13 - i).padStart(2, '0')}:00`,
-      o: c.open.toFixed(2),
-      h: c.high.toFixed(2),
-      l: c.low.toFixed(2),
-      c: c.close.toFixed(2),
-      col: isUp ? 'var(--color-up)' : 'var(--color-down)',
-      v: (c.volume * 1000).toFixed(0),
-    };
-  });
-
-  return (
-    <div role="table" aria-label="OHLC em tabela" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-      <div
-        role="rowgroup"
-        className="font-mono tabular-nums"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '70px repeat(5, 1fr)',
-          fontSize: '11px',
-        }}
-      >
-        <div role="columnheader" className="text-text-faint px-1.5 py-1">hora</div>
-        <div role="columnheader" className="text-text-faint px-1.5 py-1 text-right">abert.</div>
-        <div role="columnheader" className="text-text-faint px-1.5 py-1 text-right">máx.</div>
-        <div role="columnheader" className="text-text-faint px-1.5 py-1 text-right">mín.</div>
-        <div role="columnheader" className="text-text-faint px-1.5 py-1 text-right">fech.</div>
-        <div role="columnheader" className="text-text-faint px-1.5 py-1 text-right">volume</div>
-        {rows.map((row, i) => (
-          <div key={i} role="row" style={{ display: 'contents' }}>
-            <div role="cell" className="px-1.5 py-1 text-text-muted border-t border-divider">{row.t}</div>
-            <div role="cell" className="px-1.5 py-1 text-right border-t border-divider">{row.o}</div>
-            <div role="cell" className="px-1.5 py-1 text-right border-t border-divider">{row.h}</div>
-            <div role="cell" className="px-1.5 py-1 text-right border-t border-divider">{row.l}</div>
-            <div role="cell" className="px-1.5 py-1 text-right border-t border-divider" style={{ color: row.col }}>{row.c}</div>
-            <div role="cell" className="px-1.5 py-1 text-right border-t border-divider text-text-muted">{row.v}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function NewsTab({ news }: { news: NewsItem[] }) {
-  return (
-    <div className="py-3 flex flex-col gap-0.5">
-      {news.map((n, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-2.5 py-1.5 px-1 border-b border-divider"
-        >
-          <span className="font-mono text-text-faint w-9 shrink-0" style={{ fontSize: '10px' }}>
-            {n.ago}
-          </span>
-          <SourceRef
-            source={n.source}
-            className="text-text flex-1 min-w-0 decoration-transparent hover:text-accent-hover transition-colors"
-          >
-            {n.title}
-          </SourceRef>
-          <span className="text-text-faint shrink-0" style={{ fontSize: '10px' }}>
-            {n.source}
-          </span>
-          <span
-            className={`font-mono w-10 text-right shrink-0 ${
-              n.sentimentTone === 'up'
-                ? 'text-up'
-                : n.sentimentTone === 'down'
-                ? 'text-down'
-                : 'text-text-muted'
-            }`}
-            style={{ fontSize: '10.5px' }}
-          >
-            {n.sentimentScore}
-          </span>
-          <Bar
-            value={n.relevancePct}
-            variant="accent"
-            label={`relevância ${n.relevancePct}%`}
-            className="w-11 shrink-0"
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function CorrTab({ correlations }: { correlations: { symbol: string; value: number }[] }) {
-  const pos = correlations.filter((c) => c.value >= 0);
-  const neg = correlations.filter((c) => c.value < 0);
-
-  return (
-    <div
-      className="py-3"
-      style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}
-    >
-      <div>
-        <div
-          className="text-text-faint mb-2"
-          style={{ fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}
-        >
-          Anda junto
-        </div>
-        {pos.map((c) => (
-          <div key={c.symbol} className="flex items-center gap-2 py-1">
-            <span className="font-mono text-text shrink-0" style={{ fontSize: '11.5px', width: '90px' }}>
-              {c.symbol}
-            </span>
-            <Bar
-              value={c.value * 100}
-              variant="up"
-              label={`correlação positiva ${c.value.toFixed(2).replace('.', ',')}`}
-              className="flex-1"
-            />
-            <span className="font-mono text-up w-10 text-right shrink-0" style={{ fontSize: '11px' }}>
-              {c.value.toFixed(2).replace('.', ',')}
-            </span>
-          </div>
-        ))}
-      </div>
-      <div>
-        <div
-          className="text-text-faint mb-2"
-          style={{ fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}
-        >
-          Anda contra
-        </div>
-        {neg.map((c) => (
-          <div key={c.symbol} className="flex items-center gap-2 py-1">
-            <span className="font-mono text-text shrink-0" style={{ fontSize: '11.5px', width: '90px' }}>
-              {c.symbol}
-            </span>
-            <Bar
-              value={Math.abs(c.value) * 100}
-              variant="down"
-              label={`correlação negativa ${c.value.toFixed(2).replace('.', ',')}`}
-              className="flex-1"
-            />
-            <span className="font-mono text-down w-10 text-right shrink-0" style={{ fontSize: '11px' }}>
-              {c.value.toFixed(2).replace('.', ',')}
-            </span>
-          </div>
-        ))}
-      </div>
-      <div style={{ gridColumn: '1 / -1' }}>
-        <span className="text-text-faint" style={{ fontSize: '10px' }}>
-          janela 90 dias · retornos diários ·{' '}
-          <SourceRef source="correlação de Pearson sobre retornos diários, janela móvel de 90 dias" className="text-accent">
-            metodologia
-          </SourceRef>
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function AITab({ ai }: { ai: AssetDetailData['ai'] }) {
-  return (
-    <div className="py-3.5 flex flex-col gap-3">
-      <p className="text-text-secondary leading-relaxed" style={{ fontSize: '12.5px' }}>
-        {ai.thesis}
-      </p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-        {ai.scenarios.map((sc) => {
-          const isUp = sc.label === 'BULL' || sc.label === 'ALTA';
-          const isDown = sc.label === 'BEAR' || sc.label === 'BAIXA';
-          const color = isUp ? 'var(--color-up)' : isDown ? 'var(--color-down)' : 'var(--color-accent)';
-          const borderColor = isUp ? 'var(--color-up-border)' : isDown ? 'var(--color-danger-border)' : 'var(--color-accent-border)';
-          return (
-            <div
-              key={sc.label}
-              className="bg-inset rounded-lg p-2.5"
-              style={{ border: `1px solid ${borderColor}` }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="font-bold" style={{ fontSize: '11px', color }}>
-                  {sc.label}
-                </span>
-                <span className="ml-auto font-mono" style={{ fontSize: '12px', color }}>
-                  {sc.prob}%
-                </span>
-              </div>
-              <Bar
-                value={sc.prob}
-                variant={isUp ? 'up' : isDown ? 'down' : 'accent'}
-                label={`probabilidade ${sc.prob}%`}
-                className="my-1.5"
-              />
-              <div className="font-mono mb-1" style={{ fontSize: '11.5px' }}>
-                {sc.target}
-              </div>
-              <div className="text-text-muted leading-snug" style={{ fontSize: '10.5px' }}>
-                {sc.text}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-        <div>
-          <div
-            className="text-text-faint mb-1.5"
-            style={{ fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}
-          >
-            Riscos
-          </div>
-          {ai.risks.map((r, i) => (
-            <div key={i} className="text-text-secondary py-0.5 leading-snug" style={{ fontSize: '11.5px' }}>
-              · {r}
-            </div>
-          ))}
-        </div>
-        <div>
-          <div
-            className="text-text-faint mb-1.5"
-            style={{ fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}
-          >
-            O que invalidaria a tese
-          </div>
-          {ai.invalidations.map((iv, i) => (
-            <div key={i} className="text-warn py-0.5 leading-snug" style={{ fontSize: '11.5px' }}>
-              ✕ {iv}
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="text-text-faint" style={{ fontSize: '10.5px' }}>
-        fontes:{' '}
-        {ai.sources.map((s, i) => (
-          <span key={i}>
-            <SourceRef source={s.label} className="text-accent">
-              {s.label}
-            </SourceRef>
-            {i < ai.sources.length - 1 && ' · '}
-          </span>
-        ))}
-        <span className="ml-2.5 font-mono">
-          gerado há {ai.generatedAgo} · {ai.model}
-        </span>
-      </div>
-    </div>
-  );
-}
 
 export function AssetDetailClient({ initialClass, allData }: Props) {
   const [activeClass, setActiveClass] = useState<AssetClass>(initialClass);
@@ -339,88 +94,7 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
         </span>
       </div>
 
-      <div className="flex items-center gap-4 bg-surface border border-border rounded-lg px-3.5 py-2.5">
-        <div>
-          <div className="flex items-baseline gap-2">
-            <h1 className="m-0 font-mono font-bold" style={{ fontSize: '16px' }}>
-              {asset.symbol}
-            </h1>
-            <span className="text-text-faint" style={{ fontSize: '11px' }}>
-              {asset.venue}
-            </span>
-          </div>
-          <div className="text-text-muted" style={{ fontSize: '11px' }}>
-            {asset.name}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="font-mono tabular-nums font-semibold" style={{ fontSize: '20px' }}>
-            {asset.price}
-          </div>
-          <div
-            className={`font-mono tabular-nums ${toneClass(tone)}`}
-            style={{ fontSize: '12px' }}
-          >
-            {asset.change}
-          </div>
-        </div>
-        <div
-          className="flex gap-3.5 ml-2 pl-4"
-          style={{ borderLeft: '1px solid var(--color-border)' }}
-        >
-          {asset.stats.map((st) => (
-            <div key={st.key}>
-              <div
-                className="text-text-faint"
-                style={{ fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}
-              >
-                {st.key}
-              </div>
-              <div className="font-mono tabular-nums text-right" style={{ fontSize: '12px' }}>
-                {st.value}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="flex-1" />
-        <FreshnessTag
-          freshness={asset.freshness}
-          className="border border-border-strong rounded px-1.5 py-0.5"
-        />
-        <Link
-          href="/alerts"
-          className="cursor-pointer hover:border-border-hover transition-colors flex items-center no-underline"
-          style={{
-            height: '30px',
-            padding: '0 14px',
-            background: 'var(--color-hover)',
-            border: '1px solid var(--color-border-strong)',
-            borderRadius: '6px',
-            color: 'var(--color-text-secondary)',
-            fontSize: '12px',
-            fontFamily: 'inherit',
-          }}
-        >
-          + Alerta
-        </Link>
-        <button
-          onClick={() => setOrderOpen(true)}
-          className="cursor-pointer"
-          style={{
-            height: '30px',
-            padding: '0 14px',
-            background: 'var(--color-accent-bg)',
-            border: '1px solid var(--color-accent-border)',
-            borderRadius: '6px',
-            color: 'var(--color-accent-hover)',
-            fontSize: '12px',
-            fontWeight: 600,
-            fontFamily: 'inherit',
-          }}
-        >
-          Ordem…
-        </button>
-      </div>
+      <AssetHeader asset={asset} tone={tone} onOrderClick={() => setOrderOpen(true)} />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 316px', gap: '10px', alignItems: 'start' }}>
         <section
