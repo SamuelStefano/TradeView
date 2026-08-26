@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import { placeOrderAction, type ActionState } from '@/app/actions/trading';
+import { placeOrderAction, previewOrderAction, type ActionState } from '@/app/actions/trading';
 
 const initial: ActionState = { ok: false, message: '' };
 
@@ -19,13 +19,19 @@ interface Props {
 }
 
 export function OrderTicket({ instruments, mode, realEnabled }: Props) {
-  const [state, formAction, pending] = useActionState(placeOrderAction, initial);
+  const [sendState, send, sending] = useActionState(placeOrderAction, initial);
+  const [previewState, preview, previewing] = useActionState(previewOrderAction, initial);
   const [symbol, setSymbol] = useState(instruments[0]?.symbol ?? '');
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
   const [type, setType] = useState<'market' | 'limit'>('market');
+  const [lastAction, setLastAction] = useState<'send' | 'preview' | null>(null);
 
   const instrument = instruments.find((i) => i.symbol === symbol);
   const blocked = mode === 'real' && !realEnabled;
+  // Two useActionState hooks keep their own last result, so without this the
+  // stale one would win after switching buttons.
+  const active = lastAction === 'send' ? sendState : lastAction === 'preview' ? previewState : null;
+  const message = active?.message ? active : null;
 
   if (instruments.length === 0) {
     return (
@@ -36,7 +42,7 @@ export function OrderTicket({ instruments, mode, realEnabled }: Props) {
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-2.5">
+    <form className="flex flex-col gap-2.5">
       <input type="hidden" name="mode" value={mode} />
 
       <label className="flex flex-col gap-1 text-[11px] text-text-muted">
@@ -123,22 +129,38 @@ export function OrderTicket({ instruments, mode, realEnabled }: Props) {
         )}
       </div>
 
-      <button
-        type="submit"
-        disabled={pending || blocked}
-        className="h-9 bg-accent-bg border border-accent-border rounded-md text-accent text-xs font-semibold cursor-pointer disabled:opacity-50"
-      >
-        {pending ? 'executando…' : blocked ? 'trading real desligado' : 'Enviar ordem'}
-      </button>
+      <div className="flex gap-2">
+        <button
+          formAction={preview}
+          onClick={() => setLastAction('preview')}
+          disabled={sending || previewing}
+          className="h-9 flex-1 bg-hover border border-border-strong rounded-md text-text-secondary text-xs cursor-pointer hover:text-text disabled:opacity-50"
+        >
+          {previewing ? 'simulando…' : 'Simular'}
+        </button>
+        <button
+          formAction={send}
+          onClick={() => setLastAction('send')}
+          disabled={sending || previewing || blocked}
+          className="h-9 flex-1 bg-accent-bg border border-accent-border rounded-md text-accent text-xs font-semibold cursor-pointer disabled:opacity-50"
+        >
+          {sending ? 'executando…' : blocked ? 'real desligado' : 'Enviar ordem'}
+        </button>
+      </div>
 
       <p className="text-[11px] text-text-faint m-0 leading-[1.5]">
         A execução simulada percorre o book real da venue: preencher o topo do livro e subir
         de nível conforme a quantidade, com taxa taker e slippage cobrados.
       </p>
 
-      {state.message && (
-        <p role="status" className={`text-[11.5px] m-0 ${state.ok ? 'text-up' : 'text-down'}`}>
-          {state.message}
+      {message && (
+        <p
+          role="status"
+          className={`text-[11.5px] m-0 font-mono tabular-nums ${
+            message.ok ? 'text-up' : 'text-down'
+          }`}
+        >
+          {message.message}
         </p>
       )}
     </form>

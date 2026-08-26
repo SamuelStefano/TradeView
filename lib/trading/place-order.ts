@@ -27,6 +27,71 @@ export interface PlaceOrderResult {
   partial: boolean;
 }
 
+export interface QuotePreview {
+  filledQty: string;
+  avgPrice: string;
+  notional: string;
+  fee: string;
+  slippagePct: string;
+  partial: boolean;
+  quoteCurrency: string;
+  baseCurrency: string;
+}
+
+interface InstrumentRow {
+  symbol: string;
+  venue: string;
+  base: string;
+  quote: string;
+  active: boolean;
+}
+
+async function loadInstrument(symbol: string): Promise<InstrumentRow> {
+  const supabase = createSupabaseAdminClient();
+
+  const { data, error } = await supabase
+    .from('instruments')
+    .select('symbol, venue, base, quote, active')
+    .eq('symbol', symbol)
+    .single();
+
+  if (error || !data) throw new TradingError(`instrumento desconhecido: ${symbol}`);
+  if (!data.active) throw new TradingError(`instrumento inativo: ${symbol}`);
+
+  return data as InstrumentRow;
+}
+
+// Same engine and same book as the real thing, minus the write. The number the
+// ticket previews can only move because the book moved, never because the
+// preview used different maths.
+export async function quoteOrder(
+  input: Pick<PlaceOrderInput, 'symbol' | 'side' | 'type' | 'qty' | 'limitPrice'>,
+): Promise<QuotePreview> {
+  const instrument = await loadInstrument(input.symbol);
+  const book = await fetchOrderBook(instrument.venue, instrument.symbol);
+
+  const fill = simulateFill({
+    book,
+    side: input.side,
+    type: input.type,
+    qty: input.qty,
+    limitPrice: input.limitPrice,
+  });
+
+  if (fill.filledQty.lte(0)) throw new TradingError('sem liquidez no preço pedido');
+
+  return {
+    filledQty: fill.filledQty.toString(),
+    avgPrice: fill.avgPrice.toFixed(2),
+    notional: fill.notional.toFixed(2),
+    fee: fill.fee.toFixed(8),
+    slippagePct: fill.slippage.times(100).toFixed(3),
+    partial: fill.partial,
+    quoteCurrency: instrument.quote,
+    baseCurrency: instrument.base,
+  };
+}
+
 export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResult> {
   const supabase = createSupabaseAdminClient();
 
@@ -48,14 +113,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     if (!settings.real_trading_enabled) throw new TradingError('trading real desabilitado na sua conta');
   }
 
-  const { data: instrument, error: instrumentError } = await supabase
-    .from('instruments')
-    .select('symbol, venue, base, quote, active')
-    .eq('symbol', input.symbol)
-    .single();
-
-  if (instrumentError || !instrument) throw new TradingError(`instrumento desconhecido: ${input.symbol}`);
-  if (!instrument.active) throw new TradingError(`instrumento inativo: ${input.symbol}`);
+  const instrument = await loadInstrument(input.symbol);
 
   const book = await fetchOrderBook(instrument.venue, instrument.symbol);
 

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { getSessionUserId } from '@/lib/supabase/server';
-import { placeOrder } from '@/lib/trading/place-order';
+import { placeOrder, quoteOrder } from '@/lib/trading/place-order';
 import { recordTransfer } from '@/lib/trading/transfer';
 import type { Side, OrderType } from '@/lib/trading/paper-engine';
 import { TradingError } from '@/lib/trading/errors';
@@ -89,28 +89,67 @@ export async function withdrawAction(_prev: ActionState, form: FormData): Promis
   }
 }
 
+export async function previewOrderAction(
+  _prev: ActionState,
+  form: FormData,
+): Promise<ActionState> {
+  try {
+    await requireUser();
+
+    const { side, type, limitPrice } = orderFields(form);
+
+    const quote = await quoteOrder({
+      symbol: field(form, 'symbol'),
+      side,
+      type,
+      qty: numericField(form, 'qty'),
+      limitPrice,
+    });
+
+    const partial = quote.partial ? ' (parcial — book raso)' : '';
+    return {
+      ok: true,
+      message:
+        `${quote.filledQty} ${quote.baseCurrency} @ ${quote.avgPrice} = ` +
+        `${quote.notional} ${quote.quoteCurrency} · taxa ${quote.fee} · ` +
+        `slippage ${quote.slippagePct}%${partial}`,
+    };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+function orderFields(form: FormData): {
+  side: Side;
+  type: OrderType;
+  limitPrice: string | undefined;
+} {
+  const side = field(form, 'side');
+  if (side !== 'buy' && side !== 'sell') throw new TradingError('lado inválido');
+
+  const type = field(form, 'type');
+  if (type !== 'market' && type !== 'limit') throw new TradingError('tipo inválido');
+
+  return {
+    side,
+    type,
+    limitPrice: type === 'limit' ? numericField(form, 'limitPrice') : undefined,
+  };
+}
+
 export async function placeOrderAction(_prev: ActionState, form: FormData): Promise<ActionState> {
   try {
     const userId = await requireUser();
 
-    const side = field(form, 'side');
-    if (side !== 'buy' && side !== 'sell') throw new TradingError('lado inválido');
-
-    const type = field(form, 'type');
-    if (type !== 'market' && type !== 'limit') throw new TradingError('tipo inválido');
-
-    const limitPrice = form.get('limitPrice');
-    if (type === 'limit' && (typeof limitPrice !== 'string' || !limitPrice.trim())) {
-      throw new TradingError('ordem limitada exige preço');
-    }
+    const { side, type, limitPrice } = orderFields(form);
 
     const result = await placeOrder({
       userId,
       symbol: field(form, 'symbol'),
-      side: side as Side,
-      type: type as OrderType,
+      side,
+      type,
       qty: numericField(form, 'qty'),
-      limitPrice: type === 'limit' ? numericField(form, 'limitPrice') : undefined,
+      limitPrice,
       mode: parseMode(field(form, 'mode')),
     });
 
