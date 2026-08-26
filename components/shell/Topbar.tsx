@@ -1,10 +1,13 @@
 'use client';
 
+import type { ShellHealth } from './ShellClient';
+
 interface TopbarProps {
   clock: string;
   lastSync: string;
   wsReconnecting: boolean;
   wsAttempt: number;
+  health: ShellHealth;
   onOpenPalette: () => void;
   onOpenKill: () => void;
 }
@@ -14,9 +17,17 @@ export function Topbar({
   lastSync,
   wsReconnecting,
   wsAttempt,
+  health,
   onOpenPalette,
   onOpenKill,
 }: TopbarProps) {
+  const dotColor =
+    health.offline > 0
+      ? 'var(--color-down)'
+      : health.degraded > 0
+        ? 'var(--color-warn)'
+        : 'var(--color-up)';
+
   return (
     <header
       className="flex items-center gap-4 flex-shrink-0 border-b border-border bg-chrome px-3"
@@ -46,13 +57,13 @@ export function Topbar({
       >
         <span className="flex items-center gap-1.5">
           <span
-            style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-up)', display: 'inline-block' }}
+            style={{ width: 7, height: 7, borderRadius: '50%', background: dotColor, display: 'inline-block' }}
           />
-          48/55 mercados
+          {health.connected}/{health.total} mercados
         </span>
-        <span aria-label="latência média">▲ 42 ms</span>
-        <span className="text-warn">2 degradados</span>
-        <span className="text-down">1 offline</span>
+        <span aria-label="latência mediana">▲ {health.latencyMs} ms</span>
+        {health.degraded > 0 && <span className="text-warn">{health.degraded} degradados</span>}
+        {health.offline > 0 && <span className="text-down">{health.offline} offline</span>}
         <span title="última sincronização">sync {lastSync}</span>
       </div>
 

@@ -20,14 +20,12 @@ export interface FiredEntry {
 }
 
 export interface AlertsData {
-  total: number;
   firedToday: number;
   alerts: AlertItem[];
   fired: FiredEntry[];
 }
 
 export const alertsMock: AlertsData = {
-  total: 14,
   firedToday: 3,
   alerts: [
     {

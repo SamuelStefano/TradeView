@@ -16,16 +16,7 @@ export default async function AlertsPage() {
       style={{ gridTemplateColumns: '1fr 360px', fontSize: '13px', alignItems: 'start' }}
     >
       <div className="flex flex-col gap-3 min-w-0">
-        <div className="flex items-center gap-3">
-          <h1 className="text-text m-0" style={{ fontSize: '16px', fontWeight: 700 }}>
-            Alertas &amp; sinais
-          </h1>
-          <span className="text-text-muted" style={{ fontSize: '11px' }}>
-            {data.total} ativos · {data.firedToday} disparados hoje
-          </span>
-        </div>
-
-        <AlertList alerts={data.alerts} />
+        <AlertList alerts={data.alerts} firedToday={data.firedToday} />
         <FiredHistory fired={data.fired} />
       </div>
 

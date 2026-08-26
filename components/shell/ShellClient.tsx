@@ -8,8 +8,17 @@ import { CommandPalette } from './CommandPalette';
 import { KillSwitchModal } from './KillSwitchModal';
 import { ShortcutsModal } from './ShortcutsModal';
 
+export interface ShellHealth {
+  connected: number;
+  total: number;
+  degraded: number;
+  offline: number;
+  latencyMs: number;
+}
+
 interface ShellClientProps {
   children: ReactNode;
+  health: ShellHealth;
 }
 
 const GOTO: Record<string, string> = {
@@ -55,7 +64,7 @@ function writeDensity(next: Density) {
   densityListeners.forEach((onChange) => onChange());
 }
 
-export function ShellClient({ children }: ShellClientProps) {
+export function ShellClient({ children, health }: ShellClientProps) {
   const [clock, setClock] = useState('--:--:--');
   const [lastSync, setLastSync] = useState('há 1s');
   const [wsReconnecting, setWsReconnecting] = useState(false);
@@ -178,6 +187,7 @@ export function ShellClient({ children }: ShellClientProps) {
       <Topbar
         clock={clock}
         lastSync={lastSync}
+        health={health}
         wsReconnecting={wsReconnecting}
         wsAttempt={wsAttempt}
         onOpenPalette={openPalette}

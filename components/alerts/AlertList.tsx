@@ -22,9 +22,10 @@ const channelLabel: Record<AlertChannel, string> = {
 
 interface AlertListProps {
   alerts: AlertItem[];
+  firedToday: number;
 }
 
-export function AlertList({ alerts }: AlertListProps) {
+export function AlertList({ alerts, firedToday }: AlertListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [items, setItems] = useState(alerts);
 
@@ -35,6 +36,15 @@ export function AlertList({ alerts }: AlertListProps) {
 
   return (
     <>
+      <div className="flex items-center gap-3">
+        <h1 className="text-text m-0" style={{ fontSize: '16px', fontWeight: 700 }}>
+          Alertas &amp; sinais
+        </h1>
+        <span className="text-text-muted" style={{ fontSize: '11px' }} role="status" aria-live="polite">
+          {items.length} {items.length === 1 ? 'ativo' : 'ativos'} · {firedToday} disparados hoje
+        </span>
+      </div>
+
       <section
         aria-label="Alertas ativos"
         className="bg-surface border border-border rounded-lg overflow-hidden"
