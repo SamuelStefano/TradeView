@@ -24,7 +24,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'alerts', icon: '◉', label: 'Alertas', href: '/alerts', unbuilt: true },
   { id: 'analytics', icon: '∿', label: 'Analytics', href: '/analytics', unbuilt: true },
   { id: 'settings', icon: '⚒', label: 'Configurações', href: '/settings' },
-  { id: 'onboarding', icon: '➔', label: 'Onboarding', href: '/onboarding' },
 ];
 
 export function Nav() {

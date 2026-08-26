@@ -39,6 +39,10 @@ export function WatchlistPanel({ watchlist }: WatchlistPanelProps) {
           <Link
             key={item.symbol}
             href={`/asset/${item.slug}`}
+            // Each asset page opens a live order book on the venue. Left on, the
+            // viewport prefetch fires one request per row for pages nobody asked
+            // for, which is how the watchlist alone burns the venue rate limit.
+            prefetch={false}
             className="flex items-center gap-2 border-b border-divider no-underline hover:bg-hover rounded"
             style={{ padding: '6px 4px' }}
           >

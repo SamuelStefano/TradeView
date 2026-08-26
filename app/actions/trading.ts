@@ -6,6 +6,7 @@ import { getSessionUserId } from '@/lib/supabase/server';
 import { placeOrder, quoteOrder } from '@/lib/trading/place-order';
 import { recordTransfer } from '@/lib/trading/transfer';
 import { setKillSwitch } from '@/lib/trading/kill-switch';
+import { updateRiskSettings } from '@/lib/trading/risk-settings';
 import type { Side, OrderType } from '@/lib/trading/paper-engine';
 import { TradingError } from '@/lib/trading/errors';
 import { checkRate } from '@/lib/rate-limit';
@@ -162,6 +163,26 @@ export async function placeOrderAction(_prev: ActionState, form: FormData): Prom
       ok: true,
       message: `ordem ${label}: ${result.filledQty} @ ${result.avgPrice} · slippage ${result.slippagePct}%`,
     };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export async function updateRiskSettingsAction(
+  _prev: ActionState,
+  form: FormData,
+): Promise<ActionState> {
+  try {
+    const userId = await requireUser();
+
+    await updateRiskSettings(userId, {
+      maxOrderNotional: numericField(form, 'maxOrderNotional'),
+      realTradingEnabled: form.get('realTradingEnabled') === 'on',
+    });
+
+    revalidatePath('/settings');
+    revalidatePath('/trade');
+    return { ok: true, message: 'limites salvos' };
   } catch (error) {
     return failure(error);
   }
