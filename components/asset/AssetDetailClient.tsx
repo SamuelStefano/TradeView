@@ -11,6 +11,7 @@ import { FreshnessTag } from '@/components/ui/FreshnessTag';
 import { SourceRef } from '@/components/ui/SourceRef';
 import { Tabs } from '@/components/ui/Tabs';
 import { Bar } from '@/components/ui/Bar';
+import { Modal } from '@/components/ui/Modal';
 import { useRadioGroup } from '@/components/ui/useRadioGroup';
 import { Candlestick } from '@/components/charts/Candlestick';
 import { PanelRenderer } from '@/components/panels/PanelRenderer';
@@ -286,6 +287,8 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
     VOL: true,
   });
   const [showTable, setShowTable] = useState(false);
+  const [showTrend, setShowTrend] = useState(false);
+  const [orderOpen, setOrderOpen] = useState(false);
 
   const data = allData[activeClass];
   const { asset, panels, candles, markers, ai, news, correlations } = data;
@@ -340,9 +343,9 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
       <div className="flex items-center gap-4 bg-surface border border-border rounded-lg px-3.5 py-2.5">
         <div>
           <div className="flex items-baseline gap-2">
-            <span className="font-mono font-bold" style={{ fontSize: '16px' }}>
+            <h1 className="m-0 font-mono font-bold" style={{ fontSize: '16px' }}>
               {asset.symbol}
-            </span>
+            </h1>
             <span className="text-text-faint" style={{ fontSize: '11px' }}>
               {asset.venue}
             </span>
@@ -402,6 +405,7 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
           + Alerta
         </Link>
         <button
+          onClick={() => setOrderOpen(true)}
           className="cursor-pointer"
           style={{
             height: '30px',
@@ -481,15 +485,17 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
             <div className="ml-auto flex gap-1.5 items-center">
               <button
                 type="button"
-                title="desenhar linha de tendência"
+                onClick={() => setShowTrend((v) => !v)}
+                aria-pressed={showTrend}
+                title="linha de tendência por regressão linear sobre os fechamentos"
                 className="cursor-pointer"
                 style={{
                   height: '22px',
                   padding: '0 8px',
-                  border: '1px solid var(--color-border-strong)',
+                  border: `1px solid ${showTrend ? 'var(--color-accent-border)' : 'var(--color-border-strong)'}`,
                   borderRadius: '4px',
-                  background: 'var(--color-chrome)',
-                  color: 'var(--color-text-muted)',
+                  background: showTrend ? 'var(--color-accent-bg)' : 'var(--color-chrome)',
+                  color: showTrend ? 'var(--color-accent-hover)' : 'var(--color-text-muted)',
                   fontSize: '10.5px',
                   fontFamily: 'inherit',
                 }}
@@ -524,6 +530,7 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
                 showMA={indicators.MA}
                 showBB={indicators.BB}
                 showVOL={indicators.VOL}
+                showTrend={showTrend}
                 label={`Gráfico candlestick de ${asset.symbol}; alternativa em tabela disponível pelo botão tabela`}
               />
               <div className="flex gap-3.5 mt-1.5 font-mono text-text-faint" style={{ fontSize: '9.5px' }}>
@@ -557,6 +564,31 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
 
         <PanelRenderer panels={panels} />
       </div>
+
+      <Modal
+        open={orderOpen}
+        onClose={() => setOrderOpen(false)}
+        label={`Ordem em ${asset.symbol}`}
+        className="p-5 max-w-[420px]"
+      >
+        <div className="flex flex-col gap-3">
+          <div className="text-sm font-bold text-text">Ordem em {asset.symbol}</div>
+          <p className="text-[11.5px] text-text-secondary leading-[1.5] m-0">
+            O roteamento de ordens entra na fase 2, atrás do gate de paper trading. Toda
+            ordem passa primeiro por execução simulada com custo real — spread, taxa e
+            slippage do book — e alimenta o ledger.
+          </p>
+          <p className="text-[11.5px] text-text-muted leading-[1.5] m-0">
+            Capital real só é liberado após 60–90 dias de track record calibrado.
+          </p>
+          <button
+            onClick={() => setOrderOpen(false)}
+            className="h-8 bg-hover border border-border-strong rounded-md text-text-secondary text-xs cursor-pointer hover:text-text"
+          >
+            Entendi
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

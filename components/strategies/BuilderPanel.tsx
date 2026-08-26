@@ -54,8 +54,10 @@ export function BuilderPanel({ onActivateReal }: BuilderPanelProps) {
 
   return (
     <section
+      id="builder"
+      tabIndex={-1}
       aria-label="Builder"
-      className="bg-surface border border-border rounded-lg p-3.5 flex flex-col gap-3"
+      className="bg-surface border border-border rounded-lg p-3.5 flex flex-col gap-3 outline-none"
     >
       <div
         className="text-[11px] text-text-muted uppercase tracking-[0.6px]"

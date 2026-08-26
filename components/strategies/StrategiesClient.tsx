@@ -15,6 +15,12 @@ export function StrategiesClient({ strategies }: StrategiesClientProps) {
   const [realOpen, setRealOpen] = useState(false);
   const realCount = strategies.filter((s) => s.mode === 'REAL').length;
 
+  function focusBuilder() {
+    const builder = document.getElementById('builder');
+    builder?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    builder?.focus({ preventScroll: true });
+  }
+
   return (
     <>
       <div className="flex flex-col gap-3 p-4 text-[13px]">
@@ -25,6 +31,7 @@ export function StrategiesClient({ strategies }: StrategiesClientProps) {
           </span>
           <div className="flex-1" />
           <button
+            onClick={focusBuilder}
             className="h-[30px] px-3.5 bg-accent-bg border border-accent-border rounded-md text-accent-hover text-xs font-semibold cursor-pointer hover:bg-accent-border"
           >
             + Nova estratégia

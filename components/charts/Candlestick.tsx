@@ -8,6 +8,7 @@ interface CandlestickProps {
   showMA: boolean;
   showBB: boolean;
   showVOL: boolean;
+  showTrend: boolean;
   label: string;
 }
 
@@ -63,7 +64,23 @@ function computeChart(candles: Candle[]) {
     col: c.close >= c.open ? UP : DN,
   }));
 
-  return { gridLines, candleData, maLine, bbU, bbL, vols, scaleY };
+  const n = candles.length;
+  const sumX = (n * (n - 1)) / 2;
+  const sumXX = ((n - 1) * n * (2 * n - 1)) / 6;
+  const sumY = candles.reduce((acc, c) => acc + c.close, 0);
+  const sumXY = candles.reduce((acc, c, i) => acc + i * c.close, 0);
+  const denom = n * sumXX - sumX * sumX || 1;
+  const slope = (n * sumXY - sumX * sumY) / denom;
+  const intercept = (sumY - slope * sumX) / n;
+  const trend = {
+    x1: 6,
+    y1: scaleY(intercept).toFixed(1),
+    x2: (n - 1) * CANDLE_W + 6,
+    y2: scaleY(intercept + slope * (n - 1)).toFixed(1),
+    rising: slope >= 0,
+  };
+
+  return { gridLines, candleData, maLine, bbU, bbL, vols, scaleY, trend };
 }
 
 interface MarkerSpec {
@@ -98,10 +115,10 @@ function buildMarkers(candles: Candle[], markers: ChartMarker[], scaleY: (p: num
   }).filter((m): m is MarkerSpec => m !== null);
 }
 
-export function Candlestick({ candles, markers, showMA, showBB, showVOL, label }: CandlestickProps) {
+export function Candlestick({ candles, markers, showMA, showBB, showVOL, showTrend, label }: CandlestickProps) {
   if (candles.length === 0) return null;
 
-  const { gridLines, candleData, maLine, bbU, bbL, vols, scaleY } = computeChart(candles);
+  const { gridLines, candleData, maLine, bbU, bbL, vols, scaleY, trend } = computeChart(candles);
   const markerSpecs = buildMarkers(candles, markers, scaleY);
 
   return (
@@ -127,6 +144,18 @@ export function Candlestick({ candles, markers, showMA, showBB, showVOL, label }
           <rect x={c.x} y={c.y} width="8" height={c.h} fill={c.col} rx="1" />
         </g>
       ))}
+      {showTrend && (
+        <line
+          x1={trend.x1}
+          y1={trend.y1}
+          x2={trend.x2}
+          y2={trend.y2}
+          stroke={trend.rising ? 'var(--color-up)' : 'var(--color-down)'}
+          strokeWidth="1.4"
+          strokeDasharray="5 4"
+          opacity={0.85}
+        />
+      )}
       {showMA && (
         <polyline points={maLine} fill="none" stroke="var(--color-warn)" strokeWidth="1.3" opacity={0.9} />
       )}

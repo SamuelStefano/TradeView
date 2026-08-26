@@ -19,7 +19,9 @@ export function StrategyTable({ strategies }: StrategyTableProps) {
         className="grid px-3.5 py-2 border-b border-border"
         style={{ gridTemplateColumns: GRID }}
       >
-        <div role="columnheader" />
+        <div role="columnheader">
+          <span className="sr-only">Ícone de estado</span>
+        </div>
         <div role="columnheader" className="text-[10px] text-text-faint uppercase tracking-[0.5px]">Estratégia</div>
         <div role="columnheader" className="text-[10px] text-text-faint uppercase tracking-[0.5px]">Estado</div>
         <div role="columnheader" className="text-[10px] text-text-faint uppercase tracking-[0.5px] text-right">P&L</div>
