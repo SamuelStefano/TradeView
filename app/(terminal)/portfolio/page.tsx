@@ -13,6 +13,7 @@ export const metadata = {
 
 export default async function PortfolioPage() {
   const data = (await getDataSource().getPortfolio()) as PortfolioData;
+  const venueCount = new Set(data.positions.map((p) => p.venue)).size;
 
   return (
     <div className="flex flex-col gap-3 p-4 text-xs">
@@ -21,7 +22,7 @@ export default async function PortfolioPage() {
           Portfólio consolidado
         </h1>
         <span className="text-text-muted" style={{ fontSize: '11px' }}>
-          55 integrações · atualizado{' '}
+          {data.positions.length} posições · {venueCount} venues · atualizado{' '}
           <span className="font-mono">há 3s</span>
         </span>
         <div className="flex-1" />

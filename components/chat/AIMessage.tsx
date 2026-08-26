@@ -1,4 +1,7 @@
+'use client';
+
 import { SourceRef } from '@/components/ui/SourceRef';
+import { useShellHealth } from '@/components/shell/health-context';
 import { AttributionBar } from './AttributionBar';
 import { RiskMatrix } from './RiskMatrix';
 
@@ -44,6 +47,8 @@ export function AIMessage({
   suggestedActions,
   onSuggestedAction,
 }: AIMessageProps) {
+  const { connected } = useShellHealth();
+
   return (
     <div className="flex flex-col gap-2.5" style={{ maxWidth: '86%' }}>
       <div className="flex items-center gap-2 text-text-faint" style={{ fontSize: '10.5px' }}>
@@ -60,7 +65,7 @@ export function AIMessage({
         }}
       >
         Seu portfólio caiu{' '}
-        <SourceRef source="P&L consolidado, 55 integrações" className="text-accent">
+        <SourceRef source={`P&L consolidado, ${connected} integrações`} className="text-accent">
           −R$ 8.112 (−0,28%)
         </SourceRef>{' '}
         hoje. Três fatores explicam{' '}
