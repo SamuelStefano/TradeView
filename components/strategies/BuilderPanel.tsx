@@ -5,6 +5,8 @@ import { Bar } from '@/components/ui/Bar';
 
 interface BuilderPanelProps {
   onActivateReal: () => void;
+  onRunBacktest: () => void;
+  running: boolean;
 }
 
 interface EntryCondition {
@@ -35,7 +37,7 @@ function aiWeightNote(weight: number): string {
   return `Com ${weight}%, a IA abre posição sozinha. Exige track record calibrado antes de ir a real.`;
 }
 
-export function BuilderPanel({ onActivateReal }: BuilderPanelProps) {
+export function BuilderPanel({ onActivateReal, onRunBacktest, running }: BuilderPanelProps) {
   const [entries, setEntries] = useState(INITIAL_ENTRIES);
   const [aiWeight, setAiWeight] = useState(35);
 
@@ -147,8 +149,13 @@ export function BuilderPanel({ onActivateReal }: BuilderPanelProps) {
       </div>
 
       <div className="flex gap-2">
-        <button className="flex-1 h-8 bg-hover border border-border-strong rounded-md text-text-secondary text-xs cursor-pointer hover:text-text">
-          Rodar backtest
+        <button
+          onClick={onRunBacktest}
+          disabled={running || entries.length === 0}
+          title={entries.length === 0 ? 'Adicione ao menos uma condição de entrada' : undefined}
+          className="flex-1 h-8 bg-hover border border-border-strong rounded-md text-text-secondary text-xs cursor-pointer hover:text-text disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {running ? 'Rodando…' : 'Rodar backtest'}
         </button>
         <button
           onClick={onActivateReal}

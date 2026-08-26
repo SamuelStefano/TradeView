@@ -74,7 +74,49 @@ const trades: TradeRow[] = [
   { d: '02/07/26', a: 'BTC perp', s: 'LONG', e: '61.480', x: '65.120', r: '+5,9%', dur: '5d 3h' },
 ];
 
-export function BacktestPanel() {
+export type BacktestStatus = 'idle' | 'running' | 'done';
+
+interface BacktestPanelProps {
+  status: BacktestStatus;
+  progress: number;
+}
+
+function RunStatus({ status, progress }: BacktestPanelProps) {
+  if (status === 'idle') {
+    return (
+      <span className="text-[10.5px] text-text-faint" role="status" aria-live="polite">
+        sem execução nesta sessão
+      </span>
+    );
+  }
+
+  if (status === 'done') {
+    return (
+      <span className="text-[10.5px] text-up" role="status" aria-live="polite">
+        ✓ concluído — 1.324 candles, 4 trades
+      </span>
+    );
+  }
+
+  const remaining = Math.max(1, Math.round((100 - progress) * 0.5));
+
+  return (
+    <span
+      className="flex items-center gap-1.5 text-[10.5px] text-accent-hover"
+      role="status"
+      aria-live="polite"
+    >
+      <span
+        className="w-1.5 h-1.5 rounded-full bg-accent-hover animate-pulse-dot"
+        aria-hidden="true"
+      />
+      rodando · {progress}%
+      <span className="text-text-faint">· ~{remaining}s restantes</span>
+    </span>
+  );
+}
+
+export function BacktestPanel({ status, progress }: BacktestPanelProps) {
   const { equity, bench, ddBars, hist } = chartData;
 
   return (
@@ -88,14 +130,7 @@ export function BacktestPanel() {
         >
           Backtest — jan/2023 → ago/2026
         </span>
-        <span className="flex items-center gap-1.5 text-[10.5px] text-accent-hover">
-          <span
-            className="w-1.5 h-1.5 rounded-full bg-accent-hover animate-pulse-dot"
-            aria-hidden="true"
-          />
-          rodando · 82%
-          <span className="text-text-faint">· ~40s restantes</span>
-        </span>
+        <RunStatus status={status} progress={progress} />
         <div className="ml-auto flex gap-3 font-mono tabular-nums text-[11px]">
           <span className="text-up">+214,8%</span>
           <span className="text-text-muted">vs BTC hold +168,2%</span>

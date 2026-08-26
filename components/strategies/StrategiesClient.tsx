@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Strategy } from '@/lib/types';
 import { StrategyTable } from './StrategyTable';
 import { BuilderPanel } from './BuilderPanel';
-import { BacktestPanel } from './BacktestPanel';
+import { BacktestPanel, type BacktestStatus } from './BacktestPanel';
 import { RealModeModal } from './RealModeModal';
 
 interface StrategiesClientProps {
@@ -13,7 +13,35 @@ interface StrategiesClientProps {
 
 export function StrategiesClient({ strategies }: StrategiesClientProps) {
   const [realOpen, setRealOpen] = useState(false);
+  const [status, setStatus] = useState<BacktestStatus>('idle');
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const realCount = strategies.filter((s) => s.mode === 'REAL').length;
+
+  useEffect(() => {
+    const timer = timerRef;
+    return () => {
+      if (timer.current) clearInterval(timer.current);
+    };
+  }, []);
+
+  function runBacktest() {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setStatus('running');
+    setProgress(0);
+    timerRef.current = setInterval(() => {
+      setProgress((p) => {
+        const next = p + 7;
+        if (next >= 100) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          timerRef.current = null;
+          setStatus('done');
+          return 100;
+        }
+        return next;
+      });
+    }, 120);
+  }
 
   function focusBuilder() {
     const builder = document.getElementById('builder');
@@ -41,8 +69,12 @@ export function StrategiesClient({ strategies }: StrategiesClientProps) {
         <StrategyTable strategies={strategies} />
 
         <div className="grid gap-3 items-start" style={{ gridTemplateColumns: '380px 1fr' }}>
-          <BuilderPanel onActivateReal={() => setRealOpen(true)} />
-          <BacktestPanel />
+          <BuilderPanel
+            onActivateReal={() => setRealOpen(true)}
+            onRunBacktest={runBacktest}
+            running={status === 'running'}
+          />
+          <BacktestPanel status={status} progress={progress} />
         </div>
       </div>
 
