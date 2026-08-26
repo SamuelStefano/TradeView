@@ -1,4 +1,5 @@
 import type { FiscalRow } from '@/lib/data/mock/portfolio';
+import { ExportCsvButton } from '@/components/ui/ExportCsvButton';
 
 interface FiscalPanelProps {
   rows: FiscalRow[];
@@ -52,13 +53,17 @@ export function FiscalPanel({ rows, darfAmount, darfDue }: FiscalPanelProps) {
             {darfAmount}
           </div>
         </div>
-        <button
-          type="button"
-          className="bg-hover border border-border-strong rounded text-text-secondary cursor-pointer"
+        <ExportCsvButton
+          headers={['linha', 'valor']}
+          rows={[
+            ...rows.map((f) => [f.label, f.value]),
+            ['DARF estimado', darfAmount],
+            ['vencimento', darfDue],
+          ]}
+          filename="tradeview-memoria-de-calculo"
+          label="Gerar memória de cálculo"
           style={{ height: '26px', padding: '0 11px', fontSize: '11px', fontFamily: 'inherit' }}
-        >
-          Gerar memória de cálculo
-        </button>
+        />
       </div>
     </section>
   );
