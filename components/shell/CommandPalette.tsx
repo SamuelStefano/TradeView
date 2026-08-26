@@ -29,25 +29,43 @@ interface CommandPaletteProps {
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
     if (!open) return;
-    const id = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
-    return () => clearTimeout(id);
-  }, [open]);
 
-  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    const id = setTimeout(() => inputRef.current?.focus(), 50);
+
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && open) {
+      if (e.key === 'Escape') {
         e.preventDefault();
         onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>('button, input');
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
       }
     }
+
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
+    return () => {
+      clearTimeout(id);
+      document.removeEventListener('keydown', onKeyDown);
+      prev?.focus();
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -68,6 +86,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--color-scrim) 60%, transparent)', zIndex: 60, display: 'flex', justifyContent: 'center', paddingTop: '12vh' }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-label="Busca global"
         aria-modal="true"
@@ -80,6 +99,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Digite um ativo, mercado ou ação…"
+          aria-label="Buscar ativo, mercado ou ação"
           className="border-b border-border text-text font-sans outline-none bg-transparent"
           style={{ height: 44, padding: '0 16px', fontSize: 14 }}
         />
