@@ -4,6 +4,8 @@ O runner é um processo Node que fica vivo, reivindica estratégias com lease e
 avalia cada uma no fechamento da vela. Ele não escuta em porta nenhuma: fala com
 o Postgres e com endpoints públicos de exchange, e nada fala com ele.
 
+O host é a VPS pessoal (`samuel-agents`), que roda Docker Compose — não Swarm.
+
 ## Antes de qualquer deploy
 
 1. Aplicar a migration `supabase/migrations/20260826000006_strategies.sql` no
@@ -12,58 +14,58 @@ o Postgres e com endpoints públicos de exchange, e nada fala com ele.
 2. Ter a `SUPABASE_SECRET_KEY` (service role) em mãos. Ela ignora RLS — o escopo
    por usuário é aplicado no código, à mão.
 
+## Provar antes de subir
+
+```bash
+./runner/e2e.sh
+```
+
+Sobe um Postgres com as migrations, um PostgREST e o runner, tudo descartável em
+loopback, e prova o ciclo contra candles de verdade: reivindicar sob lease,
+decidir na vela fechada, colocar ordem, mexer no razão, liberar a lease. Não toca
+o Supabase real. Rodar depois de qualquer mudança no runner ou nas migrations.
+
 ## Build
 
-Na sua máquina:
+A imagem é construída no próprio host — não há registry, e não precisa haver:
 
 ```bash
-docker build -t tradeview-runner:$(git rev-parse --short HEAD) .
-docker save tradeview-runner:$(git rev-parse --short HEAD) | gzip > /tmp/tradeview-runner.tar.gz
-scp /tmp/tradeview-runner.tar.gz root@SEU_HOST:/tmp/
+docker build -t tradeview-runner:latest .
 ```
-
-Na VPS:
-
-```bash
-gunzip -c /tmp/tradeview-runner.tar.gz | docker load
-```
-
-Não existe registry para esta imagem. Se um dia existir, ele precisa ser privado:
-a imagem carrega a lógica de execução, não segredo, mas também não é pública.
 
 ## Segredo
 
-A chave vai como Docker secret, nunca no stack file — o que está no stack file
-aparece em `docker service inspect` e no repositório.
+A chave vai como arquivo montado, nunca como variável de ambiente: `docker
+inspect` mostra o ambiente de qualquer container para quem alcança o daemon, e a
+service role ignora RLS.
 
 ```bash
-printf '%s' 'SUA_SUPABASE_SECRET_KEY' \
-  | docker secret create tradeview_supabase_secret_key -
+install -m 600 /dev/null ~/.tradeview-supabase-secret-key
+printf '%s' 'SUA_SUPABASE_SECRET_KEY' > ~/.tradeview-supabase-secret-key
 ```
 
-Rotacionar é criar `..._v2`, apontar o stack para ele e remover o antigo depois
-que o serviço subiu.
+Fora do repositório, 0600 do dono. Rotacionar é reescrever o arquivo e recriar o
+container — o segredo é lido no boot.
 
 ## Subir
 
 ```bash
-export TRADEVIEW_IMAGE=tradeview-runner:abc1234
+cd ~/TradeView
 export TRADEVIEW_SUPABASE_URL=https://SEU_PROJETO.supabase.co
+export TRADEVIEW_SECRET_FILE=$HOME/.tradeview-supabase-secret-key
+export TRADEVIEW_VERSION=$(git rev-parse --short HEAD)
 
-docker stack deploy \
-  -c deploy/tradeview-runner.stack.yml \
-  --resolve-image never \
-  tradeview
+docker compose -f deploy/docker-compose.yml up -d
 ```
 
-`--resolve-image never` porque a imagem foi carregada localmente e não existe em
-registry nenhum; sem isso o Swarm tenta resolver e falha.
+As duas primeiras variáveis não têm default de propósito: sem elas o compose
+recusa em vez de subir um runner que não sabe com qual banco falar.
 
 ## Conferir
 
 ```bash
-docker service ls | grep tradeview
-docker service logs -f tradeview_runner
+docker compose -f deploy/docker-compose.yml logs -f
+docker inspect --format '{{.State.Health.Status}}' tradeview-runner
 ```
 
 O que esperar no primeiro minuto:
@@ -75,7 +77,8 @@ O que esperar no primeiro minuto:
 
 Se aparecer `fatal` com `variável de ambiente ausente`, o segredo ou a URL não
 chegaram no container. Se aparecer `claim_falhou`, a migration não foi aplicada
-ou a chave não é a service role.
+ou a chave não é a service role — e o intervalo entre as tentativas cresce, então
+a falha continua visível sem queimar uma requisição a cada quinze segundos.
 
 ## Saúde
 
@@ -84,13 +87,18 @@ existe porque o processo não escuta em porta: sem isso, um runner travado numa
 requisição que nunca volta continuaria `Running` segurando as leases, e toda
 estratégia reivindicada ficaria parada até alguém notar.
 
+O `valdez-autoheal` que já roda nesta VPS reinicia quem ficar `unhealthy` — daí a
+label `autoheal: 'true'` no compose. A label `autoheal.stop.timeout: '60'` existe
+porque o padrão dele é matar em 10s, o que cortaria o desligamento no meio e
+deixaria as leases presas até expirar.
+
 Do lado do banco, `tradeview.runner_heartbeats` responde a mesma pergunta pela
 aplicação — `last_seen_at` velho significa runner morto ou sem rede.
 
 ## Parar
 
 ```bash
-docker stack rm tradeview
+docker compose -f deploy/docker-compose.yml down
 ```
 
 O `stop_grace_period` de 60s dá tempo do runner terminar a estratégia na mão e
@@ -99,7 +107,7 @@ perde, mas as estratégias ficam paradas nesse intervalo.
 
 ## Escala
 
-Uma réplica. O lease existe para que duas réplicas sejam *seguras*, não para que
-sejam úteis: duas dividem as mesmas estratégias e dobram as chamadas à exchange
-para as mesmas decisões. Se um dia precisar de mais, o limitador é o rate limit
-da venue, não a CPU.
+Uma instância. O lease existe para que duas sejam *seguras*, não para que sejam
+úteis: duas dividem as mesmas estratégias e dobram as chamadas à exchange para as
+mesmas decisões. Se um dia precisar de mais, o limitador é o rate limit da venue,
+não a CPU.

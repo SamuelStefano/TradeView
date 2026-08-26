@@ -1,0 +1,51 @@
+# O runner na VPS pessoal. Leia deploy/RUNNER.md antes: a imagem e o arquivo de
+# segredo precisam existir no host para este arquivo significar alguma coisa.
+
+services:
+  runner:
+    image: tradeview-runner:latest
+    container_name: tradeview-runner
+
+    # Sem `ports` e sem proxy, de propósito. O runner abre conexões de saída e
+    # não escuta em nada, então não existe caminho de entrada até ele.
+
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${TRADEVIEW_SUPABASE_URL:?defina TRADEVIEW_SUPABASE_URL}
+      SUPABASE_SECRET_KEY_FILE: /run/secrets/supabase_secret_key
+      TRADEVIEW_RUNNER_ID: tradeview-runner
+      TRADEVIEW_VERSION: ${TRADEVIEW_VERSION:-dev}
+      TRADEVIEW_RUNNER_TICK_MS: '15000'
+      TRADEVIEW_RUNNER_BATCH: '10'
+
+    # Montado como arquivo em vez de variável: `docker inspect` mostra o ambiente
+    # de qualquer container para quem alcança o daemon, e a chave secreta ignora
+    # RLS. O arquivo fica 0600 do dono, fora do repositório.
+    volumes:
+      - ${TRADEVIEW_SECRET_FILE:?defina TRADEVIEW_SECRET_FILE}:/run/secrets/supabase_secret_key:ro
+
+    restart: unless-stopped
+
+    # Uma instância. A lease existe para que duas sejam seguras, não úteis: duas
+    # dividem as mesmas estratégias e dobram as chamadas à exchange pelas mesmas
+    # decisões.
+    labels:
+      # O autoheal que já roda nesta VPS reinicia quem ficar unhealthy. É o que
+      # tira do ar um runner preso numa requisição que não volta — e um runner
+      # preso segura leases, o que para toda estratégia que ele reivindicou.
+      autoheal: 'true'
+      # O autoheal mata em 10s por padrão, o que cortaria o desligamento no meio
+      # e deixaria as leases presas até expirar.
+      autoheal.stop.timeout: '60'
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '5'
+
+    # Tempo de terminar a estratégia na mão e liberar as leases. Matando antes,
+    # elas ficam presas até expirar.
+    stop_grace_period: 60s
+
+    mem_limit: 512m
+    cpus: 0.5

@@ -38,12 +38,19 @@ const LIVENESS_PATH = process.env.TRADEVIEW_RUNNER_LIVENESS ?? '/tmp/tradeview-r
 
 let stopping = false;
 let ticking = false;
+let claimFailures = 0;
+let quietUntil = 0;
 
 function log(event: string, detail: Record<string, unknown> = {}): void {
   console.log(JSON.stringify({ at: new Date().toISOString(), runner: RUNNER_ID, event, ...detail }));
 }
 
 async function tick(): Promise<void> {
+  // Backing off by skipping ticks rather than by sleeping longer: the loop keeps
+  // its cadence, so the liveness file stays fresh and a real hang is still told
+  // apart from a database the runner cannot use yet.
+  if (Date.now() < quietUntil) return;
+
   const supabase = createAdminClient();
 
   const { data, error } = await supabase.rpc('claim_strategies', {
@@ -53,9 +60,17 @@ async function tick(): Promise<void> {
   });
 
   if (error) {
-    log('claim_falhou', { message: error.message });
+    // A runner pointed at a database without the migration would repeat this
+    // every tick forever. The wait grows so the failure stays visible without
+    // burning a request every fifteen seconds for days.
+    claimFailures += 1;
+    quietUntil = Date.now() + Math.min(TICK_MS * 2 ** Math.min(claimFailures, 5), 10 * 60_000);
+    log('claim_falhou', { message: error.message, seguidas: claimFailures });
     return;
   }
+
+  claimFailures = 0;
+  quietUntil = 0;
 
   const claimed = (data ?? []) as StrategyRow[];
 
