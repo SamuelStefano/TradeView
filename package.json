@@ -11,6 +11,7 @@
     "test:db": "bash supabase/tests/run.sh"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
     "ccxt": "^4.5.75",

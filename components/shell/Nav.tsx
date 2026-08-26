@@ -24,12 +24,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'onboarding', icon: '➔', label: 'Onboarding', href: '/onboarding' },
 ];
 
-interface NavProps {
-  density: 'compacto' | 'confortavel';
-  onToggleDensity: () => void;
-}
-
-export function Nav({ density, onToggleDensity }: NavProps) {
+export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -81,17 +76,6 @@ export function Nav({ density, onToggleDensity }: NavProps) {
       <div style={{ flex: 1 }} />
 
       <div className="border-t border-border pt-2 flex flex-col gap-2" style={{ padding: '8px 10px' }}>
-        <div className="flex items-center gap-2 text-text-muted" style={{ fontSize: 11 }}>
-          Densidade
-          <button
-            onClick={onToggleDensity}
-            aria-pressed={density === 'compacto'}
-            className="ml-auto border border-border-strong rounded bg-hover text-text-secondary cursor-pointer font-sans hover:border-border-hover"
-            style={{ fontSize: 10.5, padding: '2px 8px' }}
-          >
-            {density === 'compacto' ? 'Compacto' : 'Confortável'}
-          </button>
-        </div>
         <div className="text-text-faint leading-snug" style={{ fontSize: 10 }}>
           Atalhos:{' '}
           <span className="font-mono">g o</span> overview ·{' '}

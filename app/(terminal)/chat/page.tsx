@@ -1,215 +1,158 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { ChatSidebar } from '@/components/chat/ChatSidebar';
-import { ChatHeader } from '@/components/chat/ChatHeader';
-import { UserMessage } from '@/components/chat/UserMessage';
-import { AIMessage } from '@/components/chat/AIMessage';
-import { StreamingMessage } from '@/components/chat/StreamingMessage';
-import { FailureBanner } from '@/components/chat/FailureBanner';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { ChatHeader, type Model } from '@/components/chat/ChatHeader';
 import { ChatInput } from '@/components/chat/ChatInput';
+import { UserMessage } from '@/components/chat/UserMessage';
+import { AssistantMessage } from '@/components/chat/AssistantMessage';
+import { FailureBanner } from '@/components/chat/FailureBanner';
 
-type Model = 'claude-sonnet-4-6' | 'claude-opus-4-2' | 'kimi-k2' | 'grok-4';
-
-interface HistoryGroup {
-  theme: string;
-  items: { t: string; active: boolean }[];
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
-interface StreamStep {
-  t: string;
-  meta: string;
-  icon: string;
-  fgClass: string;
-}
-
-const STEP_DEFS: [string, string][] = [
-  ['Coletando dados', 'ONS, CCEE, BBCE, ECMWF · 8 fontes'],
-  ['Analisando', 'ENA vs MLT, forwards, sazonalidade 10 anos'],
-  ['Sintetizando tese', 'cenários + sizing sugerido'],
-];
-
-const FULL_STREAM_TEXT =
-  'O quadro hidrológico do Q4 parte de ENA em 62% da MLT no SE/CO com reservatórios em 41%. A curva forward da BBCE ainda precifica set/26 a R$ 119/MWh, R$ 22 abaixo do spot — historicamente esse desconto só se sustentou em anos com ENA acima de 85% da média…';
-
-function buildSteps(phase: number): StreamStep[] {
-  return STEP_DEFS.map(([t, meta], i) => ({
-    t,
-    meta,
-    icon: phase > i ? '✓' : phase === i ? '◌' : '·',
-    fgClass:
-      phase > i
-        ? 'text-up'
-        : phase === i
-        ? 'text-text'
-        : 'text-text-faint',
-  }));
-}
-
-function buildHistory(activeTheme: string, activeIndex: number): HistoryGroup[] {
-  const raw: { theme: string; items: string[] }[] = [
-    {
-      theme: 'Portfólio',
-      items: ['Por que caiu hoje + risco escondido', 'Rebalanceamento sugerido — ago'],
-    },
-    {
-      theme: 'Energia',
-      items: ['Tese Q4 — PLD e forwards', 'Carbono UE vs I-REC'],
-    },
-    {
-      theme: 'Renda fixa',
-      items: ['NTN-B 2035 vs 2045', 'DARF de agosto — conferência'],
-    },
-    {
-      theme: 'Cripto',
-      items: ['Funding squeeze BTC', 'Rotação ETH/SOL'],
-    },
-  ];
-
-  return raw.map((group) => ({
-    theme: group.theme,
-    items: group.items.map((t, i) => ({
-      t,
-      active: group.theme === activeTheme && i === activeIndex,
-    })),
-  }));
-}
-
-const ATTRIBUTION_ROWS = [
-  { sym: 'PETR4', v: '−R$ 4.210', w: '86%', tone: 'down' as const, src: 'fonte: B3, posição 8.940 ações' },
-  { sym: 'WIN out', v: '−R$ 2.890', w: '59%', tone: 'down' as const, src: 'fonte: B3 derivativos' },
-  { sym: 'SOJA nov', v: '−R$ 1.480', w: '30%', tone: 'down' as const, src: 'fonte: B3 agro' },
-  { sym: 'BTC perp', v: '+R$ 1.960', w: '40%', tone: 'up' as const, src: 'fonte: Binance' },
-];
-
-type CellLevel = 0 | 1 | 2 | 3;
-
-const LEVEL_BG = ['bg-active', 'bg-up-bg', 'bg-warn-bg', 'bg-down-strong'] as const;
-const LEVEL_FG = ['text-text-faint', 'text-up', 'text-warn', 'text-down'] as const;
-
-function makeCell(t: string, lvl: CellLevel) {
-  return { t, bgClass: t ? LEVEL_BG[lvl] : 'bg-inset', fgClass: LEVEL_FG[lvl] };
-}
-
-const RISK_MATRIX_ROWS = [
-  { factor: 'Juro real BR', cells: [makeCell('', 0), makeCell('', 1), makeCell('', 2), makeCell('41%', 3)] },
-  { factor: 'Beta cripto', cells: [makeCell('', 0), makeCell('', 1), makeCell('22%', 2), makeCell('', 3)] },
-  { factor: 'Petróleo', cells: [makeCell('', 0), makeCell('11%', 1), makeCell('', 2), makeCell('', 3)] },
-  { factor: 'USD/BRL', cells: [makeCell('8%', 0), makeCell('', 1), makeCell('', 2), makeCell('', 3)] },
-];
-
-const SUGGESTED_ACTIONS = [
-  { label: 'Sugerir hedge para o fator juro real' },
-  { label: 'Ver as 3 posições que mais caíram' },
-];
+const BOTTOM_SLACK_PX = 80;
 
 export default function ChatPage() {
   const [model, setModel] = useState<Model>('claude-sonnet-4-6');
-  const [failed, setFailed] = useState(false);
-  const [phase, setPhase] = useState(0);
-  const [chars, setChars] = useState(0);
-  const [activeTheme, setActiveTheme] = useState('Portfólio');
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [streaming, setStreaming] = useState(false);
+  const [error, setError] = useState('');
   const [draft, setDraft] = useState('');
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  // Following the tail is a mode the reader enters and leaves by scrolling, not
+  // something the stream imposes. Without it, every chunk yanks the viewport
+  // back down and reading anything above the fold becomes impossible.
+  const followRef = useRef(true);
+
+  function handleScroll() {
+    const el = scrollRef.current;
+    if (!el) return;
+    followRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < BOTTOM_SLACK_PX;
+  }
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPhase((p) => Math.min(p + 1, 3));
-      setChars((c) => (phase >= 2 ? c + 3 : 0));
-    }, 900);
-    return () => clearInterval(interval);
-  }, [phase]);
+    const el = scrollRef.current;
+    if (el && followRef.current) el.scrollTop = el.scrollHeight;
+  });
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [phase, failed]);
+  useEffect(() => () => abortRef.current?.abort(), []);
 
-  const streamText = FULL_STREAM_TEXT.slice(0, Math.min(chars * 4, FULL_STREAM_TEXT.length));
-  const steps = buildSteps(phase);
-  const history = buildHistory(activeTheme, activeIndex);
+  const send = useCallback(
+    async (text: string, history: Message[]) => {
+      const outgoing = [...history, { role: 'user' as const, content: text }];
+      setMessages([...outgoing, { role: 'assistant', content: '' }]);
+      setError('');
+      setStreaming(true);
+      followRef.current = true;
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ messages: outgoing, model }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok || !response.body) {
+          setMessages(outgoing);
+          setError((await response.text()) || 'não foi possível falar com o modelo');
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let acc = '';
+
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          acc += decoder.decode(value, { stream: true });
+          setMessages([...outgoing, { role: 'assistant', content: acc }]);
+        }
+      } catch (cause) {
+        if ((cause as Error).name === 'AbortError') return;
+        setMessages(outgoing);
+        setError('a conexão caiu antes da resposta terminar');
+      } finally {
+        setStreaming(false);
+        abortRef.current = null;
+      }
+    },
+    [model],
+  );
+
+  function handleSend() {
+    const text = draft.trim();
+    if (!text || streaming) return;
+    void send(text, messages);
+  }
 
   function handleRetry() {
-    setFailed(false);
-    setPhase(0);
-    setChars(0);
+    const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+    if (!lastUser) return;
+    const upTo = messages.slice(0, messages.lastIndexOf(lastUser));
+    void send(lastUser.content, upTo);
   }
 
   function handleNewConversation() {
-    setFailed(false);
-    setPhase(0);
-    setChars(0);
-    setActiveTheme('');
-    setActiveIndex(-1);
-  }
-
-  function handleSelectItem(theme: string, index: number) {
-    setActiveTheme(theme);
-    setActiveIndex(index);
-  }
-
-  function handleSend() {
-    setFailed(false);
-    setPhase(0);
-    setChars(0);
+    abortRef.current?.abort();
+    setMessages([]);
+    setError('');
+    setDraft('');
   }
 
   return (
-    <div
-      className="grid"
-      style={{
-        gridTemplateColumns: '232px 1fr',
-        height: 'calc(100vh - 66px)',
-        fontSize: '13px',
-      }}
-    >
+    <div className="flex flex-col min-w-0" style={{ height: 'calc(100vh - 66px)', fontSize: '13px' }}>
       <h1 className="sr-only">Chat com a IA Analyst</h1>
 
-      <ChatSidebar
-        history={history}
+      <ChatHeader
+        model={model}
+        onModelChange={setModel}
         onNewConversation={handleNewConversation}
-        onSelectItem={handleSelectItem}
+        canReset={messages.length > 0}
       />
 
-      <div className="flex flex-col min-w-0">
-        <ChatHeader model={model} onModelChange={setModel} />
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto flex flex-col gap-4"
+        style={{ padding: '18px 22px' }}
+        aria-live="polite"
+        aria-label="Conversa com a IA Analyst"
+      >
+        {messages.length === 0 && !error && (
+          <p className="text-text-faint m-0 self-center" style={{ maxWidth: '52ch', marginTop: '18vh', textAlign: 'center', lineHeight: 1.6 }}>
+            Pergunte sobre mecanismo de mercado, risco ou estratégia. O Analyst não
+            enxerga cotação ao vivo nem o seu portfólio — traga os números na pergunta
+            e ele raciocina em cima deles.
+          </p>
+        )}
 
-        <div
-          className="flex-1 overflow-y-auto flex flex-col gap-4"
-          style={{ padding: '18px 22px' }}
-          aria-live="polite"
-          aria-label="Conversa com a IA Analyst"
-        >
-          <UserMessage text="Por que meu portfólio caiu hoje? E qual meu maior risco escondido?" />
+        {messages.map((message, i) =>
+          message.role === 'user' ? (
+            <UserMessage key={i} text={message.content} />
+          ) : (
+            <AssistantMessage
+              key={i}
+              model={model}
+              text={message.content}
+              pending={streaming && i === messages.length - 1}
+            />
+          ),
+        )}
 
-          <AIMessage
-            model="claude-sonnet-4-6"
-            time="14:28"
-            sourcesCount={12}
-            attribution={ATTRIBUTION_ROWS}
-            riskMatrix={RISK_MATRIX_ROWS}
-            suggestedActions={SUGGESTED_ACTIONS}
-            onSuggestedAction={setDraft}
-          />
-
-          <UserMessage text="Monte uma tese de energia pro Q4." />
-
-          <StreamingMessage
-            model={model}
-            steps={steps}
-            streamText={streamText}
-            phase={phase}
-            onSimulateFailure={() => setFailed(true)}
-          />
-
-          {failed && <FailureBanner onRetry={handleRetry} />}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        <ChatInput value={draft} onChange={setDraft} onSend={handleSend} sessionCost="US$ 0,142" />
+        {error && <FailureBanner message={error} onRetry={handleRetry} />}
       </div>
+
+      <ChatInput value={draft} onChange={setDraft} onSend={handleSend} disabled={streaming} />
     </div>
   );
 }

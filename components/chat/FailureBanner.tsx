@@ -1,8 +1,9 @@
 interface FailureBannerProps {
+  message: string;
   onRetry: () => void;
 }
 
-export function FailureBanner({ onRetry }: FailureBannerProps) {
+export function FailureBanner({ message, onRetry }: FailureBannerProps) {
   return (
     <div
       className="bg-down-bg border border-danger-border flex items-center gap-3"
@@ -15,10 +16,10 @@ export function FailureBanner({ onRetry }: FailureBannerProps) {
       </span>
       <div className="flex-1">
         <div className="text-down font-semibold" style={{ fontSize: '12.5px' }}>
-          A análise falhou ao consultar dados da CCEE
+          {message}
         </div>
         <div className="text-text-muted mt-0.5" style={{ fontSize: '11px' }}>
-          Timeout após 30s. Sua pergunta foi preservada — nada foi cobrado.
+          Sua pergunta foi preservada.
         </div>
       </div>
       <button

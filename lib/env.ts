@@ -24,3 +24,11 @@ export function credentialsEncryptionKey(): Buffer {
 export function realTradingAllowed(): boolean {
   return process.env.TRADEVIEW_ALLOW_REAL_TRADING === 'true';
 }
+
+export function anthropicKey(): string {
+  return required('ANTHROPIC_API_KEY');
+}
+
+export function anthropicConfigured(): boolean {
+  return Boolean(process.env.ANTHROPIC_API_KEY);
+}

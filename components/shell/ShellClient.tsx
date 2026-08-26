@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useSyncExternalStore, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Topbar } from './Topbar';
 import { Nav } from './Nav';
@@ -33,31 +33,6 @@ function isTyping(target: EventTarget | null): boolean {
   );
 }
 
-const DENSITY_KEY = 'tradeview:density';
-type Density = 'compacto' | 'confortavel';
-
-const densityListeners = new Set<() => void>();
-
-function subscribeDensity(onChange: () => void) {
-  densityListeners.add(onChange);
-  return () => {
-    densityListeners.delete(onChange);
-  };
-}
-
-function readDensity(): Density {
-  return localStorage.getItem(DENSITY_KEY) === 'compacto' ? 'compacto' : 'confortavel';
-}
-
-function serverDensity(): Density {
-  return 'confortavel';
-}
-
-function writeDensity(next: Density) {
-  localStorage.setItem(DENSITY_KEY, next);
-  densityListeners.forEach((onChange) => onChange());
-}
-
 // Measured against the moment the layout fetched, so the label degrades on its
 // own when a tab is left open instead of always claiming to be fresh.
 function syncAge(fetchedAt: number): string {
@@ -75,7 +50,6 @@ export function ShellClient({ children, health }: ShellClientProps) {
   const [killOpen, setKillOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [killed, setKilled] = useState(false);
-  const density = useSyncExternalStore(subscribeDensity, readDensity, serverDensity);
   const chordRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
@@ -157,9 +131,6 @@ export function ShellClient({ children, health }: ShellClientProps) {
     };
   }, []);
 
-  function toggleDensity() {
-    writeDensity(density === 'compacto' ? 'confortavel' : 'compacto');
-  }
 
   function confirmKill() {
     setKillOpen(false);
@@ -188,7 +159,7 @@ export function ShellClient({ children, health }: ShellClientProps) {
       />
 
       <div className="flex flex-1 min-h-0">
-        <Nav density={density} onToggleDensity={toggleDensity} />
+        <Nav />
         <main id="conteudo" tabIndex={-1} className="flex-1 min-w-0 overflow-y-auto bg-base outline-none">
           {children}
         </main>
