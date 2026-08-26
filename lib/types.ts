@@ -19,8 +19,6 @@ export const ASSET_CLASSES: AssetClass[] = [
   'fundos',
 ];
 
-export type Direction = 'LONG' | 'SHORT' | 'COMPRA' | 'VENDA' | 'ALTA' | 'BAIXA';
-
 export type Tone = 'up' | 'down' | 'neutral';
 
 export type Freshness =
@@ -80,51 +78,7 @@ export type Panel =
       series2?: number[];
     };
 
-export interface Source {
-  label: string;
-}
-
-export interface Scenario {
-  label: string;
-  prob: number;
-  target: string;
-  text: string;
-}
-
-export interface AIThesis {
-  thesis: string;
-  scenarios: Scenario[];
-  risks: string[];
-  invalidations: string[];
-  sources: Source[];
-  model: string;
-  generatedAgo: string;
-}
-
-export interface Signal {
-  id: string;
-  asset: string;
-  direction: Direction;
-  conviction: number;
-  horizon: string;
-  thesis: string;
-  why: string;
-  sources: Source[];
-  ago: string;
-}
-
 export type IntegrationStatus = 'conectado' | 'degradado' | 'offline' | 'nao_configurado';
-
-export interface Integration {
-  id: string;
-  name: string;
-  assetClasses: AssetClass[];
-  status: IntegrationStatus;
-  credentialKind: string;
-  canTrade: boolean;
-  rateLimitPct: number;
-  lastResponseMs: number | null;
-}
 
 export interface Position {
   symbol: string;

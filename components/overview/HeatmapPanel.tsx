@@ -1,26 +1,12 @@
-import type { HeatmapCell } from '@/lib/data/views/overview';
+import type { HeatmapRow } from '@/lib/data/views/overview';
 import { Heatmap } from '@/components/charts/Heatmap';
 
-const ROW_LABELS: Record<number, string> = {
-  0: 'Cripto',
-  1: 'Ações BR',
-  2: 'Ações US',
-  3: 'Renda fixa',
-  4: 'Câmbio',
-  5: 'Energia',
-  6: 'Commodities',
-  7: 'Índices',
-};
-
 interface HeatmapPanelProps {
-  heatmap: HeatmapCell[][];
+  heatmap: HeatmapRow[];
 }
 
 export function HeatmapPanel({ heatmap }: HeatmapPanelProps) {
-  const rows = heatmap.map((cells, i) => ({
-    label: ROW_LABELS[i] ?? `Linha ${i + 1}`,
-    cells,
-  }));
+  const total = heatmap.reduce((s, r) => s + r.cells.length, 0);
 
   return (
     <section
@@ -33,13 +19,19 @@ export function HeatmapPanel({ heatmap }: HeatmapPanelProps) {
           className="text-text-muted font-medium uppercase"
           style={{ fontSize: '11px', letterSpacing: '0.6px' }}
         >
-          Heatmap global
+          Variação 24h por venue
         </span>
-        <span className="text-text-faint" style={{ fontSize: '10px' }}>
-          variação 24h · células = ativos
+        <span className="ml-auto font-mono text-text-faint" style={{ fontSize: '10px' }}>
+          {total} ativos
         </span>
       </div>
-      <Heatmap rows={rows} />
+      {heatmap.length === 0 ? (
+        <p className="text-text-muted m-0" style={{ fontSize: '11.5px' }}>
+          Nenhuma venue respondeu cotação agora.
+        </p>
+      ) : (
+        <Heatmap rows={heatmap} />
+      )}
     </section>
   );
 }

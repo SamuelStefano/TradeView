@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import type { WatchlistItem } from '@/lib/data/views/overview';
 import { Sparkline } from '@/components/ui/Sparkline';
 import { toneOf } from '@/lib/format';
@@ -10,7 +12,7 @@ export function WatchlistPanel({ watchlist }: WatchlistPanelProps) {
   return (
     <section
       aria-label="Watchlist"
-      className="bg-surface border border-border rounded-lg flex flex-col gap-0.5"
+      className="bg-surface border border-border rounded-lg"
       style={{ padding: '14px' }}
     >
       <div className="flex items-center" style={{ marginBottom: '8px' }}>
@@ -24,6 +26,7 @@ export function WatchlistPanel({ watchlist }: WatchlistPanelProps) {
           {watchlist.length} ativos
         </span>
       </div>
+      <div className="grid gap-x-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
       {watchlist.map((item) => {
         const tone = toneOf(item.changePct);
         const colorClass = tone === 'up' ? 'text-up' : tone === 'down' ? 'text-down' : 'text-text-secondary';
@@ -33,9 +36,10 @@ export function WatchlistPanel({ watchlist }: WatchlistPanelProps) {
         const isClosed = item.freshness.kind === 'closed';
 
         return (
-          <div
+          <Link
             key={item.symbol}
-            className="flex items-center gap-2 border-b border-divider"
+            href={`/asset/${item.slug}`}
+            className="flex items-center gap-2 border-b border-divider no-underline hover:bg-hover rounded"
             style={{ padding: '6px 4px' }}
           >
             <div className="min-w-0 flex-1">
@@ -83,9 +87,10 @@ export function WatchlistPanel({ watchlist }: WatchlistPanelProps) {
                 {arrowChar} {chgStr}
               </div>
             </div>
-          </div>
+          </Link>
         );
       })}
+      </div>
     </section>
   );
 }

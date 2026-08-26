@@ -4,9 +4,10 @@ import { toneOf } from '@/lib/format';
 interface NetWorthPanelProps {
   netWorth: NetWorth;
   pnlCards: PnlCard[];
+  accountNote: string;
 }
 
-export function NetWorthPanel({ netWorth, pnlCards }: NetWorthPanelProps) {
+export function NetWorthPanel({ netWorth, pnlCards, accountNote }: NetWorthPanelProps) {
   return (
     <section
       aria-label="Patrimônio consolidado"
@@ -29,9 +30,16 @@ export function NetWorthPanel({ netWorth, pnlCards }: NetWorthPanelProps) {
         className="font-mono tabular-nums text-text-muted"
         style={{ fontSize: '12px', marginTop: '2px' }}
       >
-        {netWorth.usd}{' '}
-        <span className="text-text-faint">@ {netWorth.fxRate}</span>
+        {netWorth.usd !== '—' && <>{netWorth.usd} </>}
+        <span className="text-text-faint">
+          câmbio {netWorth.fxRate} · {netWorth.fxSource}
+        </span>
       </div>
+      {accountNote && (
+        <p className="text-text-muted m-0" style={{ fontSize: '11px', marginTop: '8px' }}>
+          {accountNote}
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-1.5" style={{ marginTop: '12px' }}>
         {pnlCards.map((card) => {
           const tone = toneOf(card.pct);

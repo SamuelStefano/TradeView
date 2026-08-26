@@ -6,7 +6,8 @@ import { getLiveAsset } from './live/asset';
 import type { Timeframe } from '../markets/timeframes';
 import type { MarketsData } from './views/markets';
 import { getLiveMarkets } from './live/venues';
-import { type OverviewData, overviewMock } from './views/overview';
+import type { OverviewData } from './views/overview';
+import { getLiveOverview } from './live/overview';
 import type { PortfolioData } from './views/portfolio';
 import { emptyPortfolio, getLivePortfolio } from './live/portfolio';
 import { strategiesMock } from './views/strategies';
@@ -22,9 +23,9 @@ export interface DataSource {
   getAnalytics(): Promise<AnalyticsData>;
 }
 
-const mockDataSource: DataSource = {
+const dataSource: DataSource = {
   async getOverview() {
-    return overviewMock;
+    return getLiveOverview();
   },
   async getAsset(slug, timeframe) {
     return getLiveAsset(slug, timeframe);
@@ -57,5 +58,5 @@ export async function fetchedAt(): Promise<number> {
 }
 
 export function getDataSource(): DataSource {
-  return mockDataSource;
+  return dataSource;
 }
