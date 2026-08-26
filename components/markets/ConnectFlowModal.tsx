@@ -22,6 +22,8 @@ const PROVIDERS: Provider[] = [
 
 const TOTAL_STEPS = 5;
 
+type Scope = 'leitura' | 'ordens';
+
 interface ConnectFlowModalProps {
   open: boolean;
   onClose: () => void;
@@ -29,9 +31,21 @@ interface ConnectFlowModalProps {
 
 export function ConnectFlowModal({ open, onClose }: ConnectFlowModalProps) {
   const [step, setStep] = useState(1);
+  const [provider, setProvider] = useState<Provider>(PROVIDERS[0]);
+  const [scope, setScope] = useState<Scope>('leitura');
 
   function next() {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+  }
+
+  function pickProvider(pv: Provider) {
+    setProvider(pv);
+    next();
+  }
+
+  function pickScope(s: Scope) {
+    setScope(s);
+    next();
   }
 
   const dots = Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1 <= step);
@@ -56,7 +70,7 @@ export function ConnectFlowModal({ open, onClose }: ConnectFlowModalProps) {
       <div className="flex items-center gap-2.5">
         <span className="text-sm font-bold text-text">Conectar integração</span>
         <span className="ml-auto font-mono text-text-faint" style={{ fontSize: '10.5px' }}>
-          passo {step}/5
+          passo {step}/{TOTAL_STEPS}
         </span>
       </div>
 
@@ -70,21 +84,11 @@ export function ConnectFlowModal({ open, onClose }: ConnectFlowModalProps) {
         ))}
       </div>
 
-      {step === 1 && (
-        <Step1 onSelect={next} />
-      )}
-      {step === 2 && (
-        <Step2 />
-      )}
-      {step === 3 && (
-        <Step3 />
-      )}
-      {step === 4 && (
-        <Step4 onSelect={next} />
-      )}
-      {step === 5 && (
-        <Step5 />
-      )}
+      {step === 1 && <Step1 onSelect={pickProvider} />}
+      {step === 2 && <Step2 provider={provider} />}
+      {step === 3 && <Step3 />}
+      {step === 4 && <Step4 onSelect={pickScope} />}
+      {step === 5 && <Step5 provider={provider} scope={scope} />}
 
       <div className="flex gap-2 justify-end">
         <button
@@ -117,13 +121,13 @@ export function ConnectFlowModal({ open, onClose }: ConnectFlowModalProps) {
   );
 }
 
-function Step1({ onSelect }: { onSelect: () => void }) {
+function Step1({ onSelect }: { onSelect: (pv: Provider) => void }) {
   return (
     <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
       {PROVIDERS.map((pv) => (
         <button
           key={pv.name}
-          onClick={onSelect}
+          onClick={() => onSelect(pv)}
           className="flex flex-col gap-1 items-start p-3 bg-inset border border-border rounded-lg cursor-pointer font-sans text-left hover:border-accent-border transition-colors"
         >
           <span className="font-semibold text-text" style={{ fontSize: '12px' }}>{pv.name}</span>
@@ -134,11 +138,11 @@ function Step1({ onSelect }: { onSelect: () => void }) {
   );
 }
 
-function Step2() {
+function Step2({ provider }: { provider: Provider }) {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-text-secondary" style={{ fontSize: '12.5px' }}>
-        Cole a chave de API da <strong className="text-text">Binance</strong>. Prefira uma chave somente-leitura — a permissão de ordem só é exigida no passo 4. Depois de salva, a chave não aparece completa de novo.
+        Cole a chave de API da <strong className="text-text">{provider.name}</strong>. Prefira uma chave somente-leitura — a permissão de ordem só é exigida no passo 4. Depois de salva, a chave não aparece completa de novo.
       </p>
       <label className="text-text-muted flex flex-col gap-1" style={{ fontSize: '11px' }}>
         API key
@@ -175,11 +179,11 @@ function Step3() {
   );
 }
 
-function Step4({ onSelect }: { onSelect: () => void }) {
+function Step4({ onSelect }: { onSelect: (s: Scope) => void }) {
   return (
     <div className="flex flex-col gap-2">
       <button
-        onClick={onSelect}
+        onClick={() => onSelect('leitura')}
         className="flex gap-2.5 items-start p-3 bg-up-bg border-2 border-up rounded-lg cursor-pointer font-sans text-left"
       >
         <span className="text-up mt-0.5">●</span>
@@ -199,7 +203,7 @@ function Step4({ onSelect }: { onSelect: () => void }) {
         </div>
       </button>
       <button
-        onClick={onSelect}
+        onClick={() => onSelect('ordens')}
         className="flex gap-2.5 items-start p-3 bg-down-bg border border-danger-border rounded-lg cursor-pointer font-sans text-left"
       >
         <span className="text-down mt-0.5">⚠</span>
@@ -216,14 +220,27 @@ function Step4({ onSelect }: { onSelect: () => void }) {
   );
 }
 
-function Step5() {
+function Step5({ provider, scope }: { provider: Provider; scope: Scope }) {
+  const orders = scope === 'ordens';
+
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-text-secondary" style={{ fontSize: '12.5px', lineHeight: 1.55 }}>
-        Confirme: conectar <strong className="text-text">Binance</strong> em modo{' '}
-        <strong className="text-up">somente leitura</strong>, chave terminada em{' '}
-        <span className="font-mono">3kQz</span>, rotação sugerida a cada 90 dias.
+        Confirme: conectar <strong className="text-text">{provider.name}</strong> em modo{' '}
+        <strong className={orders ? 'text-down' : 'text-up'}>
+          {orders ? 'leitura + envio de ordens' : 'somente leitura'}
+        </strong>
+        , chave terminada em <span className="font-mono">3kQz</span>, rotação sugerida a cada 90 dias.
       </p>
+      {orders && (
+        <p
+          className="border border-danger-border rounded-md bg-down-bg text-down p-2.5 m-0"
+          style={{ fontSize: '11.5px', lineHeight: 1.5 }}
+        >
+          ⚠ Esta chave poderá movimentar dinheiro real na sua conta {provider.name}. Se você não
+          precisa enviar ordens hoje, volte e escolha somente leitura.
+        </p>
+      )}
       <p className="text-text-faint" style={{ fontSize: '11px' }}>
         Você pode revogar a qualquer momento em Configurações → Chaves.
       </p>
