@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface PaletteResult {
@@ -28,9 +28,25 @@ interface CommandPaletteProps {
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
+  const [highlighted, setHighlighted] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const listId = useId();
   const router = useRouter();
+
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setQuery('');
+      setHighlighted(0);
+    }
+  }
+
+  const q = query.toLowerCase();
+  const results = q
+    ? ALL_RESULTS.filter((r) => r.label.toLowerCase().includes(q))
+    : ALL_RESULTS;
 
   useEffect(() => {
     if (!open) return;
@@ -44,6 +60,24 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         onClose();
         return;
       }
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (results.length === 0) return;
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        setHighlighted((i) => (i + step + results.length) % results.length);
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        const target = results[highlighted];
+        if (!target) return;
+        e.preventDefault();
+        router.push(target.href);
+        onClose();
+        return;
+      }
+
       if (e.key !== 'Tab' || !dialogRef.current) return;
 
       const focusable = dialogRef.current.querySelectorAll<HTMLElement>('button, input');
@@ -66,14 +100,9 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       document.removeEventListener('keydown', onKeyDown);
       prev?.focus();
     };
-  }, [open, onClose]);
+  }, [open, onClose, results, highlighted, router]);
 
   if (!open) return null;
-
-  const q = query.toLowerCase();
-  const results = q
-    ? ALL_RESULTS.filter((r) => r.label.toLowerCase().includes(q))
-    : ALL_RESULTS;
 
   function go(href: string) {
     router.push(href);
@@ -97,19 +126,36 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         <input
           ref={inputRef}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setHighlighted(0);
+          }}
           placeholder="Digite um ativo, mercado ou ação…"
           aria-label="Buscar ativo, mercado ou ação"
+          role="combobox"
+          aria-expanded={results.length > 0}
+          aria-controls={listId}
+          aria-activedescendant={results[highlighted] ? `${listId}-${highlighted}` : undefined}
+          autoComplete="off"
           className="border-b border-border text-text font-sans outline-none bg-transparent"
           style={{ height: 44, padding: '0 16px', fontSize: 14 }}
         />
-        <div className="overflow-y-auto p-1.5">
+        <div id={listId} role="listbox" aria-label="Resultados" className="overflow-y-auto p-1.5">
           {results.map((r, i) => (
             <button
               key={i}
+              id={`${listId}-${i}`}
+              role="option"
+              aria-selected={i === highlighted}
+              tabIndex={-1}
+              onMouseEnter={() => setHighlighted(i)}
               onClick={() => go(r.href)}
-              className="flex items-center gap-2.5 w-full rounded-md border-none text-text text-left cursor-pointer font-sans hover:bg-hover"
-              style={{ padding: '8px 10px', background: 'transparent', fontSize: 12.5 }}
+              className="flex items-center gap-2.5 w-full rounded-md border-none text-text text-left cursor-pointer font-sans"
+              style={{
+                padding: '8px 10px',
+                background: i === highlighted ? 'var(--color-hover)' : 'transparent',
+                fontSize: 12.5,
+              }}
             >
               <span
                 className="font-mono text-text-faint"
