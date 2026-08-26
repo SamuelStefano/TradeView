@@ -17,6 +17,7 @@ interface ApiKeyRowProps {
 
 export function ApiKeyRow({ apiKey }: ApiKeyRowProps) {
   const [revokeOpen, setRevokeOpen] = useState(false);
+  const [rotateOpen, setRotateOpen] = useState(false);
 
   const scopeDanger = apiKey.scope === 'ORDEM + LEITURA';
 
@@ -50,6 +51,8 @@ export function ApiKeyRow({ apiKey }: ApiKeyRowProps) {
           rotação: {apiKey.rot}
         </span>
         <button
+          onClick={() => setRotateOpen(true)}
+          aria-label={`Rotacionar chave de ${apiKey.name}`}
           className="border border-border-strong rounded-md text-text-muted hover:text-text cursor-pointer"
           style={{ height: 24, padding: '0 10px', background: 'var(--color-hover)', fontSize: '10.5px', fontFamily: 'inherit' }}
         >
@@ -57,12 +60,23 @@ export function ApiKeyRow({ apiKey }: ApiKeyRowProps) {
         </button>
         <button
           onClick={() => setRevokeOpen(true)}
+          aria-label={`Revogar chave de ${apiKey.name}`}
           className="border border-danger-border rounded-md text-down cursor-pointer"
           style={{ height: 24, padding: '0 10px', background: 'var(--color-down-bg)', fontSize: '10.5px', fontFamily: 'inherit' }}
         >
           Revogar
         </button>
       </div>
+
+      <ConfirmByTyping
+        open={rotateOpen}
+        onClose={() => setRotateOpen(false)}
+        onConfirm={() => setRotateOpen(false)}
+        phrase="rotacionar chave"
+        title={`Rotacionar chave de ${apiKey.name}`}
+        description={`Uma chave nova será gerada e ${apiKey.mask} deixa de funcionar imediatamente. Estratégias que usam essa integração param até a nova chave propagar.`}
+        confirmLabel="Rotacionar agora"
+      />
 
       <ConfirmByTyping
         open={revokeOpen}
