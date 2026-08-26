@@ -21,13 +21,21 @@ const CHANNEL_OPTIONS = [
 export function CreateAlertPanel() {
   const [kinds, setKinds] = useState(KIND_OPTIONS);
   const [channels, setChannels] = useState(CHANNEL_OPTIONS);
+  const [created, setCreated] = useState<string | null>(null);
+
+  const activeChannels = channels.filter((c) => c.active);
 
   function toggleKind(i: number) {
     setKinds((prev) => prev.map((k, idx) => ({ ...k, active: idx === i ? !k.active : k.active })));
   }
 
   function toggleChannel(i: number) {
+    setCreated(null);
     setChannels((prev) => prev.map((c, idx) => ({ ...c, active: idx === i ? !c.active : c.active })));
+  }
+
+  function createAlert() {
+    setCreated(activeChannels.map((c) => c.label).join(', '));
   }
 
   return (
@@ -99,11 +107,22 @@ export function CreateAlertPanel() {
       </div>
 
       <button
-        className="h-8 bg-accent-bg border border-accent-border rounded-md text-accent-hover font-semibold cursor-pointer font-sans hover:bg-accent-bg-soft transition-colors"
+        onClick={createAlert}
+        disabled={activeChannels.length === 0}
+        title={activeChannels.length === 0 ? 'Selecione ao menos um canal' : undefined}
+        className="h-8 bg-accent-bg border border-accent-border rounded-md text-accent-hover font-semibold cursor-pointer font-sans hover:bg-accent-bg-soft transition-colors disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-accent-bg"
         style={{ fontSize: '12px' }}
       >
         Criar alerta
       </button>
+
+      <div role="status" aria-live="polite">
+        {created && (
+          <div className="font-mono text-up" style={{ fontSize: '10.5px' }}>
+            ✓ alerta armado — notifica por {created}
+          </div>
+        )}
+      </div>
 
       <p className="text-text-faint leading-relaxed" style={{ fontSize: '10px' }}>
         Alertas nunca executam ordens — apenas notificam. Disparos ficam registrados para auditoria de acurácia.

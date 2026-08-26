@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import type { AssetClass, Candle } from '@/lib/types';
 import type { AssetDetailData, NewsItem } from '@/lib/data/mock/assets';
 import { ASSET_CLASSES } from '@/lib/types';
@@ -383,8 +384,9 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
           freshness={asset.freshness}
           className="border border-border-strong rounded px-1.5 py-0.5"
         />
-        <button
-          className="cursor-pointer hover:border-border-hover transition-colors"
+        <Link
+          href="/alerts"
+          className="cursor-pointer hover:border-border-hover transition-colors flex items-center no-underline"
           style={{
             height: '30px',
             padding: '0 14px',
@@ -397,7 +399,7 @@ export function AssetDetailClient({ initialClass, allData }: Props) {
           }}
         >
           + Alerta
-        </button>
+        </Link>
         <button
           className="cursor-pointer"
           style={{

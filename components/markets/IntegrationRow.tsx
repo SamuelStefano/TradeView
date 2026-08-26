@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { MarketIntegration } from '@/lib/data/mock/markets';
 import type { IntegrationStatus } from '@/lib/types';
 import { Bar } from '@/components/ui/Bar';
@@ -152,12 +153,14 @@ export function IntegrationRow({ integration: r }: IntegrationRowProps) {
       </div>
 
       <div role="cell" className="text-right">
-        <button
-          className="bg-hover border border-border-strong rounded text-text-muted cursor-pointer font-sans hover:text-text-secondary transition-colors"
+        <Link
+          href="/settings"
+          aria-label={`${isUnconfigured ? 'Configurar' : 'Gerenciar'} ${name}`}
+          className="inline-flex items-center bg-hover border border-border-strong rounded text-text-muted cursor-pointer font-sans hover:text-text-secondary transition-colors no-underline"
           style={{ height: 24, padding: '0 10px', fontSize: '10.5px' }}
         >
           {isUnconfigured ? 'Configurar' : 'Gerenciar'}
-        </button>
+        </Link>
       </div>
     </div>
   );
