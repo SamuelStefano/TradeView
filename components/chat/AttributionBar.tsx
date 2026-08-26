@@ -1,3 +1,4 @@
+import { SourceRef } from '@/components/ui/SourceRef';
 interface AttributionRow {
   sym: string;
   v: string;
@@ -30,14 +31,12 @@ export function AttributionBar({ rows }: AttributionBarProps) {
               style={{ height: '100%', width: row.w }}
             />
           </div>
-          <a
-            href="#"
-            title={row.src}
-            className={`font-mono tabular-nums ${row.tone === 'up' ? 'text-up' : 'text-down'} hover:underline`}
-            style={{ fontSize: '11.5px', width: '88px', textAlign: 'right' }}
+          <SourceRef
+            source={row.src}
+            className={`font-mono tabular-nums ${row.tone === 'up' ? 'text-up' : 'text-down'}`}
           >
             {row.v}
-          </a>
+          </SourceRef>
         </div>
       ))}
     </div>

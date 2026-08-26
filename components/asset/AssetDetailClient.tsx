@@ -8,6 +8,7 @@ import { ASSET_CLASSES } from '@/lib/types';
 import { TIMEFRAMES, INDICATORS } from '@/lib/data/mock/assets';
 import { toneOf, toneClass } from '@/lib/format';
 import { FreshnessTag } from '@/components/ui/FreshnessTag';
+import { SourceRef } from '@/components/ui/SourceRef';
 import { Tabs } from '@/components/ui/Tabs';
 import { Bar } from '@/components/ui/Bar';
 import { useRadioGroup } from '@/components/ui/useRadioGroup';
@@ -173,9 +174,9 @@ function CorrTab({ correlations }: { correlations: { symbol: string; value: numb
       <div style={{ gridColumn: '1 / -1' }}>
         <span className="text-text-faint" style={{ fontSize: '10px' }}>
           janela 90 dias · retornos diários ·{' '}
-          <a href="#" className="text-accent hover:text-accent-hover">
+          <SourceRef source="correlação de Pearson sobre retornos diários, janela móvel de 90 dias" className="text-accent">
             metodologia
-          </a>
+          </SourceRef>
         </span>
       </div>
     </div>

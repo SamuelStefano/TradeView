@@ -1,4 +1,5 @@
 import type { RiskMetric } from '@/lib/data/mock/portfolio';
+import { SourceRef } from '@/components/ui/SourceRef';
 
 interface RiskPanelProps {
   metrics: RiskMetric[];
@@ -50,9 +51,9 @@ export function RiskPanel({ metrics, concentrationWarning }: RiskPanelProps) {
       >
         <span>⚠ {concentrationWarning}</span>
         {' '}
-        <a href="#" className="text-warn underline">
+        <SourceRef source="decomposição de fatores de risco do portfólio" className="text-warn">
           ver decomposição
-        </a>
+        </SourceRef>
       </div>
     </section>
   );

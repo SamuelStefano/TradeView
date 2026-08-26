@@ -99,7 +99,20 @@ export function MarketsClient({ data }: MarketsClientProps) {
         </div>
 
         <div className="text-text-faint" style={{ padding: '9px 14px', fontSize: '10.5px' }}>
-          mostrando {filtered.length} de {data.totalCount} · <a href="#">ver todas</a> · chaves nunca são exibidas por completo
+          mostrando {filtered.length} de {data.totalCount}
+          {filter.trim() && (
+            <>
+              {' · '}
+              <button
+                onClick={() => setFilter('')}
+                className="bg-transparent border-none p-0 text-accent underline cursor-pointer font-sans"
+                style={{ fontSize: '10.5px' }}
+              >
+                ver todas
+              </button>
+            </>
+          )}
+          {' · '}chaves nunca são exibidas por completo
         </div>
       </div>
 

@@ -1,15 +1,23 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface ChatInputProps {
+  value: string;
+  onChange: (next: string) => void;
   onSend: () => void;
   sessionCost: string;
 }
 
-export function ChatInput({ onSend, sessionCost }: ChatInputProps) {
-  const [value, setValue] = useState('');
+export function ChatInput({ value, onChange, onSend, sessionCost }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -19,21 +27,9 @@ export function ChatInput({ onSend, sessionCost }: ChatInputProps) {
   };
 
   const handleSend = () => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
+    if (!value.trim()) return;
     onSend();
-    setValue('');
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
-  };
-
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setValue(e.target.value);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
+    onChange('');
   };
 
   return (
@@ -47,7 +43,7 @@ export function ChatInput({ onSend, sessionCost }: ChatInputProps) {
           ref={textareaRef}
           rows={1}
           value={value}
-          onChange={handleInput}
+          onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Pergunte sobre qualquer ativo, mercado ou sobre o seu portfólio…"
           className="flex-1 bg-transparent border-none text-text text-sm outline-none resize-none leading-relaxed placeholder:text-text-faint"

@@ -1,3 +1,4 @@
+import { SourceRef } from '@/components/ui/SourceRef';
 import { AttributionBar } from './AttributionBar';
 import { RiskMatrix } from './RiskMatrix';
 
@@ -31,6 +32,7 @@ interface AIMessageProps {
   attribution: AttributionRow[];
   riskMatrix: RiskRow[];
   suggestedActions: SuggestedAction[];
+  onSuggestedAction: (label: string) => void;
 }
 
 export function AIMessage({
@@ -40,6 +42,7 @@ export function AIMessage({
   attribution,
   riskMatrix,
   suggestedActions,
+  onSuggestedAction,
 }: AIMessageProps) {
   return (
     <div className="flex flex-col gap-2.5" style={{ maxWidth: '86%' }}>
@@ -57,39 +60,40 @@ export function AIMessage({
         }}
       >
         Seu portfólio caiu{' '}
-        <a href="#" title="fonte: P&L consolidado, 55 integrações">
+        <SourceRef source="P&L consolidado, 55 integrações" className="text-accent">
           −R$ 8.112 (−0,28%)
-        </a>{' '}
+        </SourceRef>{' '}
         hoje. Três fatores explicam{' '}
-        <a href="#" title="fonte: atribuição de performance por posição">
+        <SourceRef source="atribuição de performance por posição" className="text-accent">
           91% da queda
-        </a>
+        </SourceRef>
         :
         <AttributionBar rows={attribution} />
         Sobre o risco escondido: sua maior exposição não é a nenhum ativo, é à{' '}
         <strong className="text-text">curva de juros real brasileira</strong>. Somando NTN-Bs,
         FIIs (correlação{' '}
-        <a href="#" title="fonte: matriz de correlação 90d">
+        <SourceRef source="matriz de correlação 90d" className="text-accent">
           0,81
-        </a>{' '}
+        </SourceRef>{' '}
         com a B35) e ações de utilities,{' '}
-        <a href="#" title="fonte: decomposição de fatores de risco">
+        <SourceRef source="decomposição de fatores de risco" className="text-accent">
           41% do patrimônio
-        </a>{' '}
+        </SourceRef>{' '}
         responde ao mesmo fator.
         <RiskMatrix rows={riskMatrix} />
         <div className="mt-2.5 text-text-faint" style={{ fontSize: '11px' }}>
           fontes:{' '}
-          <a href="#">atribuição de P&L</a> ·{' '}
-          <a href="#">matriz de correlação 90d</a> ·{' '}
-          <a href="#">curva ANBIMA</a> ·{' '}
-          <a href="#">posições consolidadas</a>
+          <SourceRef source="atribuição de P&L">atribuição de P&L</SourceRef> ·{' '}
+          <SourceRef source="matriz de correlação 90d">matriz de correlação 90d</SourceRef> ·{' '}
+          <SourceRef source="curva ANBIMA">curva ANBIMA</SourceRef> ·{' '}
+          <SourceRef source="posições consolidadas">posições consolidadas</SourceRef>
         </div>
       </div>
       <div className="flex gap-2 flex-wrap">
         {suggestedActions.map((action) => (
           <button
             key={action.label}
+            onClick={() => onSuggestedAction(action.label)}
             className="h-[26px] px-2.5 bg-inset border border-border-strong rounded-md text-text-muted cursor-pointer hover:bg-hover hover:text-text-secondary transition-colors"
             style={{ fontSize: '11px' }}
           >

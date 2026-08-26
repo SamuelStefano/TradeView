@@ -110,6 +110,7 @@ export default function ChatPage() {
   const [chars, setChars] = useState(0);
   const [activeTheme, setActiveTheme] = useState('Portfólio');
   const [activeIndex, setActiveIndex] = useState(0);
+  const [draft, setDraft] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -187,6 +188,7 @@ export default function ChatPage() {
             attribution={ATTRIBUTION_ROWS}
             riskMatrix={RISK_MATRIX_ROWS}
             suggestedActions={SUGGESTED_ACTIONS}
+            onSuggestedAction={setDraft}
           />
 
           <UserMessage text="Monte uma tese de energia pro Q4." />
@@ -204,7 +206,7 @@ export default function ChatPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        <ChatInput onSend={handleSend} sessionCost="US$ 0,142" />
+        <ChatInput value={draft} onChange={setDraft} onSend={handleSend} sessionCost="US$ 0,142" />
       </div>
     </div>
   );
