@@ -141,7 +141,7 @@ export function ShellClient({ children }: ShellClientProps) {
   return (
     <div
       className="flex flex-col overflow-hidden bg-base text-text font-sans"
-      style={{ height: '100vh', minWidth: 1360, fontSize: 13 }}
+      style={{ height: '100vh', minWidth: 1180, fontSize: 13 }}
     >
       <Topbar
         clock={clock}

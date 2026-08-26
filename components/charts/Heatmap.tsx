@@ -43,19 +43,19 @@ export function Heatmap({ rows }: HeatmapProps) {
               <div
                 key={cell.symbol}
                 title={`${cell.symbol} ${formatChg(cell.changePct)}`}
-                className="flex-1 rounded flex items-center justify-center gap-0.5 cursor-default min-w-0"
+                className="@container flex-1 rounded flex items-center justify-start @min-[44px]:justify-center gap-0.5 cursor-default min-w-0 overflow-hidden px-px"
                 style={{ height: 26, background: styles.background }}
                 role="cell"
                 aria-label={`${cell.symbol} ${formatChg(cell.changePct)}`}
               >
                 <span
-                  className="font-semibold overflow-hidden whitespace-nowrap"
+                  className="font-semibold shrink-0 whitespace-nowrap"
                   style={{ fontSize: '9px', color: styles.color }}
                 >
                   {cell.symbol}
                 </span>
                 <span
-                  className="font-mono tabular-nums"
+                  className="font-mono tabular-nums shrink-0 whitespace-nowrap hidden @min-[44px]:inline"
                   style={{ fontSize: '9px', color: styles.color }}
                 >
                   {formatChg(cell.changePct)}
