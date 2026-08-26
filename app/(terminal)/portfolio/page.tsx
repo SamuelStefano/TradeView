@@ -5,6 +5,7 @@ import { ExposurePanel } from '@/components/portfolio/ExposurePanel';
 import { RiskPanel } from '@/components/portfolio/RiskPanel';
 import { FiscalPanel } from '@/components/portfolio/FiscalPanel';
 import { TradesTable } from '@/components/portfolio/TradesTable';
+import { ExportCsvButton } from '@/components/ui/ExportCsvButton';
 
 export const metadata = {
   title: 'Portfólio — TradeView',
@@ -24,13 +25,16 @@ export default async function PortfolioPage() {
           <span className="font-mono">há 3s</span>
         </span>
         <div className="flex-1" />
-        <button
-          type="button"
-          className="bg-hover border border-border-strong rounded text-text-secondary cursor-pointer"
+        <ExportCsvButton
+          headers={['ativo', 'venue', 'classe', 'qtd.', 'preco medio', 'preco atual', 'pnl aberto', 'pnl aberto %', 'pnl realizado', 'peso %']}
+          rows={data.positions.map((p) => [
+            p.symbol, p.venue, p.assetClass, p.qty, p.avgPrice, p.currentPrice,
+            p.pnlOpen, p.pnlOpenPct, p.pnlRealized, p.weightPct,
+          ])}
+          filename="tradeview-posicoes"
+          label="Exportar posições"
           style={{ height: '30px', padding: '0 12px', fontSize: '12px', fontFamily: 'inherit' }}
-        >
-          Exportar CSV
-        </button>
+        />
       </div>
 
       <PositionsTable positions={data.positions} />

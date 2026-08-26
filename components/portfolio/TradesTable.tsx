@@ -1,4 +1,5 @@
 import type { TradeRecord } from '@/lib/data/mock/portfolio';
+import { ExportCsvButton } from '@/components/ui/ExportCsvButton';
 
 interface TradesTableProps {
   trades: TradeRecord[];
@@ -48,13 +49,12 @@ export function TradesTable({ trades }: TradesTableProps) {
           ))}
         </div>
         <div className="flex-1" />
-        <button
-          type="button"
-          className="bg-hover border border-border-strong rounded text-text-secondary cursor-pointer"
+        <ExportCsvButton
+          headers={['data/hora', 'ativo', 'lado', 'qtd.', 'preco', 'total', 'resultado', 'origem']}
+          rows={trades.map((t) => [t.datetime, t.asset, t.side, t.qty, t.price, t.total, t.result, t.origin])}
+          filename="tradeview-trades"
           style={{ height: '26px', padding: '0 11px', fontSize: '11px', fontFamily: 'inherit' }}
-        >
-          Exportar
-        </button>
+        />
       </div>
       <div className="font-mono tabular-nums overflow-x-auto" style={{ fontSize: '11px' }}>
         <table className="w-full" aria-label="Trades">
