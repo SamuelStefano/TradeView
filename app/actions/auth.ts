@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
 import { safeNextPath } from '@/lib/auth/next-path';
+import { signupAllowed } from '@/lib/auth/allowlist';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensureUserSetup } from '@/lib/provision';
 
@@ -53,6 +54,10 @@ export async function signUpAction(_prev: AuthState, form: FormData): Promise<Au
     ({ email, password } = credentials(form));
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : 'dados inválidos' };
+  }
+
+  if (!signupAllowed(email)) {
+    return { ok: false, message: 'cadastro fechado — este terminal é de uso pessoal' };
   }
 
   const supabase = await createSupabaseServerClient();
