@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ConfirmByTyping } from '@/components/ui/ConfirmByTyping';
 
-interface ApiKey {
+export interface ApiKey {
   name: string;
   mask: string;
   scope: string;
@@ -13,9 +13,11 @@ interface ApiKey {
 
 interface ApiKeyRowProps {
   apiKey: ApiKey;
+  onRevoke: (name: string) => void;
+  onRotate: (name: string) => void;
 }
 
-export function ApiKeyRow({ apiKey }: ApiKeyRowProps) {
+export function ApiKeyRow({ apiKey, onRevoke, onRotate }: ApiKeyRowProps) {
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [rotateOpen, setRotateOpen] = useState(false);
 
@@ -71,7 +73,10 @@ export function ApiKeyRow({ apiKey }: ApiKeyRowProps) {
       <ConfirmByTyping
         open={rotateOpen}
         onClose={() => setRotateOpen(false)}
-        onConfirm={() => setRotateOpen(false)}
+        onConfirm={() => {
+          setRotateOpen(false);
+          onRotate(apiKey.name);
+        }}
         phrase="rotacionar chave"
         title={`Rotacionar chave de ${apiKey.name}`}
         description={`Uma chave nova será gerada e ${apiKey.mask} deixa de funcionar imediatamente. Estratégias que usam essa integração param até a nova chave propagar.`}
@@ -81,7 +86,10 @@ export function ApiKeyRow({ apiKey }: ApiKeyRowProps) {
       <ConfirmByTyping
         open={revokeOpen}
         onClose={() => setRevokeOpen(false)}
-        onConfirm={() => setRevokeOpen(false)}
+        onConfirm={() => {
+          setRevokeOpen(false);
+          onRevoke(apiKey.name);
+        }}
         phrase="revogar chave"
         title={`Revogar chave de ${apiKey.name}`}
         description={`Esta ação é irreversível. A chave ${apiKey.mask} será imediatamente invalidada. Você precisará gerar uma nova chave na plataforma.`}
