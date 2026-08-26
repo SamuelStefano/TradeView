@@ -1,24 +1,24 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import { useShellHealth } from './health-context';
 
 interface NavItem {
   id: string;
   icon: string;
   label: string;
   href: string;
-  badge?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'overview', icon: '◧', label: 'Overview', href: '/' },
-  { id: 'markets', icon: '⇄', label: 'Mercados', href: '/markets', badge: '55' },
+  { id: 'markets', icon: '⇄', label: 'Mercados', href: '/markets' },
   { id: 'asset', icon: '▤', label: 'Ativos', href: '/asset/BTC-USD' },
   { id: 'chat', icon: '✦', label: 'IA Analyst', href: '/chat' },
-  { id: 'strategies', icon: '⚙', label: 'Estratégias', href: '/strategies', badge: '4' },
+  { id: 'strategies', icon: '⚙', label: 'Estratégias', href: '/strategies' },
   { id: 'portfolio', icon: '◔', label: 'Portfólio', href: '/portfolio' },
   { id: 'trade', icon: '⊞', label: 'Mesa', href: '/trade' },
-  { id: 'alerts', icon: '◉', label: 'Alertas', href: '/alerts', badge: '3' },
+  { id: 'alerts', icon: '◉', label: 'Alertas', href: '/alerts' },
   { id: 'analytics', icon: '∿', label: 'Analytics', href: '/analytics' },
   { id: 'settings', icon: '⚒', label: 'Configurações', href: '/settings' },
   { id: 'onboarding', icon: '➔', label: 'Onboarding', href: '/onboarding' },
@@ -27,6 +27,8 @@ const NAV_ITEMS: NavItem[] = [
 export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
+  const health = useShellHealth();
+  const badges: Record<string, string> = { markets: String(health.total) };
 
   function isCurrent(item: NavItem): boolean {
     if (item.href === '/') return pathname === '/';
@@ -42,6 +44,7 @@ export function Nav() {
     >
       {NAV_ITEMS.map((item) => {
         const current = isCurrent(item);
+        const badge = badges[item.id];
         return (
           <button
             key={item.id}
@@ -61,12 +64,12 @@ export function Nav() {
               {item.icon}
             </span>
             {item.label}
-            {item.badge && (
+            {badge && (
               <span
                 className="ml-auto font-mono bg-accent-bg-soft text-accent-hover rounded-full"
                 style={{ fontSize: 10, padding: '1px 6px' }}
               >
-                {item.badge}
+                {badge}
               </span>
             )}
           </button>

@@ -14,6 +14,7 @@ export function getExchange(venue: string): Exchange {
   if (!Ctor) throw new Error(`venue não suportado: ${venue}`);
 
   const exchange = new Ctor({ enableRateLimit: true, timeout: 10_000 });
+  instrument(venue, exchange);
   instances.set(venue, exchange);
   return exchange;
 }
@@ -35,6 +36,49 @@ export function ensureMarkets(venue: string): Promise<unknown> {
 
   marketsLoaded.set(venue, promise);
   return promise;
+}
+
+export interface VenueHealth {
+  venue: string;
+  ok: boolean;
+  latencyMs: number;
+  at: number;
+  error: string | null;
+}
+
+const health = new Map<string, VenueHealth>();
+
+export function venueHealth(venue: string): VenueHealth | undefined {
+  return health.get(venue);
+}
+
+type Fetcher = (...args: unknown[]) => Promise<unknown>;
+
+// Timing happens around the HTTP call rather than around fetchTickers, because
+// the rate limiter sleeps inside the latter: a healthy venue would report two
+// seconds of our own throttling as if it were slow to answer. It also means
+// every call path is covered without each one remembering to record.
+function instrument(venue: string, exchange: Exchange): void {
+  const target = exchange as unknown as { fetch: Fetcher };
+  const original = target.fetch.bind(exchange) as Fetcher;
+
+  target.fetch = async (...args: unknown[]) => {
+    const started = Date.now();
+    try {
+      const value = await original(...args);
+      health.set(venue, { venue, ok: true, latencyMs: Date.now() - started, at: Date.now(), error: null });
+      return value;
+    } catch (err) {
+      health.set(venue, {
+        venue,
+        ok: false,
+        latencyMs: Date.now() - started,
+        at: Date.now(),
+        error: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
+    }
+  };
 }
 
 export interface BookLevel {
@@ -90,17 +134,27 @@ export interface Quote {
 }
 
 const QUOTE_TTL_MS = 15_000;
-const quoteCache = new Map<string, { at: number; value: Map<string, Quote> }>();
+// A failure is cached too, for less time. Without this a venue that times out
+// would re-block every render for the full 10s timeout, since nothing was
+// stored to short-circuit the retry.
+const QUOTE_FAILURE_TTL_MS = 5_000;
+const quoteCache = new Map<string, { at: number; ttl: number; value: Map<string, Quote> }>();
 
 // A screen renders dozens of symbols from one venue. fetchTickers is a single
 // call for all of them, where fetchTicker would be one round trip each and blow
 // the rate limit long before the page finished.
 export async function fetchQuotes(venue: string, symbols: string[]): Promise<Map<string, Quote>> {
   const cached = quoteCache.get(venue);
-  if (cached && Date.now() - cached.at < QUOTE_TTL_MS) return cached.value;
+  if (cached && Date.now() - cached.at < cached.ttl) return cached.value;
 
-  await ensureMarkets(venue);
-  const raw = await getExchange(venue).fetchTickers(symbols);
+  let raw;
+  try {
+    await ensureMarkets(venue);
+    raw = await getExchange(venue).fetchTickers(symbols);
+  } catch (err) {
+    quoteCache.set(venue, { at: Date.now(), ttl: QUOTE_FAILURE_TTL_MS, value: new Map() });
+    throw err;
+  }
 
   const quotes = new Map<string, Quote>();
   for (const [symbol, ticker] of Object.entries(raw)) {
@@ -115,7 +169,7 @@ export async function fetchQuotes(venue: string, symbols: string[]): Promise<Map
     });
   }
 
-  quoteCache.set(venue, { at: Date.now(), value: quotes });
+  quoteCache.set(venue, { at: Date.now(), ttl: QUOTE_TTL_MS, value: quotes });
   return quotes;
 }
 

@@ -7,7 +7,7 @@ export interface ShellHealth {
   total: number;
   degraded: number;
   offline: number;
-  latencyMs: number;
+  latencyMs: number | null;
   realStrategies: number;
   fetchedAt: number;
 }

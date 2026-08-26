@@ -57,7 +57,9 @@ export function Topbar({
           />
           {health.connected}/{health.total} mercados
         </span>
-        <span aria-label="latência mediana">▲ {health.latencyMs} ms</span>
+        {health.latencyMs !== null && (
+          <span aria-label="latência mediana">▲ {health.latencyMs} ms</span>
+        )}
         {health.degraded > 0 && <span className="text-warn">{health.degraded} degradados</span>}
         {health.offline > 0 && <span className="text-down">{health.offline} offline</span>}
         <span title="última sincronização">sync {lastSync}</span>

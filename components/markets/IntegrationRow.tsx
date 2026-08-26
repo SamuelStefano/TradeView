@@ -1,7 +1,5 @@
-import Link from 'next/link';
-import type { MarketIntegration } from '@/lib/data/views/markets';
+import type { VenueRow } from '@/lib/data/views/markets';
 import type { IntegrationStatus } from '@/lib/types';
-import { Bar } from '@/components/ui/Bar';
 
 const STATUS_LABEL: Record<IntegrationStatus, string> = {
   conectado: 'conectado',
@@ -28,58 +26,26 @@ function statusDotClass(status: IntegrationStatus): string {
   }
 }
 
-function rateLimitColorClass(pct: number): string {
-  if (pct > 85) return 'text-down';
-  if (pct > 60) return 'text-warn';
-  return 'text-accent';
-}
-
-function rateLimitVariant(pct: number): 'down' | 'warn' | 'accent' {
-  if (pct > 85) return 'down';
-  if (pct > 60) return 'warn';
-  return 'accent';
-}
-
-function lastResponseColorClass(status: IntegrationStatus): string {
-  switch (status) {
-    case 'offline': return 'text-down';
-    case 'degradado': return 'text-warn';
-    default: return 'text-text-muted';
-  }
-}
-
 const LOGO_BG: Record<string, string> = {
-  BN: 'bg-warn-bg',
-  B3: 'bg-accent-bg',
-  TD: 'bg-up-bg',
-  CB: 'bg-accent-bg',
-  IB: 'bg-down-strong',
-  AV: 'bg-hover',
-  CC: 'bg-warn-bg',
-  EN: 'bg-hover',
-  EI: 'bg-hover',
-  KR: 'bg-ai-bg',
-  GN: 'bg-up-bg',
-  CF: 'bg-hover',
-  MT: 'bg-hover',
+  FX: 'bg-warn-bg',
+  OK: 'bg-accent-bg',
 };
 
+export const VENUE_GRID = '200px 110px 150px 130px 1fr 150px';
+
 interface IntegrationRowProps {
-  integration: MarketIntegration;
+  venue: VenueRow;
 }
 
-export function IntegrationRow({ integration: r }: IntegrationRowProps) {
-  const { name, kind, logo, status, credentialKind, canTrade, rateLimitPct, lastResponseLabel } = r;
-  const hasNoCredential = credentialKind === '—';
-  const isUnconfigured = status === 'nao_configurado';
-  const rlPct = rateLimitPct < 0 ? 0 : rateLimitPct;
-  const rlText = rateLimitPct < 0 ? '—' : `${rateLimitPct}%`;
+export function IntegrationRow({ venue: v }: IntegrationRowProps) {
+  const { name, kind, logo, site, status, symbolCount, quotedCount, quoteCurrencies } = v;
+  const partial = status !== 'offline' && quotedCount < symbolCount;
 
   return (
     <div
       role="row"
-      className={`grid items-center border-b border-divider hover:bg-hover transition-colors ${canTrade ? 'bg-down/[0.025]' : ''}`}
-      style={{ gridTemplateColumns: '200px 110px 130px 150px 1fr 130px 110px', padding: '9px 14px' }}
+      className="grid items-center border-b border-divider hover:bg-hover transition-colors"
+      style={{ gridTemplateColumns: VENUE_GRID, padding: '9px 14px' }}
     >
       <div role="cell" className="flex items-center gap-2">
         <div
@@ -100,67 +66,50 @@ export function IntegrationRow({ integration: r }: IntegrationRowProps) {
         {STATUS_LABEL[status]}
       </div>
 
+      <div role="cell" className="font-mono tabular-nums" style={{ fontSize: '11px' }}>
+        <span className={partial ? 'text-warn' : 'text-text-muted'}>
+          {quotedCount}/{symbolCount}
+        </span>
+        <span className="text-text-faint"> cotados</span>
+      </div>
+
       <div role="cell" className="text-text-muted font-mono" style={{ fontSize: '11px' }}>
-        {credentialKind}
+        {quoteCurrencies.join(' · ')}
       </div>
 
-      <div role="cell">
-        {canTrade && (
-          <span
-            className="inline-flex items-center gap-1 font-bold text-down bg-down-bg border border-danger-border rounded"
-            style={{ fontSize: '10px', letterSpacing: '0.5px', padding: '3px 8px' }}
-          >
-            ⚠ ORDEM + LEITURA
-          </span>
-        )}
-        {!canTrade && !hasNoCredential && (
-          <span
-            className="text-text-muted bg-hover border border-border-strong rounded"
-            style={{ fontSize: '10px', padding: '3px 8px' }}
-          >
-            somente leitura
-          </span>
-        )}
-        {hasNoCredential && (
-          <span className="text-text-faint" style={{ fontSize: '10px' }}>—</span>
-        )}
-      </div>
-
-      <div role="cell" className="flex items-center gap-2 pr-4">
-        {!isUnconfigured ? (
-          <>
-            <Bar
-              value={rlPct}
-              variant={rateLimitVariant(rlPct)}
-              height={5}
-              label={`rate limit ${rlPct}% consumido`}
-              className="flex-1 max-w-[120px]"
-            />
-            <span
-              className={`font-mono tabular-nums ${rateLimitColorClass(rlPct)}`}
-              style={{ fontSize: '10.5px', width: 34, textAlign: 'right' }}
-            >
-              {rlText}
-            </span>
-          </>
-        ) : (
-          <span className="text-text-faint font-mono" style={{ fontSize: '10.5px' }}>—</span>
-        )}
-      </div>
-
-      <div role="cell" className={`font-mono ${lastResponseColorClass(status)}`} style={{ fontSize: '10.5px' }}>
-        {lastResponseLabel}
-      </div>
-
-      <div role="cell" className="text-right">
-        <Link
-          href="/settings"
-          aria-label={`${isUnconfigured ? 'Configurar' : 'Gerenciar'} ${name}`}
-          className="inline-flex items-center bg-hover border border-border-strong rounded text-text-muted cursor-pointer font-sans hover:text-text-secondary transition-colors no-underline"
-          style={{ height: 24, padding: '0 10px', fontSize: '10.5px' }}
+      <div role="cell" className="pr-4">
+        <span
+          className="text-text-muted bg-hover border border-border-strong rounded"
+          style={{ fontSize: '10px', padding: '3px 8px' }}
         >
-          {isUnconfigured ? 'Configurar' : 'Gerenciar'}
-        </Link>
+          dados públicos · somente leitura
+        </span>
+        {v.error && (
+          <div className="text-down font-mono truncate" style={{ fontSize: '10px', marginTop: 3 }} title={v.error}>
+            {v.error}
+          </div>
+        )}
+      </div>
+
+      <div
+        role="cell"
+        className={`font-mono ${status === 'offline' ? 'text-down' : status === 'degradado' ? 'text-warn' : 'text-text-muted'}`}
+        style={{ fontSize: '10.5px' }}
+      >
+        {v.lastResponseLabel}
+        {site && (
+          <>
+            {' · '}
+            <a
+              href={site}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-accent no-underline hover:underline"
+            >
+              site
+            </a>
+          </>
+        )}
       </div>
     </div>
   );

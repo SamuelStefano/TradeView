@@ -2,7 +2,8 @@ import type { AssetClass, Strategy } from '../types';
 import { type AlertsData, alertsMock } from './views/alerts';
 import { type AnalyticsData, analyticsMock } from './views/analytics';
 import { type AssetDetailData, assetsMock, defaultSymbolByClass } from './views/assets';
-import { type MarketsData, marketsMock } from './views/markets';
+import type { MarketsData } from './views/markets';
+import { getLiveMarkets } from './live/venues';
 import { type OverviewData, overviewMock } from './views/overview';
 import type { PortfolioData } from './views/portfolio';
 import { emptyPortfolio, getLivePortfolio } from './live/portfolio';
@@ -31,7 +32,7 @@ const mockDataSource: DataSource = {
     return defaultSymbolByClass;
   },
   async getMarkets() {
-    return marketsMock;
+    return getLiveMarkets();
   },
   // The portfolio is the one screen that must never show a number the user did
   // not put there. Without a database there is nothing to report, so it reports

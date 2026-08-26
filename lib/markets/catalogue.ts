@@ -43,6 +43,34 @@ export const TRADABLE: CatalogueEntry[] = [
 
 export const VENUES = [...new Set(TRADABLE.map((t) => t.venue))];
 
+export interface VenueInfo {
+  id: string;
+  name: string;
+  kind: string;
+  logo: string;
+  site: string;
+}
+
+// Only the two venues that answer from a datacenter IP. Binance returns 451 and
+// Mercado Bitcoin 403 to hosted ranges, so listing them would be listing a
+// connection that can never be established from where this runs.
+export const VENUE_INFO: Record<string, VenueInfo> = {
+  foxbit: {
+    id: 'foxbit',
+    name: 'Foxbit',
+    kind: 'cripto BR · spot',
+    logo: 'FX',
+    site: 'https://foxbit.com.br',
+  },
+  okx: {
+    id: 'okx',
+    name: 'OKX',
+    kind: 'cripto global · spot',
+    logo: 'OK',
+    site: 'https://www.okx.com',
+  },
+};
+
 export function bySymbol(symbol: string): CatalogueEntry | undefined {
   return TRADABLE.find((t) => t.symbol === symbol);
 }
