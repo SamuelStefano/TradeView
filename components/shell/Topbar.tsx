@@ -5,8 +5,6 @@ import type { ShellHealth } from './health-context';
 interface TopbarProps {
   clock: string;
   lastSync: string;
-  wsReconnecting: boolean;
-  wsAttempt: number;
   health: ShellHealth;
   onOpenPalette: () => void;
   onOpenKill: () => void;
@@ -15,8 +13,6 @@ interface TopbarProps {
 export function Topbar({
   clock,
   lastSync,
-  wsReconnecting,
-  wsAttempt,
   health,
   onOpenPalette,
   onOpenKill,
@@ -66,20 +62,6 @@ export function Topbar({
         {health.offline > 0 && <span className="text-down">{health.offline} offline</span>}
         <span title="última sincronização">sync {lastSync}</span>
       </div>
-
-      {wsReconnecting && (
-        <div
-          role="status"
-          className="flex items-center gap-1.5 border border-warn-border rounded-md bg-warn-bg px-2.5 py-1 text-warn"
-          style={{ fontSize: 11 }}
-        >
-          <span
-            className="animate-pulse-dot"
-            style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-warn)', display: 'inline-block' }}
-          />
-          WebSocket reconectando… tentativa {wsAttempt}/5
-        </div>
-      )}
 
       <div style={{ flex: 1 }} />
 

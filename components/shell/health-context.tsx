@@ -9,6 +9,7 @@ export interface ShellHealth {
   offline: number;
   latencyMs: number;
   realStrategies: number;
+  fetchedAt: number;
 }
 
 const ShellHealthContext = createContext<ShellHealth | null>(null);

@@ -1,9 +1,13 @@
-import { getDataSource } from '@/lib/data/index';
+import { fetchedAt, getDataSource } from '@/lib/data/index';
 import { ShellClient } from '@/components/shell/ShellClient';
 
 export default async function TerminalLayout({ children }: LayoutProps<'/'>) {
   const source = getDataSource();
-  const [markets, strategies] = await Promise.all([source.getMarkets(), source.getStrategies()]);
+  const [markets, strategies, at] = await Promise.all([
+    source.getMarkets(),
+    source.getStrategies(),
+    fetchedAt(),
+  ]);
 
   return (
     <ShellClient
@@ -14,6 +18,7 @@ export default async function TerminalLayout({ children }: LayoutProps<'/'>) {
         offline: markets.offlineCount,
         latencyMs: markets.medianLatencyMs,
         realStrategies: strategies.filter((s) => s.mode === 'REAL').length,
+        fetchedAt: at,
       }}
     >
       {children}

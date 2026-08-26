@@ -58,11 +58,19 @@ function writeDensity(next: Density) {
   densityListeners.forEach((onChange) => onChange());
 }
 
+// Measured against the moment the layout fetched, so the label degrades on its
+// own when a tab is left open instead of always claiming to be fresh.
+function syncAge(fetchedAt: number): string {
+  const seconds = Math.max(0, Math.round((Date.now() - fetchedAt) / 1000));
+  if (seconds < 60) return `há ${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `há ${minutes}min`;
+  return `há ${Math.floor(minutes / 60)}h`;
+}
+
 export function ShellClient({ children, health }: ShellClientProps) {
   const [clock, setClock] = useState('--:--:--');
-  const [lastSync, setLastSync] = useState('há 1s');
-  const [wsReconnecting, setWsReconnecting] = useState(false);
-  const [wsAttempt, setWsAttempt] = useState(2);
+  const [lastSync, setLastSync] = useState('—');
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [killOpen, setKillOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -85,21 +93,13 @@ export function ShellClient({ children, health }: ShellClientProps) {
     function tick() {
       const d = new Date();
       setClock(`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`);
-      setLastSync(`há ${1 + (d.getSeconds() % 5)}s`);
+      setLastSync(syncAge(health.fetchedAt));
     }
 
     tick();
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const wsTimer = setInterval(() => {
-      setWsReconnecting((prev) => !prev);
-      setWsAttempt(1 + Math.floor(Math.random() * 4));
-    }, 14000);
-    return () => clearInterval(wsTimer);
-  }, []);
+  }, [health.fetchedAt]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -183,8 +183,6 @@ export function ShellClient({ children, health }: ShellClientProps) {
         clock={clock}
         lastSync={lastSync}
         health={health}
-        wsReconnecting={wsReconnecting}
-        wsAttempt={wsAttempt}
         onOpenPalette={openPalette}
         onOpenKill={openKill}
       />

@@ -45,6 +45,12 @@ const mockDataSource: DataSource = {
   },
 };
 
+// Async so it is a data read, not a clock call during render — React's purity
+// rule rejects the latter, and it is genuinely a property of the fetch.
+export async function fetchedAt(): Promise<number> {
+  return Date.now();
+}
+
 export function getDataSource(): DataSource {
   return mockDataSource;
 }

@@ -22,8 +22,7 @@ export default async function PortfolioPage() {
           Portfólio consolidado
         </h1>
         <span className="text-text-muted" style={{ fontSize: '11px' }}>
-          {data.positions.length} posições · {venueCount} venues · atualizado{' '}
-          <span className="font-mono">há 3s</span>
+          {data.positions.length} posições · {venueCount} venues
         </span>
         <div className="flex-1" />
         <ExportCsvButton
