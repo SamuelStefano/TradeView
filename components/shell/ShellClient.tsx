@@ -19,6 +19,7 @@ const GOTO: Record<string, string> = {
   a: '/asset/BTC-USD',
   p: '/portfolio',
   s: '/strategies',
+  m: '/trade',
 };
 
 function isTyping(target: EventTarget | null): boolean {

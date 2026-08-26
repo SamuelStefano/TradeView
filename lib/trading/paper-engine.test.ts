@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { simulateFill, cashEffect } from './paper-engine.ts';
-import type { OrderBookSnapshot } from '../markets/exchange.ts';
+import { simulateFill, cashEffect } from './paper-engine';
+import type { OrderBookSnapshot } from '../markets/exchange';
 
 function book(overrides: Partial<OrderBookSnapshot> = {}): OrderBookSnapshot {
   return {

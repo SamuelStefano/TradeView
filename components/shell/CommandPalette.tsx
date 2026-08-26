@@ -17,6 +17,8 @@ const ALL_RESULTS: PaletteResult[] = [
   { kind: 'ATIVO', label: 'PLD Sudeste — spot', hint: 'R$ 141,20/MWh', href: '/asset/PLD-SE' },
   { kind: 'TELA', label: 'Portfólio consolidado', hint: 'g p', href: '/portfolio' },
   { kind: 'TELA', label: 'Estratégias e bots', hint: 'g s', href: '/strategies' },
+  { kind: 'TELA', label: 'Mesa de operações', hint: 'g m', href: '/trade' },
+  { kind: 'AÇÃO', label: 'Depositar saldo na conta paper', hint: '', href: '/trade' },
   { kind: 'AÇÃO', label: 'Criar alerta em linguagem natural', hint: '', href: '/alerts' },
   { kind: 'AÇÃO', label: 'Perguntar à IA sobre o portfólio', hint: '', href: '/chat' },
 ];

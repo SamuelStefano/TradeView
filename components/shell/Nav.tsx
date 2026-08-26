@@ -17,6 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'chat', icon: '✦', label: 'IA Analyst', href: '/chat' },
   { id: 'strategies', icon: '⚙', label: 'Estratégias', href: '/strategies', badge: '4' },
   { id: 'portfolio', icon: '◔', label: 'Portfólio', href: '/portfolio' },
+  { id: 'trade', icon: '⊞', label: 'Mesa', href: '/trade' },
   { id: 'alerts', icon: '◉', label: 'Alertas', href: '/alerts', badge: '3' },
   { id: 'analytics', icon: '∿', label: 'Analytics', href: '/analytics' },
   { id: 'settings', icon: '⚒', label: 'Configurações', href: '/settings' },
