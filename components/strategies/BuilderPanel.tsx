@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Bar } from '@/components/ui/Bar';
 
 interface BuilderPanelProps {
@@ -12,14 +13,45 @@ interface EntryCondition {
   b: string;
 }
 
-const entries: EntryCondition[] = [
+const INITIAL_ENTRIES: EntryCondition[] = [
   { a: 'funding_8h', op: '<', b: '−0,010%' },
   { a: 'open_interest_Δ48h', op: '>', b: '+5%' },
   { a: 'preço', op: '≥', b: 'MA(21) no 4h' },
   { a: 'convicção_IA', op: '≥', b: '40' },
 ];
 
+const CANDIDATES: EntryCondition[] = [
+  { a: 'volume_24h', op: '>', b: 'média(20d) × 1,5' },
+  { a: 'basis_anual', op: '>', b: '+8%' },
+  { a: 'rsi_4h', op: '<', b: '68' },
+  { a: 'spread_efetivo', op: '<', b: '4 bps' },
+  { a: 'liquidez_book_1%', op: '≥', b: 'US$ 250k' },
+];
+
+function aiWeightNote(weight: number): string {
+  if (weight === 0) return 'Com 0%, a IA não participa da decisão — a estratégia é puramente sistemática.';
+  if (weight < 50) return `Com ${weight}%, a IA pode vetar entradas (convicção < 40) mas não pode abrir posição sozinha.`;
+  if (weight < 80) return `Com ${weight}%, a IA veta entradas e pode ajustar o sizing, mas a entrada ainda exige o sinal sistemático.`;
+  return `Com ${weight}%, a IA abre posição sozinha. Exige track record calibrado antes de ir a real.`;
+}
+
 export function BuilderPanel({ onActivateReal }: BuilderPanelProps) {
+  const [entries, setEntries] = useState(INITIAL_ENTRIES);
+  const [aiWeight, setAiWeight] = useState(35);
+
+  function removeEntry(index: number) {
+    setEntries((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function addEntry() {
+    setEntries((prev) => {
+      const next = CANDIDATES.find((c) => !prev.some((e) => e.a === c.a));
+      return next ? [...prev, next] : prev;
+    });
+  }
+
+  const allUsed = CANDIDATES.every((c) => entries.some((e) => e.a === c.a));
+
   return (
     <section
       aria-label="Builder"
@@ -35,22 +67,33 @@ export function BuilderPanel({ onActivateReal }: BuilderPanelProps) {
         <div className="text-[10.5px] text-text-faint">ENTRADA — todas as condições</div>
         {entries.map((e, i) => (
           <div
-            key={i}
+            key={e.a}
             className="flex items-center gap-2 bg-inset border border-border rounded-md px-2.5 py-[7px] font-mono text-[11px]"
           >
             <span className="text-accent-hover">{e.a}</span>
             <span className="text-text-faint">{e.op}</span>
             <span className="text-text">{e.b}</span>
             <button
-              aria-label="remover condição"
+              onClick={() => removeEntry(i)}
+              aria-label={`Remover condição ${e.a}`}
               className="ml-auto bg-transparent border-none text-text-faint cursor-pointer text-[11px] hover:text-text-muted"
             >
               ✕
             </button>
           </div>
         ))}
-        <button className="h-[26px] border border-dashed border-border-strong rounded-md bg-transparent text-text-faint text-[11px] cursor-pointer hover:text-text-muted">
-          + condição
+        {entries.length === 0 && (
+          <div className="text-[10.5px] text-text-faint italic">
+            Sem condições de entrada — a estratégia não dispara.
+          </div>
+        )}
+        <button
+          onClick={addEntry}
+          disabled={allUsed}
+          aria-label="Adicionar condição de entrada"
+          className="h-[26px] border border-dashed border-border-strong rounded-md bg-transparent text-text-faint text-[11px] cursor-pointer hover:text-text-muted disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {allUsed ? 'sem condições disponíveis' : '+ condição'}
         </button>
       </div>
 
@@ -84,12 +127,21 @@ export function BuilderPanel({ onActivateReal }: BuilderPanelProps) {
       <div>
         <div className="flex justify-between text-[10.5px] text-text-faint mb-[5px]">
           <span>Peso da IA na decisão</span>
-          <span className="font-mono text-ai">35%</span>
+          <span className="font-mono text-ai">{aiWeight}%</span>
         </div>
-        <Bar value={35} variant="ai" height={5} label="Peso da IA na decisão: 35%" />
-        <p className="text-[10px] text-text-faint mt-[5px] leading-[1.4]">
-          Com 35%, a IA pode vetar entradas (convicção &lt; 40) mas não pode abrir posição sozinha.
-        </p>
+        <Bar value={aiWeight} variant="ai" height={5} label={`Peso da IA na decisão: ${aiWeight}%`} />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={aiWeight}
+          onChange={(e) => setAiWeight(Number(e.target.value))}
+          aria-label="Peso da IA na decisão"
+          className="w-full mt-1.5 cursor-pointer"
+          style={{ accentColor: 'var(--color-ai)', height: 14 }}
+        />
+        <p className="text-[10px] text-text-faint mt-[5px] leading-[1.4]">{aiWeightNote(aiWeight)}</p>
       </div>
 
       <div className="flex gap-2">
@@ -98,7 +150,9 @@ export function BuilderPanel({ onActivateReal }: BuilderPanelProps) {
         </button>
         <button
           onClick={onActivateReal}
-          className="flex-1 h-8 bg-down-bg border border-danger-border rounded-md text-down text-xs font-bold cursor-pointer hover:bg-down-strong"
+          disabled={entries.length === 0}
+          title={entries.length === 0 ? 'Adicione ao menos uma condição de entrada' : undefined}
+          className="flex-1 h-8 bg-down-bg border border-danger-border rounded-md text-down text-xs font-bold cursor-pointer hover:bg-down-strong disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-down-bg"
         >
           ⚠ Ativar em REAL
         </button>
