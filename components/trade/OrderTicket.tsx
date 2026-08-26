@@ -15,11 +15,10 @@ export interface TradableInstrument {
 interface Props {
   instruments: TradableInstrument[];
   mode: 'paper' | 'real';
-  realEnabled: boolean;
   initialSymbol?: string;
 }
 
-export function OrderTicket({ instruments, mode, realEnabled, initialSymbol }: Props) {
+export function OrderTicket({ instruments, mode, initialSymbol }: Props) {
   const [sendState, send, sending] = useActionState(placeOrderAction, initial);
   const [previewState, preview, previewing] = useActionState(previewOrderAction, initial);
   const [symbol, setSymbol] = useState(
@@ -30,7 +29,9 @@ export function OrderTicket({ instruments, mode, realEnabled, initialSymbol }: P
   const [lastAction, setLastAction] = useState<'send' | 'preview' | null>(null);
 
   const instrument = instruments.find((i) => i.symbol === symbol);
-  const blocked = mode === 'real' && !realEnabled;
+  // O modo real não tem roteamento para a venue, então o botão não promete uma
+  // execução que o servidor vai recusar.
+  const blocked = mode === 'real';
   // Two useActionState hooks keep their own last result, so without this the
   // stale one would win after switching buttons.
   const active = lastAction === 'send' ? sendState : lastAction === 'preview' ? previewState : null;
@@ -147,7 +148,7 @@ export function OrderTicket({ instruments, mode, realEnabled, initialSymbol }: P
           disabled={sending || previewing || blocked}
           className="h-9 flex-1 bg-accent-bg border border-accent-border rounded-md text-accent text-xs font-semibold cursor-pointer disabled:opacity-50"
         >
-          {sending ? 'executando…' : blocked ? 'real desligado' : 'Enviar ordem'}
+          {sending ? 'executando…' : blocked ? 'sem execução real' : 'Enviar ordem'}
         </button>
       </div>
 

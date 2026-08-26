@@ -102,10 +102,11 @@ export default async function TradePage({
         </form>
       </header>
 
-      {mode === 'real' && !settings?.real_trading_enabled && (
+      {mode === 'real' && (
         <p className="text-[11.5px] text-warn m-0">
-          Trading real desligado nesta conta. O modo real só executa com o flag do servidor e o
-          da conta ligados ao mesmo tempo.
+          O modo real ainda não roteia nada para a corretora — a ordem é recusada em vez de ser
+          preenchida contra o book e gravada como se tivesse acontecido. O saldo e o histórico
+          abaixo são da conta real e são reais; só a execução é que não existe.
         </p>
       )}
 
@@ -145,7 +146,6 @@ export default async function TradePage({
             instruments={instruments}
             initialSymbol={params.symbol}
             mode={mode}
-            realEnabled={Boolean(settings?.real_trading_enabled)}
           />
         </Card>
       </div>

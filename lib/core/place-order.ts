@@ -87,6 +87,12 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     // one off keeps real capital out of reach.
     if (!realTradingAllowed()) throw new TradingError('trading real desabilitado neste ambiente');
     if (!settings.real_trading_enabled) throw new TradingError('trading real desabilitado na sua conta');
+
+    // Não existe roteamento para a venue: o preenchimento abaixo é simulado
+    // contra o book. Passar por aqui gravaria no razão uma execução que nunca
+    // aconteceu, e a diferença só apareceria na corretora. Recusar é a única
+    // resposta honesta enquanto a ordem não sai daqui.
+    throw new TradingError('execução real ainda não existe — a ordem não sairia para a corretora');
   }
 
   const instrument = await loadInstrument(input.symbol);
