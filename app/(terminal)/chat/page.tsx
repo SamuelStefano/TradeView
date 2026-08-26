@@ -35,10 +35,12 @@ export default function ChatPage() {
     followRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < BOTTOM_SLACK_PX;
   }
 
+  // Keyed to the conversation, not to every render: without the dependency this
+  // also fired on each keystroke and dragged the reader back to the bottom.
   useEffect(() => {
     const el = scrollRef.current;
     if (el && followRef.current) el.scrollTop = el.scrollHeight;
-  });
+  }, [messages]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -110,7 +112,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col min-w-0" style={{ height: 'calc(100vh - 66px)', fontSize: '13px' }}>
+    <div className="flex flex-col min-w-0 h-full" style={{ fontSize: '13px' }}>
       <h1 className="sr-only">Chat com a IA Analyst</h1>
 
       <ChatHeader

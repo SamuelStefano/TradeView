@@ -3,7 +3,6 @@ const PREFS = [
   { k: 'Timezone', v: 'America/Sao_Paulo' },
   { k: 'Formato numérico', v: 'pt-BR · 1.234,56' },
   { k: 'Tema', v: 'escuro' },
-  { k: 'Densidade', v: 'confortável' },
   { k: 'Paleta daltônica', v: 'desligada' },
   { k: 'Reduzir animações', v: 'segue o sistema' },
 ];
