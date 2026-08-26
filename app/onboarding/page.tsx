@@ -48,7 +48,7 @@ export default function OnboardingPage() {
   const nextLabel = step === TOTAL_STEPS ? 'Abrir o terminal' : 'Continuar →';
 
   return (
-    <div
+    <main
       className="bg-base text-text"
       style={{
         minHeight: 'calc(100vh - 66px)',
@@ -104,6 +104,6 @@ export default function OnboardingPage() {
           </button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

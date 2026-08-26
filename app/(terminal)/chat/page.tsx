@@ -164,6 +164,8 @@ export default function ChatPage() {
         fontSize: '13px',
       }}
     >
+      <h1 className="sr-only">Chat com a IA Analyst</h1>
+
       <ChatSidebar
         history={history}
         onNewConversation={handleNewConversation}

@@ -24,7 +24,9 @@ export function AccuracyGrid({ rows, modelAccuracy, signalCount }: AccuracyGridP
       <table className="w-full border-collapse" style={{ fontSize: '10.5px' }}>
         <thead>
           <tr>
-            <th scope="col" className="text-left font-normal text-text-faint" style={{ width: '110px', paddingBottom: '6px' }} />
+            <th scope="col" className="text-left font-normal text-text-faint" style={{ width: '110px', paddingBottom: '6px' }}>
+              <span className="sr-only">Classe de ativo</span>
+            </th>
             {HORIZONS.map((h) => (
               <th
                 key={h}

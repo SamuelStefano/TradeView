@@ -14,7 +14,7 @@ export default async function OverviewPage() {
   const data = await getDataSource().getOverview();
 
   return (
-    <main
+    <div
       style={{
         padding: '16px',
         display: 'grid',
@@ -24,6 +24,8 @@ export default async function OverviewPage() {
         alignItems: 'start',
       }}
     >
+      <h1 className="sr-only">Overview do portfólio</h1>
+
       <div className="flex flex-col gap-3">
         <NetWorthPanel netWorth={data.netWorth} pnlCards={data.pnlCards} />
         <AllocationPanel allocation={data.allocation} />
@@ -36,6 +38,6 @@ export default async function OverviewPage() {
       </div>
 
       <WatchlistPanel watchlist={data.watchlist} />
-    </main>
+    </div>
   );
 }
