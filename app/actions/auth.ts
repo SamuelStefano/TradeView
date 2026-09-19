@@ -4,9 +4,11 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
 import { safeNextPath } from '@/lib/auth/next-path';
-import { signupAllowed } from '@/lib/auth/allowlist';
+import { accessAllowed } from '@/lib/auth/allowlist';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensureUserSetup } from '@/lib/provision';
+import { checkRate } from '@/lib/rate-limit';
+import { TradingError } from '@/lib/trading/errors';
 
 export interface AuthState {
   ok: boolean;
@@ -33,6 +35,25 @@ export async function signInAction(_prev: AuthState, form: FormData): Promise<Au
     return { ok: false, message: error instanceof Error ? error.message : 'dados inválidos' };
   }
 
+  // The only unauthenticated write path in the app, so it is the one that has to
+  // carry the limiter. Keyed on the address rather than on nothing, so a spray
+  // across many passwords for one account runs out first.
+  try {
+    checkRate(`signin:${email.toLowerCase()}`);
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof TradingError ? error.message : 'muitas tentativas — aguarde',
+    };
+  }
+
+  // auth.users belongs to the whole project, so every account of the app that
+  // shares it already holds credentials that authenticate here. Gating only the
+  // signup form left the login form open to all of them, and ensureUserSetup
+  // below would then hand each one a TradeView wallet. Same generic message, so
+  // the form still does not say who is on the list.
+  if (!accessAllowed(email)) return { ok: false, message: 'e-mail ou senha incorretos' };
+
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -56,7 +77,16 @@ export async function signUpAction(_prev: AuthState, form: FormData): Promise<Au
     return { ok: false, message: error instanceof Error ? error.message : 'dados inválidos' };
   }
 
-  if (!signupAllowed(email)) {
+  try {
+    checkRate(`signup:${email.toLowerCase()}`);
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof TradingError ? error.message : 'muitas tentativas — aguarde',
+    };
+  }
+
+  if (!accessAllowed(email)) {
     return { ok: false, message: 'cadastro fechado — este terminal é de uso pessoal' };
   }
 

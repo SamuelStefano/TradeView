@@ -129,6 +129,8 @@ export interface Quote {
   last: number;
   changePct: number | null;
   quoteVolume: number | null;
+  /** When the venue printed this tick, so the screen can age it honestly. */
+  observedAt: number;
 }
 
 const QUOTE_TTL_MS = 15_000;
@@ -154,6 +156,7 @@ export async function fetchQuotes(venue: string, symbols: string[]): Promise<Map
     throw err;
   }
 
+  const fetchedAt = Date.now();
   const quotes = new Map<string, Quote>();
   for (const [symbol, ticker] of Object.entries(raw)) {
     const last = ticker.last ?? ticker.close;
@@ -164,6 +167,10 @@ export async function fetchQuotes(venue: string, symbols: string[]): Promise<Map
       last,
       changePct: typeof ticker.percentage === 'number' ? ticker.percentage : null,
       quoteVolume: typeof ticker.quoteVolume === 'number' ? ticker.quoteVolume : null,
+      // Not every venue stamps a ticker; the fetch is the newest the tick can be.
+      observedAt: typeof ticker.timestamp === 'number' && ticker.timestamp > 0
+        ? ticker.timestamp
+        : fetchedAt,
     });
   }
 

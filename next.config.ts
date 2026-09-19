@@ -1,5 +1,20 @@
 import type { NextConfig } from 'next';
 
+// Pinned to this project's own origin. A wildcard over *.supabase.co would let
+// injected script post the session to any Supabase project an attacker can
+// create for free, with the CSP approving the exfiltration.
+function supabaseOrigin(): string {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!raw) return 'https://*.supabase.co wss://*.supabase.co';
+
+  try {
+    const { host } = new URL(raw);
+    return `https://${host} wss://${host}`;
+  } catch {
+    return 'https://*.supabase.co wss://*.supabase.co';
+  }
+}
+
 const CSP = [
   "default-src 'self'",
   // Next injects an inline bootstrap script on every page; dropping
@@ -8,7 +23,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  `connect-src 'self' ${supabaseOrigin()}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

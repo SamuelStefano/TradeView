@@ -2,6 +2,7 @@ import 'server-only';
 
 import { VENUE_INFO, byVenue, bySymbol, fromSlug } from '../../markets/catalogue';
 import { fetchCandles, fetchOrderBook, fetchQuotes, type Candle as RawCandle } from '../../markets/exchange';
+import { freshnessOf } from '../../markets/freshness';
 import { num } from '../../format';
 import type { Candle, Panel, Stat } from '../../types';
 import type { Timeframe } from '../../markets/timeframes';
@@ -163,6 +164,7 @@ export async function getLiveAsset(
   const ticker = quotes?.get(symbol) ?? null;
   const last = ticker?.last ?? rawCandles.at(-1)?.c ?? null;
   const changePct = ticker?.changePct ?? 0;
+  const observedAt = ticker?.observedAt ?? rawCandles.at(-1)?.t ?? null;
 
   const stats: Stat[] = [];
   if (ticker?.quoteVolume != null) {
@@ -205,7 +207,11 @@ export async function getLiveAsset(
       price: last !== null ? moneyIn(currency, last) : '—',
       change: ticker?.changePct != null ? `${num(ticker.changePct, 2)}% em 24h` : 'variação indisponível',
       changePct,
-      freshness: { kind: 'realtime', agoSeconds: 0 },
+      // Falls back to the last candle when the ticker call failed: the price
+      // shown then comes from that candle, so the age has to describe it.
+      freshness: observedAt === null
+        ? { kind: 'closed' }
+        : freshnessOf(observedAt, Date.now(), venueName),
       stats,
     },
     panels,

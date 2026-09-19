@@ -12,6 +12,7 @@ import type {
   WatchlistItem,
 } from '../views/overview';
 import { emptyOverview } from '../views/overview';
+import { freshnessOf } from '../../markets/freshness';
 import { currencyToBRL, loadQuotes, priceOf, usdtToBRL, type QuoteBook } from './valuation';
 
 const CLASS_COLOR: Record<string, string> = {
@@ -53,24 +54,26 @@ function buildHeatmap(quotes: QuoteBook): HeatmapRow[] {
   return rows;
 }
 
-function buildWatchlist(quotes: QuoteBook): WatchlistItem[] {
+function buildWatchlist(quotes: QuoteBook, now: number): WatchlistItem[] {
   const items: WatchlistItem[] = [];
 
   for (const t of TRADABLE) {
     const quote = quotes.get(t.symbol);
     if (!quote) continue;
 
+    const venueName = VENUE_INFO[t.venue]?.name ?? t.venue;
+
     items.push({
       symbol: t.symbol,
       slug: toSlug(t.symbol),
-      name: VENUE_INFO[t.venue]?.name ?? t.venue,
+      name: venueName,
       price: money2(quote.last, t.quote),
       changePct: quote.changePct ?? 0,
       // The tickers carry no price series and pulling daily candles per symbol
       // would mean one request per row on every render. The price and the 24h
       // change are measured; a drawn trend would not be.
       spark: [],
-      freshness: { kind: 'realtime', agoSeconds: 0 },
+      freshness: freshnessOf(quote.observedAt, now, venueName),
     });
   }
 
@@ -87,7 +90,7 @@ export async function getLiveOverview(): Promise<OverviewData> {
   const quotes = await loadQuotes();
 
   const heatmap = buildHeatmap(quotes);
-  const watchlist = buildWatchlist(quotes);
+  const watchlist = buildWatchlist(quotes, Date.now());
 
   const usdRate = usdtToBRL(quotes);
   const fx = {

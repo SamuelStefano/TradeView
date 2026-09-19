@@ -20,6 +20,11 @@ export function formatBRL(value: Money | string): string {
   return `${d.isNegative() ? '-' : ''}R$ ${formatted}`;
 }
 
+// Trailing zeros are only dropped after the decimal point. Stripping them from
+// the whole string turns 1000 at precision 0 into 1.
 export function formatQty(value: Money | string, precision = 8): string {
-  return money(value).toFixed(precision).replace(/\.?0+$/, '');
+  return money(value)
+    .toFixed(precision)
+    .replace(/(\.\d*?)0+$/, '$1')
+    .replace(/\.$/, '');
 }
