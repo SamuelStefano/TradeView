@@ -4,15 +4,13 @@ import { anthropicConfigured, anthropicKey } from '@/lib/env';
 import { getSessionUserId } from '@/lib/supabase/server';
 import { supabaseConfigured } from '@/lib/supabase/config';
 import { checkRate } from '@/lib/rate-limit';
+import { parseMessages, type ChatMessage } from '@/lib/chat/messages';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const MODELS = ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001'] as const;
 type Model = (typeof MODELS)[number];
-
-const MAX_MESSAGES = 40;
-const MAX_CHARS = 8000;
 
 const SYSTEM = `Você é o Analyst do TradeView, um terminal de trading multimercado.
 Responde em português do Brasil, direto, sem preâmbulo.
@@ -24,26 +22,6 @@ precisa do dado e explique qual. Raciocínio sobre mecanismo, risco e estratégi
 você pode dar à vontade.
 
 Nada do que você escreve é recomendação de investimento.`;
-
-interface IncomingMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-function parseMessages(raw: unknown): IncomingMessage[] {
-  if (!Array.isArray(raw) || raw.length === 0) throw new Error('conversa vazia');
-  if (raw.length > MAX_MESSAGES) throw new Error('conversa longa demais');
-
-  return raw.map((entry) => {
-    const item = entry as Record<string, unknown>;
-    if (item.role !== 'user' && item.role !== 'assistant') throw new Error('papel inválido');
-    if (typeof item.content !== 'string' || item.content.trim() === '') {
-      throw new Error('mensagem vazia');
-    }
-    if (item.content.length > MAX_CHARS) throw new Error('mensagem longa demais');
-    return { role: item.role, content: item.content };
-  });
-}
 
 function parseModel(raw: unknown): Model {
   return MODELS.includes(raw as Model) ? (raw as Model) : 'claude-sonnet-4-6';
@@ -63,7 +41,7 @@ export async function POST(request: Request): Promise<Response> {
   const userId = await getSessionUserId();
   if (!userId) return refuse('sessão expirada — entre novamente', 401);
 
-  let messages: IncomingMessage[];
+  let messages: ChatMessage[];
   let model: Model;
   try {
     checkRate(`chat:${userId}`);
