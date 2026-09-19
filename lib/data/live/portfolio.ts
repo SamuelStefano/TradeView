@@ -5,6 +5,8 @@ import { bySymbol } from '../../markets/catalogue';
 import { getAccountSnapshot } from '../../accounts';
 import { createSupabaseServerClient } from '../../supabase/server';
 import { formatBRL, formatQty, money } from '../../money';
+import { dayKeyLabel, saoPauloDayKey } from '../../market-clock';
+import { summariseMonth, type FiscalFill } from '../../fiscal';
 import type {
   ExposureRow,
   FiscalRow,
@@ -191,9 +193,20 @@ function buildRisk(
   ];
 
   const severe = Boolean(largest && largestPct > 40);
-  const warning = severe
+  const base = severe
     ? `${largest.symbol} responde por ${largestPct.toFixed(1)}% do patrimônio — uma queda nesse ativo move a carteira quase inteira.`
     : 'Sem concentração acima de 40%. Sharpe, VaR e beta exigem histórico de retorno que o app ainda não guarda, então não são exibidos.';
+
+  // A position the venue could not price is worth zero in every total above, so
+  // every percentage on this panel is measured against a smaller carteira than
+  // the real one. Saying so is the difference between a stale number and a lie.
+  const unpriced = valued.filter((p) => p.lastQuote === null);
+  const warning =
+    unpriced.length > 0
+      ? `${base} ${unpriced.length} ${unpriced.length === 1 ? 'posição está' : 'posições estão'} sem cotação (${unpriced
+          .map((p) => p.symbol)
+          .join(', ')}) e ${unpriced.length === 1 ? 'ficou' : 'ficaram'} de fora destes percentuais.`
+      : base;
 
   return { risk, warning, severe };
 }
@@ -210,6 +223,9 @@ interface FillRow {
 function buildTrades(fills: FillRow[], quotes: QuoteBook): TradeRecord[] {
   return fills
     .filter((f) => f.orders)
+    // Sorted on the raw instant. The rendered pt-BR stamp is day-first, so
+    // ordering the formatted strings puts 31/01 above 01/02.
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .map((f) => {
       const order = f.orders!;
       const entry = bySymbol(order.symbol);
@@ -232,8 +248,7 @@ function buildTrades(fills: FillRow[], quotes: QuoteBook): TradeRecord[] {
         result: `taxa ${formatQty(money(f.fee), 2)} ${f.fee_currency}`,
         origin: order.mode === 'paper' ? 'paper' : 'real',
       };
-    })
-    .sort((a, b) => (a.datetime < b.datetime ? 1 : -1));
+    });
 }
 
 interface LedgerRow {
@@ -256,7 +271,7 @@ function buildEquityCurve(
   for (const e of entries) {
     const rate = currencyToBRL(e.currency, quotes);
     if (rate === null) continue;
-    const day = e.created_at.slice(0, 10);
+    const day = saoPauloDayKey(e.created_at);
     byDay.set(day, (byDay.get(day) ?? 0) + money(e.amount).toNumber() * rate);
   }
 
@@ -270,39 +285,72 @@ function buildEquityCurve(
     curve.push(Math.round(running * 100) / 100);
   }
 
-  return {
-    curve,
-    labels: days.map((d) => d.slice(8, 10) + '/' + d.slice(5, 7)),
-  };
+  return { curve, labels: days.map(dayKeyLabel) };
 }
 
-function buildFiscal(fills: FillRow[], quotes: QuoteBook): { rows: FiscalRow[]; note: string } {
-  const now = new Date();
-  const month = now.toISOString().slice(0, 7);
+// The month is the São Paulo one, because that is the month the exemption is
+// measured in. Slicing the UTC timestamp moved every trade made after 21:00 on
+// the last day of a month into the next one, against a header that already read
+// the local month.
+function buildFiscal(
+  fills: FillRow[],
+  quotes: QuoteBook,
+  mode: 'paper' | 'real',
+): { rows: FiscalRow[]; note: string } {
+  const entries: FiscalFill[] = fills
+    .filter((f) => f.orders)
+    .map((f) => {
+      const entry = bySymbol(f.orders!.symbol);
+      const rate = entry ? (currencyToBRL(entry.quote, quotes) ?? 1) : 1;
 
-  let salesBRL = 0;
-  let feesBRL = 0;
-  let tradeCount = 0;
+      return {
+        at: f.created_at,
+        side: f.orders!.side === 'sell' ? ('sell' as const) : ('buy' as const),
+        grossBRL: money(f.qty).mul(money(f.price)).toNumber() * rate,
+        feeBRL: money(f.fee).toNumber() * (currencyToBRL(f.fee_currency, quotes) ?? 1),
+      };
+    });
 
-  for (const f of fills) {
-    if (!f.orders || f.created_at.slice(0, 7) !== month) continue;
-    const entry = bySymbol(f.orders.symbol);
-    const rate = entry ? (currencyToBRL(entry.quote, quotes) ?? 1) : 1;
-    tradeCount += 1;
-    feesBRL += money(f.fee).toNumber() * (currencyToBRL(f.fee_currency, quotes) ?? 1);
-    if (f.orders.side === 'sell') salesBRL += money(f.qty).mul(money(f.price)).toNumber() * rate;
-  }
+  const summary = summariseMonth(entries, new Date());
 
   const rows: FiscalRow[] = [
-    { label: 'Operações no mês', value: String(tradeCount), tone: 'neutral' },
-    { label: 'Vendas no mês', value: formatBRL(money(salesBRL)), tone: 'neutral' },
-    { label: 'Taxas pagas', value: formatBRL(money(feesBRL)), tone: 'down' },
+    { label: 'Operações no mês', value: String(summary.tradeCount), tone: 'neutral' },
+    { label: 'Vendas no mês', value: formatBRL(money(summary.salesBRL)), tone: 'neutral' },
+    {
+      label: 'Margem até a isenção',
+      value: formatBRL(money(summary.headroomBRL)),
+      tone: summary.overExemption ? 'down' : 'neutral',
+    },
+    { label: 'Taxas pagas', value: formatBRL(money(summary.feesBRL)), tone: 'down' },
   ];
+
+  // A simulated fill has no tax consequence at all. Presenting it next to the
+  // exemption ceiling without saying so reads as an apuração of real disposals.
+  if (mode === 'paper') {
+    return {
+      rows,
+      note:
+        'Estes números vêm de operações simuladas (papel) e não geram imposto. ' +
+        'Servem para você ver como a apuração ficaria: vendas de cripto acima de ' +
+        'R$ 35.000 por mês na pessoa física perdem a isenção, e o imposto incide ' +
+        'sobre o ganho, não sobre o volume. O TradeView não calcula DARF.',
+    };
+  }
+
+  if (summary.overExemption) {
+    return {
+      rows,
+      note:
+        `As vendas do mês passaram de R$ 35.000, então a isenção da pessoa física ` +
+        'não se aplica a este mês e incide imposto sobre o ganho, não sobre o ' +
+        'volume. O TradeView não calcula DARF — leve estes números ao seu contador.',
+    };
+  }
 
   return {
     rows,
     note:
-      salesBRL > 0
+      summary.salesBRL > 0
         ? 'Vendas de cripto até R$ 35.000 por mês são isentas na pessoa física. Acima disso incide imposto sobre o ganho, não sobre o volume. O TradeView não calcula DARF — leve estes números ao seu contador.'
         : 'Nenhuma venda registrada neste mês. O TradeView não calcula DARF; estes números servem de insumo para o seu contador.',
   };
@@ -373,7 +421,7 @@ export async function getLivePortfolio(mode: 'paper' | 'real' = 'paper'): Promis
 
   const { risk, warning, severe } = buildRisk(valued, cashBRL, total);
   const { curve, labels } = buildEquityCurve(ledger, quotes);
-  const fiscal = buildFiscal(fills, quotes);
+  const fiscal = buildFiscal(fills, quotes, mode);
 
   return {
     positions: toPositions(valued, total),
