@@ -48,7 +48,7 @@ jobs:
       - name: Nenhuma credencial literal no repo
         run: |
           if grep -rnE "sb_secret_[A-Za-z0-9]|ghp_[A-Za-z0-9]{20}|github_pat_[A-Za-z0-9]{20}|AKIA[0-9A-Z]{16}|BEGIN (RSA |EC )?PRIVATE KEY" \
-             --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github .; then
+             --exclude-dir=node_modules --exclude-dir=.git .; then
             echo "credencial literal encontrada" >&2
             exit 1
           fi
